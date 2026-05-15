@@ -1,0 +1,9 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/2479622009_3538484753_223132457.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_622916031_209065738.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_3399809844_146867257.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_3198153663_3107306088.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_2235428534_663289966.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_3707229752_225089004.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_2894344825_561513361.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/AnalogyVectorScene/4178499015_3633749023_2979300429.mp4'

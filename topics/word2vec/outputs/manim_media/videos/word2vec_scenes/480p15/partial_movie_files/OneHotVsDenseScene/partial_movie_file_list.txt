@@ -1,0 +1,7 @@
+# This file is used internally by FFMPEG.
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/2479622009_929875003_223132457.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/4178499015_2927000349_1110194824.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/4178499015_2068583732_34683420.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/4178499015_2942885949_1360452356.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/4178499015_2900915873_186106858.mp4'
+file 'file:/Users/kart/projects/wheels/topics/word2vec/outputs/manim_media/videos/word2vec_scenes/480p15/partial_movie_files/OneHotVsDenseScene/4178499015_2376443722_669732545.mp4'

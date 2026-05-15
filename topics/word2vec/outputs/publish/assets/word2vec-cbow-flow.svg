@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">CBOW predicts the current word from context</title>
+  <desc id="desc">A CBOW architecture diagram showing surrounding context words flowing into a shared projection and sum, then predicting the current word.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #1f2933; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 650; }
+      .small { font-size: 14px; fill: #4b5563; }
+      .box { fill: #ffffff; stroke: #c7cdd4; stroke-width: 1.5; }
+      .input { fill: #e8f2ff; stroke: #2563eb; }
+      .projection { fill: #eef8ee; stroke: #238636; }
+      .output { fill: #fff3df; stroke: #ef7d32; stroke-width: 2; }
+      .arrow { stroke: #2563eb; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .caption { font-size: 15px; fill: #374151; }
+    </style>
+  </defs>
+  <rect width="960" height="520" fill="#f7f9fc"/>
+  <text x="40" y="46" class="title">CBOW: context words -> current word</text>
+  <text x="40" y="76" class="small">Redrawn from the paper's Figure 1 direction: CBOW predicts the current word based on context.</text>
+
+  <text x="88" y="124" class="label">Input context</text>
+  <text x="420" y="124" class="label">Shared projection</text>
+  <text x="748" y="124" class="label">Output</text>
+
+  <g>
+    <rect x="70" y="155" width="130" height="46" rx="8" class="input"/><text x="111" y="184" class="label">w(t-2)</text>
+    <rect x="70" y="215" width="130" height="46" rx="8" class="input"/><text x="111" y="244" class="label">w(t-1)</text>
+    <rect x="70" y="275" width="130" height="46" rx="8" class="input"/><text x="111" y="304" class="label">w(t+1)</text>
+    <rect x="70" y="335" width="130" height="46" rx="8" class="input"/><text x="111" y="364" class="label">w(t+2)</text>
+  </g>
+
+  <rect x="380" y="210" width="200" height="112" rx="10" class="projection"/>
+  <text x="430" y="252" class="label">lookup vectors</text>
+  <text x="433" y="281" class="label">then sum / avg</text>
+  <text x="413" y="308" class="small">word order is ignored here</text>
+
+  <rect x="730" y="235" width="150" height="62" rx="10" class="output"/>
+  <text x="778" y="273" class="label">w(t)</text>
+  <text x="737" y="322" class="small">current word</text>
+
+  <path d="M200 178 C270 178, 305 225, 380 235" class="arrow"/>
+  <path d="M200 238 C275 238, 310 250, 380 255" class="arrow"/>
+  <path d="M200 298 C275 298, 310 280, 380 278" class="arrow"/>
+  <path d="M200 358 C270 358, 305 318, 380 302" class="arrow"/>
+  <path d="M580 266 L730 266" class="arrow"/>
+
+  <text x="40" y="458" class="caption">Caption: CBOW uses surrounding context words to predict the current word. Direction must not be reversed.</text>
+</svg>

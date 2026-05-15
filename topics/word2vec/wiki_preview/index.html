@@ -1,0 +1,1830 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheels Wiki: word2vec</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --panel: #ffffff;
+      --ink: #202122;
+      --muted: #54595d;
+      --line: #a2a9b1;
+      --line-soft: #eaecf0;
+      --link: #0645ad;
+      --link-visited: #0b0080;
+      --code-bg: #f5f5f5;
+      --sidebar-width: 19rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:visited {
+      color: var(--link-visited);
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      padding: 1.1rem 1rem 2rem;
+    }
+
+    .brand {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .nav-list,
+    .page-toc {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-page {
+      margin: 0 0 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .nav-title {
+      display: block;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .nav-path {
+      margin-top: 0.18rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      overflow-wrap: anywhere;
+    }
+
+    .page-toc {
+      margin-top: 0.5rem;
+      font-size: 0.84rem;
+    }
+
+    .page-toc li {
+      margin: 0.18rem 0;
+    }
+
+    .toc-h2 {
+      padding-left: 0.65rem;
+    }
+
+    .toc-h3 {
+      padding-left: 1.25rem;
+    }
+
+    .content {
+      max-width: 72rem;
+      padding: 2rem clamp(1rem, 4vw, 4rem) 4rem;
+    }
+
+    .wiki-article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin: 0 0 2rem;
+      padding: clamp(1.1rem, 3vw, 2.25rem);
+    }
+
+    .article-header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+    }
+
+    .article-path {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      margin: 0 0 0.35rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      line-height: 1.28;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.55rem);
+    }
+
+    .article-body h1 {
+      margin-top: 0;
+      font-size: 1.9rem;
+    }
+
+    .article-body h2 {
+      border-bottom: 1px solid var(--line-soft);
+      margin-top: 2rem;
+      padding-bottom: 0.25rem;
+      font-size: 1.55rem;
+    }
+
+    .article-body h3 {
+      margin-top: 1.55rem;
+      font-size: 1.25rem;
+    }
+
+    p,
+    ul,
+    ol,
+    table,
+    pre,
+    blockquote {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.45rem;
+    }
+
+    li + li {
+      margin-top: 0.25rem;
+    }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+      padding: 0.1rem 0.22rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      overflow: auto;
+      padding: 0.9rem 1rem;
+    }
+
+    pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      width: max-content;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.62rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eaecf0;
+      font-weight: 650;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--line);
+      color: var(--muted);
+      padding-left: 1rem;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .wiki-article {
+        border-left: 0;
+        border-right: 0;
+        margin-left: -1rem;
+        margin-right: -1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1 class="brand-title">Wheels Wiki</h1>
+        <p class="brand-subtitle">word2vec</p>
+      </div>
+      <ol class="nav-list">
+            <li class="nav-page">
+              <a class="nav-title" href="#architecture_notes">Architecture Notes: Word2Vec</a>
+              <div class="nav-path">architecture_notes.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#architecture_notes--architecture-notes-word2vec">Architecture Notes: Word2Vec</a></li><li class="toc-h2"><a href="#architecture_notes--why-architecture-matters-in-this-paper">Why Architecture Matters in This Paper</a></li><li class="toc-h2"><a href="#architecture_notes--total-training-cost">Total Training Cost</a></li><li class="toc-h2"><a href="#architecture_notes--feedforward-neural-net-language-model">Feedforward Neural Net Language Model</a></li><li class="toc-h3"><a href="#architecture_notes--structure">Structure</a></li><li class="toc-h3"><a href="#architecture_notes--cost">Cost</a></li><li class="toc-h3"><a href="#architecture_notes--beginner-explanation">Beginner explanation</a></li><li class="toc-h2"><a href="#architecture_notes--recurrent-neural-net-language-model">Recurrent Neural Net Language Model</a></li><li class="toc-h3"><a href="#architecture_notes--structure_1">Structure</a></li><li class="toc-h3"><a href="#architecture_notes--cost_1">Cost</a></li><li class="toc-h3"><a href="#architecture_notes--beginner-explanation_1">Beginner explanation</a></li><li class="toc-h2"><a href="#architecture_notes--parallel-training-with-distbelief">Parallel Training with DistBelief</a></li><li class="toc-h2"><a href="#architecture_notes--new-log-linear-models">New Log-linear Models</a></li><li class="toc-h2"><a href="#architecture_notes--cbow-architecture">CBOW Architecture</a></li><li class="toc-h3"><a href="#architecture_notes--prediction-direction">Prediction direction</a></li><li class="toc-h3"><a href="#architecture_notes--architecture">Architecture</a></li><li class="toc-h3"><a href="#architecture_notes--training-target">Training target</a></li><li class="toc-h3"><a href="#architecture_notes--cost_2">Cost</a></li><li class="toc-h3"><a href="#architecture_notes--beginner-example">Beginner example</a></li><li class="toc-h3"><a href="#architecture_notes--what-to-emphasize-in-the-lesson">What to emphasize in the lesson</a></li><li class="toc-h2"><a href="#architecture_notes--skip-gram-architecture">Skip-gram Architecture</a></li><li class="toc-h3"><a href="#architecture_notes--prediction-direction_1">Prediction direction</a></li><li class="toc-h3"><a href="#architecture_notes--architecture_1">Architecture</a></li><li class="toc-h3"><a href="#architecture_notes--window-size-and-sampling">Window size and sampling</a></li><li class="toc-h3"><a href="#architecture_notes--cost_3">Cost</a></li><li class="toc-h3"><a href="#architecture_notes--beginner-example_1">Beginner example</a></li><li class="toc-h3"><a href="#architecture_notes--what-to-emphasize-in-the-lesson_1">What to emphasize in the lesson</a></li><li class="toc-h2"><a href="#architecture_notes--figure-1-architecture-summary">Figure 1 Architecture Summary</a></li><li class="toc-h2"><a href="#architecture_notes--architecture-comparison-table">Architecture Comparison Table</a></li><li class="toc-h2"><a href="#architecture_notes--equations-to-carry-forward">Equations to Carry Forward</a></li><li class="toc-h2"><a href="#architecture_notes--common-architecture-mistakes-to-avoid">Common Architecture Mistakes to Avoid</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#concepts">Concepts: Word2Vec</a>
+              <div class="nav-path">concepts.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#concepts--concepts-word2vec">Concepts: Word2Vec</a></li><li class="toc-h2"><a href="#concepts--vocabulary-and-atomic-word-ids">Vocabulary and Atomic Word IDs</a></li><li class="toc-h2"><a href="#concepts--one-hot-encoding">One-Hot Encoding</a></li><li class="toc-h2"><a href="#concepts--continuous-dense-word-vectors">Continuous Dense Word Vectors</a></li><li class="toc-h2"><a href="#concepts--distributed-representations">Distributed Representations</a></li><li class="toc-h2"><a href="#concepts--language-modeling-versus-representation-learning">Language Modeling Versus Representation Learning</a></li><li class="toc-h2"><a href="#concepts--context-windows">Context Windows</a></li><li class="toc-h2"><a href="#concepts--projection-layer">Projection Layer</a></li><li class="toc-h2"><a href="#concepts--cbow">CBOW</a></li><li class="toc-h2"><a href="#concepts--skip-gram">Skip-gram</a></li><li class="toc-h2"><a href="#concepts--log-linear-classifier">Log-linear Classifier</a></li><li class="toc-h2"><a href="#concepts--hierarchical-softmax-and-huffman-trees">Hierarchical Softmax and Huffman Trees</a></li><li class="toc-h2"><a href="#concepts--training-complexity">Training Complexity</a></li><li class="toc-h2"><a href="#concepts--cosine-similarity">Cosine Similarity</a></li><li class="toc-h2"><a href="#concepts--analogy-and-vector-offset-questions">Analogy and Vector Offset Questions</a></li><li class="toc-h2"><a href="#concepts--semantic-versus-syntactic-regularities">Semantic Versus Syntactic Regularities</a></li><li class="toc-h2"><a href="#concepts--exact-match-accuracy">Exact-Match Accuracy</a></li><li class="toc-h2"><a href="#concepts--terms-and-symbols-for-the-final-lesson">Terms and Symbols for the Final Lesson</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#results_notes">Results Notes: Word2Vec</a>
+              <div class="nav-path">results_notes.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#results_notes--results-notes-word2vec">Results Notes: Word2Vec</a></li><li class="toc-h2"><a href="#results_notes--what-the-paper-tries-to-measure">What the Paper Tries to Measure</a></li><li class="toc-h2"><a href="#results_notes--analogy-style-evaluation">Analogy-Style Evaluation</a></li><li class="toc-h2"><a href="#results_notes--semantic-syntactic-word-relationship-test-set">Semantic-Syntactic Word Relationship Test Set</a></li><li class="toc-h2"><a href="#results_notes--table-1-question-categories">Table 1: Question Categories</a></li><li class="toc-h2"><a href="#results_notes--table-2-data-size-and-vector-dimensionality">Table 2: Data Size and Vector Dimensionality</a></li><li class="toc-h2"><a href="#results_notes--table-3-architecture-comparison">Table 3: Architecture Comparison</a></li><li class="toc-h2"><a href="#results_notes--table-4-public-vectors-and-authors-models">Table 4: Public Vectors and Authors&#x27; Models</a></li><li class="toc-h2"><a href="#results_notes--table-5-one-epoch-versus-three-epochs">Table 5: One Epoch Versus Three Epochs</a></li><li class="toc-h2"><a href="#results_notes--table-6-large-scale-parallel-training">Table 6: Large-Scale Parallel Training</a></li><li class="toc-h2"><a href="#results_notes--table-7-microsoft-sentence-completion-challenge">Table 7: Microsoft Sentence Completion Challenge</a></li><li class="toc-h2"><a href="#results_notes--table-8-learned-relationship-examples">Table 8: Learned Relationship Examples</a></li><li class="toc-h2"><a href="#results_notes--overall-result-story">Overall Result Story</a></li><li class="toc-h2"><a href="#results_notes--what-the-results-do-not-prove">What the Results Do Not Prove</a></li><li class="toc-h2"><a href="#results_notes--exact-result-claims-worth-preserving">Exact Result Claims Worth Preserving</a></li><li class="toc-h2"><a href="#results_notes--visual-recommendations-for-later-phases">Visual Recommendations for Later Phases</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_summary">Source Summary: Word2Vec</a>
+              <div class="nav-path">source_summary.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_summary--source-summary-word2vec">Source Summary: Word2Vec</a></li><li class="toc-h2"><a href="#source_summary--source-inventory">Source Inventory</a></li><li class="toc-h2"><a href="#source_summary--extraction-notes-and-caveats">Extraction Notes and Caveats</a></li><li class="toc-h2"><a href="#source_summary--high-level-paper-claim-map">High-Level Paper Claim Map</a></li><li class="toc-h2"><a href="#source_summary--section-by-section-source-map">Section-by-Section Source Map</a></li><li class="toc-h3"><a href="#source_summary--abstract">Abstract</a></li><li class="toc-h3"><a href="#source_summary--1-introduction">1. Introduction</a></li><li class="toc-h3"><a href="#source_summary--11-goals-of-the-paper">1.1 Goals of the Paper</a></li><li class="toc-h3"><a href="#source_summary--12-previous-work">1.2 Previous Work</a></li><li class="toc-h3"><a href="#source_summary--2-model-architectures">2. Model Architectures</a></li><li class="toc-h3"><a href="#source_summary--21-feedforward-neural-net-language-model">2.1 Feedforward Neural Net Language Model</a></li><li class="toc-h3"><a href="#source_summary--22-recurrent-neural-net-language-model">2.2 Recurrent Neural Net Language Model</a></li><li class="toc-h3"><a href="#source_summary--23-parallel-training-of-neural-networks">2.3 Parallel Training of Neural Networks</a></li><li class="toc-h3"><a href="#source_summary--3-new-log-linear-models">3. New Log-linear Models</a></li><li class="toc-h3"><a href="#source_summary--31-continuous-bag-of-words-model">3.1 Continuous Bag-of-Words Model</a></li><li class="toc-h3"><a href="#source_summary--32-continuous-skip-gram-model">3.2 Continuous Skip-gram Model</a></li><li class="toc-h3"><a href="#source_summary--figure-1">Figure 1</a></li><li class="toc-h3"><a href="#source_summary--4-results">4. Results</a></li><li class="toc-h3"><a href="#source_summary--41-task-description">4.1 Task Description</a></li><li class="toc-h3"><a href="#source_summary--42-maximization-of-accuracy">4.2 Maximization of Accuracy</a></li><li class="toc-h3"><a href="#source_summary--43-comparison-of-model-architectures">4.3 Comparison of Model Architectures</a></li><li class="toc-h3"><a href="#source_summary--44-large-scale-parallel-training-of-models">4.4 Large Scale Parallel Training of Models</a></li><li class="toc-h3"><a href="#source_summary--45-microsoft-research-sentence-completion-challenge">4.5 Microsoft Research Sentence Completion Challenge</a></li><li class="toc-h3"><a href="#source_summary--5-examples-of-the-learned-relationships">5. Examples of the Learned Relationships</a></li><li class="toc-h3"><a href="#source_summary--6-conclusion">6. Conclusion</a></li><li class="toc-h3"><a href="#source_summary--7-follow-up-work">7. Follow-Up Work</a></li><li class="toc-h2"><a href="#source_summary--equation-map">Equation Map</a></li><li class="toc-h2"><a href="#source_summary--figure-and-table-map">Figure and Table Map</a></li><li class="toc-h2"><a href="#source_summary--core-claims-to-preserve">Core Claims to Preserve</a></li><li class="toc-h2"><a href="#source_summary--claims-requiring-careful-wording">Claims Requiring Careful Wording</a></li><li class="toc-h2"><a href="#source_summary--beginner-teaching-anchors-from-the-source">Beginner Teaching Anchors from the Source</a></li><li class="toc-h2"><a href="#source_summary--open-checks-for-later-phases">Open Checks for Later Phases</a></li></ol>
+            </li>
+            </ol>
+    </aside>
+    <main class="content">
+      
+    <article id="architecture_notes" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">architecture_notes.md</p>
+        <h1>Architecture Notes: Word2Vec</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="architecture_notes--architecture-notes-word2vec">Architecture Notes: Word2Vec</h1>
+<p>This file compares the model architectures discussed in the paper in beginner-readable terms. It is grounded in <code>wiki/source_summary.md</code> and the primary source PDF.</p>
+<p>Use these labels in later lesson work:</p>
+<ul>
+<li><strong>Paper claim:</strong> What the paper states or reports.</li>
+<li><strong>Teaching interpretation:</strong> A simplified explanation meant to help beginners.</li>
+</ul>
+<h2 id="architecture_notes--why-architecture-matters-in-this-paper">Why Architecture Matters in This Paper</h2>
+<p><strong>Paper claim:</strong> The paper compares architectures by computational complexity, defined as the number of parameters that need to be accessed to fully train the model. The goal is to maximize accuracy while minimizing computational complexity.</p>
+<p><strong>Teaching interpretation:</strong> The authors are asking: how much useful word-vector quality can we get per unit of training work?</p>
+<p>This matters because the paper's goal is not just to train word vectors. It is to train high-quality vectors from billions of words and very large vocabularies.</p>
+<h2 id="architecture_notes--total-training-cost">Total Training Cost</h2>
+<p><strong>Paper claim:</strong> The paper defines total training complexity as:</p>
+<p><code>O = E x T x Q</code></p>
+<p>Where:</p>
+<ul>
+<li><code>E</code> is the number of training epochs.</li>
+<li><code>T</code> is the number of words in the training set.</li>
+<li><code>Q</code> is the architecture-specific training cost per example.</li>
+</ul>
+<p><strong>Teaching interpretation:</strong> Training work comes from three knobs:</p>
+<ul>
+<li>How many times we pass over the text.</li>
+<li>How much text we use.</li>
+<li>How expensive the model is for each word or context.</li>
+</ul>
+<p>The paper tries to reduce <code>Q</code>, so larger <code>T</code> and larger vectors become practical.</p>
+<h2 id="architecture_notes--feedforward-neural-net-language-model">Feedforward Neural Net Language Model</h2>
+<p><strong>Exact term in paper:</strong> Feedforward Neural Net Language Model, or NNLM</p>
+<h3 id="architecture_notes--structure">Structure</h3>
+<p><strong>Paper claim:</strong> The feedforward NNLM has input, projection, hidden, and output layers. The input uses <code>N</code> previous words encoded with <code>1-of-V</code> coding. The projection layer has size <code>N x D</code>, and the hidden layer has size <code>H</code>.</p>
+<p><strong>Teaching interpretation:</strong> This model looks at a fixed number of previous words, converts them into dense vectors, pushes those through a hidden layer, and predicts a probability distribution over the vocabulary.</p>
+<h3 id="architecture_notes--cost">Cost</h3>
+<p><strong>Paper claim:</strong> The per-example complexity is:</p>
+<p><code>Q = N x D + N x D x H + H x V</code></p>
+<p>The paper says the <code>H x V</code> term is dominating before output optimizations. With hierarchical softmax, much of the remaining complexity comes from <code>N x D x H</code>.</p>
+<h3 id="architecture_notes--beginner-explanation">Beginner explanation</h3>
+<p>The old model is powerful but expensive for two reasons:</p>
+<ul>
+<li>It has a dense hidden layer computation.</li>
+<li>It may need to score many possible output words.</li>
+</ul>
+<p>The proposed Word2Vec architectures are easier to understand if this is the contrast: remove expensive hidden-layer machinery and train useful vectors with simpler prediction tasks.</p>
+<h2 id="architecture_notes--recurrent-neural-net-language-model">Recurrent Neural Net Language Model</h2>
+<p><strong>Exact term in paper:</strong> Recurrent Neural Net Language Model, or RNNLM</p>
+<h3 id="architecture_notes--structure_1">Structure</h3>
+<p><strong>Paper claim:</strong> The RNNLM has input, hidden, and output layers. A recurrent matrix connects the hidden layer to itself through time-delayed connections, allowing the model to carry information from the past.</p>
+<p><strong>Teaching interpretation:</strong> An RNNLM has a memory-like hidden state. Instead of only looking at a fixed window of previous words, it updates a state as it reads a sequence.</p>
+<h3 id="architecture_notes--cost_1">Cost</h3>
+<p><strong>Paper claim:</strong> The per-example complexity is:</p>
+<p><code>Q = H x H + H x V</code></p>
+<p>With hierarchical softmax, <code>H x V</code> can be reduced to <code>H x log2(V)</code>, leaving <code>H x H</code> as much of the complexity.</p>
+<h3 id="architecture_notes--beginner-explanation_1">Beginner explanation</h3>
+<p>The RNNLM can model sequence patterns, but maintaining and updating a hidden state is expensive. The Word2Vec paper does not try to teach RNNs; it uses RNNLMs as one comparison point for word-vector quality and training cost.</p>
+<h2 id="architecture_notes--parallel-training-with-distbelief">Parallel Training with DistBelief</h2>
+<p><strong>Paper claim:</strong> The authors implemented several models in DistBelief. They trained multiple replicas in parallel and synchronized gradient updates through centralized parameter servers. They used mini-batch asynchronous gradient descent with Adagrad.</p>
+<p><strong>Teaching interpretation:</strong> The paper is partly an engineering scaling paper. It asks how to learn vectors when the text corpus and vocabulary are very large, and it uses distributed infrastructure for large experiments.</p>
+<p><strong>Lesson guidance:</strong> Mention this after the reader understands why the architecture is cheaper. Do not make distributed systems the main thread.</p>
+<h2 id="architecture_notes--new-log-linear-models">New Log-linear Models</h2>
+<p><strong>Paper claim:</strong> The paper proposes two new architectures that try to minimize computational complexity. The main observation is that much complexity in earlier neural models comes from the non-linear hidden layer.</p>
+<p><strong>Teaching interpretation:</strong> The authors simplify the model: keep the prediction task that teaches useful word vectors, but remove a costly hidden layer. This is the central architecture move.</p>
+<h2 id="architecture_notes--cbow-architecture">CBOW Architecture</h2>
+<p><strong>Exact term in paper:</strong> Continuous Bag-of-Words Model</p>
+<h3 id="architecture_notes--prediction-direction">Prediction direction</h3>
+<p><strong>Paper claim:</strong> CBOW predicts the current word based on context.</p>
+<p><strong>Must preserve:</strong> <code>context words -&gt; current/middle word</code></p>
+<h3 id="architecture_notes--architecture">Architecture</h3>
+<p><strong>Paper claim:</strong> CBOW is similar to the feedforward NNLM, but the non-linear hidden layer is removed. The projection layer is shared for all words. All context words are projected into the same position, so their vectors are averaged. Word order in the history does not influence the projection. The paper also uses future words.</p>
+<p><strong>Teaching interpretation:</strong> CBOW takes several nearby words, blends their vectors into one context clue, and asks: what word probably belongs in the middle?</p>
+<h3 id="architecture_notes--training-target">Training target</h3>
+<p><strong>Paper claim:</strong> The paper reports best performance on its task with four future and four history words as input, where the criterion is to classify the current middle word correctly.</p>
+<h3 id="architecture_notes--cost_2">Cost</h3>
+<p><strong>Paper claim:</strong> CBOW training complexity is:</p>
+<p><code>Q = N x D + D x log2(V)</code></p>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of context words</li>
+<li><code>D</code>: vector dimensionality</li>
+<li><code>V</code>: vocabulary size</li>
+</ul>
+<h3 id="architecture_notes--beginner-example">Beginner example</h3>
+<p>Sentence fragment:</p>
+<p><code>the quick ___ fox</code></p>
+<p>CBOW uses words like <code>the</code>, <code>quick</code>, and <code>fox</code> as clues and tries to predict the missing word.</p>
+<h3 id="architecture_notes--what-to-emphasize-in-the-lesson">What to emphasize in the lesson</h3>
+<ul>
+<li>CBOW is fast because it removes the non-linear hidden layer.</li>
+<li>It ignores word order in the bag-of-words projection.</li>
+<li>It predicts one center word from multiple context words.</li>
+</ul>
+<h2 id="architecture_notes--skip-gram-architecture">Skip-gram Architecture</h2>
+<p><strong>Exact term in paper:</strong> Continuous Skip-gram Model</p>
+<h3 id="architecture_notes--prediction-direction_1">Prediction direction</h3>
+<p><strong>Paper claim:</strong> Skip-gram predicts surrounding words given the current word.</p>
+<p><strong>Must preserve:</strong> <code>current/center word -&gt; surrounding context words</code></p>
+<h3 id="architecture_notes--architecture_1">Architecture</h3>
+<p><strong>Paper claim:</strong> Skip-gram uses each current word as input to a log-linear classifier with a continuous projection layer, and predicts words within a certain range before and after the current word.</p>
+<p><strong>Teaching interpretation:</strong> Skip-gram takes one word and asks: what nearby words should this word help predict?</p>
+<h3 id="architecture_notes--window-size-and-sampling">Window size and sampling</h3>
+<p><strong>Paper claim:</strong> Increasing the prediction range improves vector quality but increases computational complexity. More distant words are sampled less often because they are usually less related to the current word. The paper uses <code>C = 10</code> in later experiments.</p>
+<h3 id="architecture_notes--cost_3">Cost</h3>
+<p><strong>Paper claim:</strong> Skip-gram training complexity is:</p>
+<p><code>Q = C x (D + D x log2(V))</code></p>
+<p>Where:</p>
+<ul>
+<li><code>C</code>: maximum distance of context words</li>
+<li><code>D</code>: vector dimensionality</li>
+<li><code>V</code>: vocabulary size</li>
+</ul>
+<h3 id="architecture_notes--beginner-example_1">Beginner example</h3>
+<p>Sentence fragment:</p>
+<p><code>the quick brown fox</code></p>
+<p>If the center word is <code>brown</code>, Skip-gram may train on predictions like:</p>
+<ul>
+<li><code>brown -&gt; quick</code></li>
+<li><code>brown -&gt; fox</code></li>
+<li><code>brown -&gt; the</code>, if the window includes it</li>
+</ul>
+<h3 id="architecture_notes--what-to-emphasize-in-the-lesson_1">What to emphasize in the lesson</h3>
+<ul>
+<li>Skip-gram predicts multiple context words from one center word.</li>
+<li>Wider windows can help but cost more.</li>
+<li>The paper's results show Skip-gram is especially strong on semantic analogy questions in key comparisons.</li>
+</ul>
+<h2 id="architecture_notes--figure-1-architecture-summary">Figure 1 Architecture Summary</h2>
+<p><strong>Paper claim:</strong> Figure 1 compares the two new model architectures. Its caption states that CBOW predicts the current word from context and Skip-gram predicts surrounding words from the current word.</p>
+<p><strong>Redraw guidance for later visual phase:</strong></p>
+<ul>
+<li>CBOW side:</li>
+<li>Inputs: <code>w(t-2)</code>, <code>w(t-1)</code>, <code>w(t+1)</code>, <code>w(t+2)</code></li>
+<li>Projection: shared lookup plus sum/average</li>
+<li>Output: <code>w(t)</code></li>
+<li>Skip-gram side:</li>
+<li>Input: <code>w(t)</code></li>
+<li>Projection: current word vector</li>
+<li>Outputs: <code>w(t-2)</code>, <code>w(t-1)</code>, <code>w(t+1)</code>, <code>w(t+2)</code></li>
+</ul>
+<p><strong>Caveat:</strong> Figure 1 needs visual inspection before final redraw. Text extraction captured structure but not exact layout.</p>
+<h2 id="architecture_notes--architecture-comparison-table">Architecture Comparison Table</h2>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Main prediction target</th>
+<th>Key expensive part</th>
+<th>Paper role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Feedforward NNLM</td>
+<td>Next/current word from previous words</td>
+<td>Hidden layer and vocabulary output</td>
+<td>Prior model comparison</td>
+</tr>
+<tr>
+<td>RNNLM</td>
+<td>Next word using recurrent hidden state</td>
+<td>Recurrent hidden computation and vocabulary output</td>
+<td>Prior model comparison</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td>Current word from context</td>
+<td>Much cheaper; no non-linear hidden layer</td>
+<td>Proposed model</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td>Surrounding words from current word</td>
+<td>Repeated predictions over context range</td>
+<td>Proposed model</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architecture_notes--equations-to-carry-forward">Equations to Carry Forward</h2>
+<p>Use these exact formulas in later lesson work, with beginner explanation before or immediately after each one:</p>
+<table>
+<thead>
+<tr>
+<th>Equation</th>
+<th>Formula</th>
+<th>Teaching use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td><code>O = E x T x Q</code></td>
+<td>Total training cost story</td>
+</tr>
+<tr>
+<td>(2)</td>
+<td><code>Q = N x D + N x D x H + H x V</code></td>
+<td>Why feedforward NNLM is expensive</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td><code>Q = H x H + H x V</code></td>
+<td>Why RNNLM is expensive</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td><code>Q = N x D + D x log2(V)</code></td>
+<td>Why CBOW is cheaper</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td><code>Q = C x (D + D x log2(V))</code></td>
+<td>Why Skip-gram cost grows with context range</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architecture_notes--common-architecture-mistakes-to-avoid">Common Architecture Mistakes to Avoid</h2>
+<ul>
+<li>Do not say CBOW predicts surrounding words. It predicts the current/middle word from context.</li>
+<li>Do not say Skip-gram averages context vectors. Skip-gram predicts context words from the current word.</li>
+<li>Do not teach hierarchical softmax as the main invention. It is an efficiency technique used in the models.</li>
+<li>Do not claim that removing the hidden layer always improves modeling power. The paper frames the simpler models as potentially less precise but much more scalable.</li>
+<li>Do not over-teach NNLM or RNNLM internals. They are supporting contrast, not the core beginner topic.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="concepts" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">concepts.md</p>
+        <h1>Concepts: Word2Vec</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="concepts--concepts-word2vec">Concepts: Word2Vec</h1>
+<p>This file compiles beginner-readable concept notes for the Word2Vec topic. It is grounded in <code>raw/papers/word2vec.pdf</code> through <code>wiki/source_summary.md</code>.</p>
+<p>Use two labels consistently in later lesson work:</p>
+<ul>
+<li><strong>Paper claim:</strong> A claim made by the Mikolov et al. paper.</li>
+<li><strong>Teaching interpretation:</strong> A beginner-friendly explanation or analogy derived from the paper, not a direct claim by the paper.</li>
+</ul>
+<h2 id="concepts--vocabulary-and-atomic-word-ids">Vocabulary and Atomic Word IDs</h2>
+<p><strong>Paper claim:</strong> The paper says many NLP systems treated words as atomic units, represented as indices in a vocabulary, with no built-in notion of similarity between words.</p>
+<p><strong>Teaching interpretation:</strong> A vocabulary index is like assigning every word a locker number. The number helps you find the word, but it does not tell you that <code>cat</code> is closer in meaning to <code>dog</code> than to <code>engine</code>.</p>
+<p><strong>Beginner example:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>Atomic ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cat</td>
+<td>17</td>
+</tr>
+<tr>
+<td>dog</td>
+<td>42</td>
+</tr>
+<tr>
+<td>car</td>
+<td>203</td>
+</tr>
+<tr>
+<td>engine</td>
+<td>204</td>
+</tr>
+</tbody>
+</table>
+<p>The IDs can identify words, but the model has no direct reason to treat <code>cat</code> and <code>dog</code> as related.</p>
+<p><strong>Lesson caution:</strong> Do not imply atomic representations are useless. The paper explicitly notes that simple models have advantages: simplicity, robustness, and the ability to train on huge data.</p>
+<h2 id="concepts--one-hot-encoding">One-Hot Encoding</h2>
+<p><strong>Paper claim:</strong> In the paper's feedforward NNLM discussion, previous words are encoded with <code>1-of-V</code> coding, where <code>V</code> is vocabulary size.</p>
+<p><strong>Teaching interpretation:</strong> One-hot encoding is a common way to represent a vocabulary index as a vector. If there are <code>V</code> words, the vector has <code>V</code> slots. A word turns on exactly one slot and leaves all others at zero.</p>
+<p><strong>Beginner example:</strong></p>
+<p>For a tiny vocabulary <code>[cat, dog, car, engine]</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>One-hot vector</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cat</td>
+<td><code>[1, 0, 0, 0]</code></td>
+</tr>
+<tr>
+<td>dog</td>
+<td><code>[0, 1, 0, 0]</code></td>
+</tr>
+<tr>
+<td>car</td>
+<td><code>[0, 0, 1, 0]</code></td>
+</tr>
+<tr>
+<td>engine</td>
+<td><code>[0, 0, 0, 1]</code></td>
+</tr>
+</tbody>
+</table>
+<p>This is useful for identity, but it does not encode similarity. Every pair of different words is equally different in this representation.</p>
+<h2 id="concepts--continuous-dense-word-vectors">Continuous Dense Word Vectors</h2>
+<p><strong>Paper claim:</strong> The paper proposes architectures for computing continuous vector representations of words from very large datasets.</p>
+<p><strong>Teaching interpretation:</strong> A dense word vector is a short list of learned numbers. Instead of one active slot and thousands or millions of zeros, each word has many coordinates that can shift during training. Words that behave similarly in text can end up with vectors that point in similar directions or sit near each other.</p>
+<p><strong>Beginner example:</strong></p>
+<p>These numbers are illustrative, not from the paper:</p>
+<table>
+<thead>
+<tr>
+<th>Word</th>
+<th>Tiny dense vector</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cat</td>
+<td><code>[0.7, 0.2, -0.1]</code></td>
+</tr>
+<tr>
+<td>dog</td>
+<td><code>[0.6, 0.3, -0.2]</code></td>
+</tr>
+<tr>
+<td>car</td>
+<td><code>[-0.4, 0.8, 0.5]</code></td>
+</tr>
+<tr>
+<td>engine</td>
+<td><code>[-0.5, 0.7, 0.6]</code></td>
+</tr>
+</tbody>
+</table>
+<p>The model can now represent graded relationships because vectors can be close, far, or point in similar directions.</p>
+<p><strong>Lesson caution:</strong> The paper usually says "word vectors," "continuous vector representations," and "distributed representations." The word "embedding" is a later/common teaching term and should be introduced as explanatory interpretation.</p>
+<h2 id="concepts--distributed-representations">Distributed Representations</h2>
+<p><strong>Paper claim:</strong> The paper identifies distributed representations of words as a successful concept and cites prior work. It does not claim that Word2Vec invented distributed word representations.</p>
+<p><strong>Teaching interpretation:</strong> "Distributed" means the information about a word is spread across many vector dimensions instead of stored in one slot. No single coordinate needs to mean "animal" or "country"; the pattern across coordinates is what matters.</p>
+<p><strong>Why this matters for beginners:</strong> It helps explain why vector similarity can emerge without a hand-written dictionary of meanings.</p>
+<h2 id="concepts--language-modeling-versus-representation-learning">Language Modeling Versus Representation Learning</h2>
+<p><strong>Paper claim:</strong> The paper discusses neural network language models, but its new architectures focus on learning word vectors efficiently. It directly extends earlier work where vectors are learned first and can then be used in a neural language model.</p>
+<p><strong>Teaching interpretation:</strong> A language model tries to predict words well. Word2Vec uses prediction tasks as a training signal, but the final prize in this paper is the learned word vectors.</p>
+<p><strong>Beginner distinction:</strong></p>
+<ul>
+<li>Language modeling question: "What word probably comes next?"</li>
+<li>Word representation question: "After training on many prediction tasks, what useful vector did each word learn?"</li>
+</ul>
+<h2 id="concepts--context-windows">Context Windows</h2>
+<p><strong>Paper claim:</strong> CBOW uses surrounding words, including future words, to predict the current middle word. Skip-gram predicts words within a range before and after the current word. The paper uses <code>C = 10</code> in the Skip-gram experiments.</p>
+<p><strong>Teaching interpretation:</strong> A context window is a small neighborhood around a word in a sentence.</p>
+<p><strong>Beginner example:</strong></p>
+<p>Sentence: <code>the quick brown fox jumps over the lazy dog</code></p>
+<p>If the center word is <code>fox</code> and the window size is 2:</p>
+<ul>
+<li>Context before: <code>quick</code>, <code>brown</code></li>
+<li>Center: <code>fox</code></li>
+<li>Context after: <code>jumps</code>, <code>over</code></li>
+</ul>
+<p>This small local neighborhood becomes a training example.</p>
+<h2 id="concepts--projection-layer">Projection Layer</h2>
+<p><strong>Paper claim:</strong> The paper describes projection layers in neural language models and the proposed architectures. For CBOW, the projection layer is shared for all words and context vectors are averaged because all words are projected into the same position.</p>
+<p><strong>Teaching interpretation:</strong> The projection layer is the lookup step. Given a word ID, the model retrieves that word's current dense vector.</p>
+<p><strong>Beginner mental model:</strong> Think of a table with one row per word. Training changes the numbers in the rows.</p>
+<h2 id="concepts--cbow">CBOW</h2>
+<p><strong>Exact term:</strong> Continuous Bag-of-Words Model</p>
+<p><strong>Paper claim:</strong> CBOW predicts the current word based on surrounding context. In the paper's best setting for the described task, the input used four future and four history words, and the training criterion was to classify the current middle word correctly.</p>
+<p><strong>Teaching interpretation:</strong> CBOW is a fill-in-the-blank game:</p>
+<p><code>the quick ___ fox</code></p>
+<p>Given the surrounding words, the model tries to predict the missing center word.</p>
+<p><strong>Prediction direction to preserve:</strong></p>
+<p><code>context words -&gt; current/middle word</code></p>
+<p><strong>Important properties from the paper:</strong></p>
+<ul>
+<li>The non-linear hidden layer from the feedforward NNLM is removed.</li>
+<li>Context vectors are averaged or summed in the shared projection.</li>
+<li>Word order in the history does not affect the projection.</li>
+<li>Future words can be used as context.</li>
+</ul>
+<p><strong>Equation to preserve:</strong></p>
+<p><code>Q = N x D + D x log2(V)</code></p>
+<p>Where:</p>
+<ul>
+<li><code>N</code>: number of context words</li>
+<li><code>D</code>: vector dimensionality</li>
+<li><code>V</code>: vocabulary size</li>
+<li><code>Q</code>: model-specific training cost per example</li>
+</ul>
+<p><strong>Lesson caution:</strong> Do not describe CBOW as predicting context words. That is Skip-gram.</p>
+<h2 id="concepts--skip-gram">Skip-gram</h2>
+<p><strong>Exact term:</strong> Continuous Skip-gram Model</p>
+<p><strong>Paper claim:</strong> Skip-gram uses each current word as input and predicts words within a certain range before and after it. Increasing the range can improve vector quality but increases computational complexity. More distant words are sampled less often because they are usually less related.</p>
+<p><strong>Teaching interpretation:</strong> Skip-gram is the reverse prediction game:</p>
+<p>Given <code>brown</code>, try to predict nearby words such as <code>quick</code> and <code>fox</code>.</p>
+<p><strong>Prediction direction to preserve:</strong></p>
+<p><code>current/center word -&gt; surrounding context words</code></p>
+<p><strong>Equation to preserve:</strong></p>
+<p><code>Q = C x (D + D x log2(V))</code></p>
+<p>Where:</p>
+<ul>
+<li><code>C</code>: maximum context distance</li>
+<li><code>D</code>: vector dimensionality</li>
+<li><code>V</code>: vocabulary size</li>
+<li><code>Q</code>: model-specific training cost per example</li>
+</ul>
+<p><strong>Lesson caution:</strong> Do not describe Skip-gram as averaging context to predict the center word. That is CBOW.</p>
+<h2 id="concepts--log-linear-classifier">Log-linear Classifier</h2>
+<p><strong>Paper claim:</strong> The paper calls CBOW and Skip-gram new log-linear models and describes CBOW as a log-linear classifier in the setting with history and future words.</p>
+<p><strong>Teaching interpretation:</strong> For this lesson, a log-linear classifier can be explained as a simpler prediction model without the extra non-linear hidden layer used in heavier neural language models.</p>
+<p><strong>Beginner framing:</strong> The model still learns by making predictions and adjusting weights, but it avoids a costly middle computation layer. That design choice is central to the paper's speed story.</p>
+<h2 id="concepts--hierarchical-softmax-and-huffman-trees">Hierarchical Softmax and Huffman Trees</h2>
+<p><strong>Paper claim:</strong> The paper uses hierarchical softmax where the vocabulary is represented as a Huffman binary tree. Frequent words receive shorter binary codes. This reduces the number of output units evaluated, compared with scoring every word in the vocabulary.</p>
+<p><strong>Teaching interpretation:</strong> Instead of asking "Which one of a million words is the answer?" all at once, hierarchical softmax turns prediction into a sequence of smaller left/right decisions down a tree.</p>
+<p><strong>Beginner example:</strong></p>
+<p>If the target word is <code>the</code>, a frequent word, it might be reachable by a short path. A rare word might require a longer path.</p>
+<p><strong>Caution:</strong> The paper notes this speedup is especially important for architectures without hidden layers because they depend heavily on efficient softmax normalization.</p>
+<h2 id="concepts--training-complexity">Training Complexity</h2>
+<p><strong>Paper claim:</strong> The paper defines training complexity as proportional to:</p>
+<p><code>O = E x T x Q</code></p>
+<p>Where:</p>
+<ul>
+<li><code>E</code>: training epochs</li>
+<li><code>T</code>: number of words in the training set</li>
+<li><code>Q</code>: architecture-specific work per training example</li>
+</ul>
+<p><strong>Teaching interpretation:</strong> Total training work grows when you:</p>
+<ul>
+<li>make more passes over the data,</li>
+<li>use more training words,</li>
+<li>or use a model that does more work per word.</li>
+</ul>
+<p><strong>Beginner example:</strong> If a model is twice as expensive per word, training on the same corpus takes roughly twice the work. If the corpus is twice as large, that also roughly doubles work.</p>
+<h2 id="concepts--cosine-similarity">Cosine Similarity</h2>
+<p><strong>Paper claim:</strong> In analogy evaluation, after computing a target vector expression, the paper searches for the closest word vector using cosine distance and discards the input question words.</p>
+<p><strong>Teaching interpretation:</strong> Cosine similarity compares vector direction. Two words can be similar if their vectors point in similar directions, even if their raw coordinate sizes differ.</p>
+<p><strong>Beginner framing:</strong> If vectors are arrows, cosine similarity asks whether two arrows point the same way.</p>
+<h2 id="concepts--analogy-and-vector-offset-questions">Analogy and Vector Offset Questions</h2>
+<p><strong>Paper claim:</strong> The paper evaluates whether word vectors preserve syntactic and semantic regularities through vector arithmetic. Example: compute <code>vector("biggest") - vector("big") + vector("small")</code>, then search for the closest vector. The expected result is <code>smallest</code>.</p>
+<p><strong>Teaching interpretation:</strong> Some learned relationships act like reusable arrows in vector space. If <code>big -&gt; biggest</code> is one arrow, applying a similar arrow to <code>small</code> may land near <code>smallest</code>.</p>
+<p><strong>Beginner example:</strong></p>
+<p><code>Paris - France + Italy</code> should land near <code>Rome</code> in a good vector space.</p>
+<p><strong>Caution:</strong> This is statistical and imperfect. It is not symbolic logic. The paper's own examples would score only about 60% under the exact-match metric described in Table 8.</p>
+<h2 id="concepts--semantic-versus-syntactic-regularities">Semantic Versus Syntactic Regularities</h2>
+<p><strong>Paper claim:</strong> The paper's test set contains five semantic question types and nine syntactic question types, with 8,869 semantic and 10,675 syntactic questions.</p>
+<p><strong>Teaching interpretation:</strong></p>
+<ul>
+<li>Semantic relationships are about meaning or world relationships: country-capital, city-state, currency.</li>
+<li>Syntactic relationships are about grammar or word form: comparative, superlative, plural, past tense.</li>
+</ul>
+<p><strong>Examples from the paper's categories:</strong></p>
+<ul>
+<li>Semantic: <code>Athens : Greece :: Oslo : Norway</code></li>
+<li>Syntactic: <code>great : greater :: tough : tougher</code></li>
+</ul>
+<h2 id="concepts--exact-match-accuracy">Exact-Match Accuracy</h2>
+<p><strong>Paper claim:</strong> A question is marked correct only if the closest computed vector exactly matches the expected answer. Synonyms count as mistakes.</p>
+<p><strong>Teaching interpretation:</strong> The metric is strict. A model can produce a reasonable nearby answer and still be scored wrong if it is not the exact target word.</p>
+<p><strong>Why this matters:</strong> It prevents the lesson from overstating or understating results. The numbers are useful, but they are tied to a specific exact-match test.</p>
+<h2 id="concepts--terms-and-symbols-for-the-final-lesson">Terms and Symbols for the Final Lesson</h2>
+<p>Use these consistently:</p>
+<table>
+<thead>
+<tr>
+<th>Symbol or term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>V</code></td>
+<td>Vocabulary size</td>
+</tr>
+<tr>
+<td><code>D</code></td>
+<td>Word vector dimensionality</td>
+</tr>
+<tr>
+<td><code>N</code></td>
+<td>Number of previous or context words, depending on architecture discussion</td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>Hidden layer size</td>
+</tr>
+<tr>
+<td><code>E</code></td>
+<td>Number of training epochs</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>Number of training words</td>
+</tr>
+<tr>
+<td><code>Q</code></td>
+<td>Model-specific training cost per example</td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>Maximum Skip-gram context distance</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td>Continuous Bag-of-Words; predicts current word from context</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td>Predicts surrounding words from current word</td>
+</tr>
+<tr>
+<td>NNLM</td>
+<td>Neural network language model</td>
+</tr>
+<tr>
+<td>RNNLM</td>
+<td>Recurrent neural network language model</td>
+</tr>
+</tbody>
+</table>
+      </div>
+    </article>
+    
+
+    <article id="results_notes" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">results_notes.md</p>
+        <h1>Results Notes: Word2Vec</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="results_notes--results-notes-word2vec">Results Notes: Word2Vec</h1>
+<p>This file compiles the paper's evaluation setup, tables, examples, and result cautions for later lesson writing. It is grounded in <code>wiki/source_summary.md</code> and the primary source PDF.</p>
+<p>Use these labels consistently:</p>
+<ul>
+<li><strong>Paper claim:</strong> What the paper states or reports.</li>
+<li><strong>Teaching interpretation:</strong> A beginner-friendly explanation based on the paper.</li>
+</ul>
+<h2 id="results_notes--what-the-paper-tries-to-measure">What the Paper Tries to Measure</h2>
+<p><strong>Paper claim:</strong> The paper evaluates word vectors using syntactic and semantic word relationship tasks, not just nearest-neighbor examples.</p>
+<p><strong>Teaching interpretation:</strong> Nearest neighbors can show that <code>France</code> is near <code>Italy</code>, but that is a weak test. The paper wants to know whether relationships between pairs of words are also organized in vector space.</p>
+<h2 id="results_notes--analogy-style-evaluation">Analogy-Style Evaluation</h2>
+<p><strong>Paper claim:</strong> The paper represents a relationship by subtracting and adding word vectors, then searches for the closest word vector using cosine distance. Input question words are discarded during the search.</p>
+<p><strong>Example from the paper's explanation:</strong></p>
+<p><code>vector("biggest") - vector("big") + vector("small")</code></p>
+<p>Expected answer: <code>smallest</code></p>
+<p><strong>Teaching interpretation:</strong> The test asks whether a relationship acts like a reusable direction in vector space. If the model learned a "comparative or superlative direction," applying it to another word may land near the correct form.</p>
+<p><strong>Lesson caution:</strong> Vector arithmetic should be presented as an empirical pattern, not symbolic reasoning.</p>
+<h2 id="results_notes--semantic-syntactic-word-relationship-test-set">Semantic-Syntactic Word Relationship Test Set</h2>
+<p><strong>Paper claim:</strong> The paper introduces a comprehensive test set with five semantic relationship types and nine syntactic relationship types.</p>
+<p>Reported question counts:</p>
+<ul>
+<li>Semantic: 8,869 questions</li>
+<li>Syntactic: 10,675 questions</li>
+</ul>
+<p><strong>Paper claim:</strong> Questions were created by manually building lists of related word pairs, then connecting pairs to form questions. The test set includes only single-token words, so multi-word entities like "New York" are excluded.</p>
+<p><strong>Paper claim:</strong> A model is correct only if the closest vector exactly matches the expected word. Synonyms count as mistakes.</p>
+<p><strong>Teaching interpretation:</strong> The score is strict. A plausible answer can still be wrong under this metric if it is not exactly the target word.</p>
+<h2 id="results_notes--table-1-question-categories">Table 1: Question Categories</h2>
+<p><strong>Paper claim:</strong> Table 1 gives examples of five semantic and nine syntactic categories.</p>
+<p>Categories shown:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Category examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Semantic</td>
+<td>common capital city, all capital cities, currency, city-in-state, man-woman</td>
+</tr>
+<tr>
+<td>Syntactic</td>
+<td>adjective to adverb, opposite, comparative, superlative, present participle, nationality adjective, past tense, plural nouns, plural verbs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Teaching interpretation:</strong> These categories let the paper test both meaning-like relationships and grammar-like relationships.</p>
+<p><strong>Visual/table caution:</strong> Table 1 is readable from extraction, but exact examples should be checked against the PDF before final reproduction.</p>
+<h2 id="results_notes--table-2-data-size-and-vector-dimensionality">Table 2: Data Size and Vector Dimensionality</h2>
+<p><strong>Paper claim:</strong> The authors train CBOW on subsets of Google News data with vocabulary restricted to the 30,000 most frequent words for this experiment.</p>
+<p>Variables:</p>
+<ul>
+<li>Vector dimensionality: 50, 100, 300, 600</li>
+<li>Training words: 24M, 49M, 98M, 196M, 391M, 783M</li>
+</ul>
+<p><strong>Paper claim:</strong> Accuracy generally improves as training words and vector dimensionality increase, but with diminishing improvements after some point.</p>
+<p>Notable extracted value:</p>
+<ul>
+<li>600-dimensional CBOW vectors trained on 783M words reach 50.4 accuracy on this restricted-vocabulary subset.</li>
+</ul>
+<p><strong>Teaching interpretation:</strong> Bigger vectors help, and more data helps, but neither knob is magic by itself. The paper argues they should be increased together under a compute budget.</p>
+<p><strong>Equation connection:</strong> From Equation (4), the paper notes that doubling training data produces about the same computational-complexity increase as doubling vector size.</p>
+<h2 id="results_notes--table-3-architecture-comparison">Table 3: Architecture Comparison</h2>
+<p><strong>Paper claim:</strong> Table 3 compares RNNLM, NNLM, CBOW, and Skip-gram using the same data and 640-dimensional vectors. It reports semantic and syntactic accuracy on the paper's test set, plus a syntactic MSR word relatedness test.</p>
+<p>Extracted values:</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th style="text-align: right;">Semantic</th>
+<th style="text-align: right;">Syntactic</th>
+<th style="text-align: right;">MSR syntactic test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RNNLM</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">35</td>
+</tr>
+<tr>
+<td>NNLM</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">47</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">56</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Paper claim:</strong> CBOW performs better than NNLM on syntactic tasks and about the same on semantic tasks. Skip-gram is slightly worse than CBOW on syntactic tasks but much better on semantic tasks.</p>
+<p><strong>Teaching interpretation:</strong> This is the cleanest table for explaining the architecture tradeoff. CBOW is very strong on syntax here; Skip-gram shines on semantic relationships.</p>
+<h2 id="results_notes--table-4-public-vectors-and-authors-models">Table 4: Public Vectors and Authors' Models</h2>
+<p><strong>Paper claim:</strong> Table 4 compares publicly available word vectors with vectors from the authors' models on the full Semantic-Syntactic Word Relationship test set.</p>
+<p>Selected extracted values:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align: right;">Dimensionality</th>
+<th style="text-align: right;">Training words</th>
+<th style="text-align: right;">Semantic</th>
+<th style="text-align: right;">Syntactic</th>
+<th style="text-align: right;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Our NNLM</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">6B</td>
+<td style="text-align: right;">34.2</td>
+<td style="text-align: right;">64.5</td>
+<td style="text-align: right;">50.8</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">783M</td>
+<td style="text-align: right;">15.5</td>
+<td style="text-align: right;">53.1</td>
+<td style="text-align: right;">36.1</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">783M</td>
+<td style="text-align: right;">50.0</td>
+<td style="text-align: right;">55.9</td>
+<td style="text-align: right;">53.3</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Teaching interpretation:</strong> The table supports the paper's claim that the simpler architectures are competitive and efficient. Skip-gram with less data than the 6B-word NNLM has the best total among these selected rows.</p>
+<p><strong>Lesson caution:</strong> Do not overload beginners with all rows from Table 4 unless needed. A compact comparison is enough.</p>
+<h2 id="results_notes--table-5-one-epoch-versus-three-epochs">Table 5: One Epoch Versus Three Epochs</h2>
+<p><strong>Paper claim:</strong> Training a model on twice as much data for one epoch gives comparable or better results than iterating over the same data for three epochs in the reported cases.</p>
+<p>Selected extracted values:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align: right;">Dimensionality</th>
+<th style="text-align: right;">Training words</th>
+<th style="text-align: right;">Total accuracy</th>
+<th>Training time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3 epoch CBOW</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">783M</td>
+<td style="text-align: right;">36.1</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td>1 epoch CBOW</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">1.6B</td>
+<td style="text-align: right;">36.1</td>
+<td>0.6 days</td>
+</tr>
+<tr>
+<td>3 epoch Skip-gram</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">783M</td>
+<td style="text-align: right;">53.3</td>
+<td>3 days</td>
+</tr>
+<tr>
+<td>1 epoch Skip-gram</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">1.6B</td>
+<td style="text-align: right;">53.8</td>
+<td>2 days</td>
+</tr>
+<tr>
+<td>1 epoch Skip-gram</td>
+<td style="text-align: right;">600</td>
+<td style="text-align: right;">783M</td>
+<td style="text-align: right;">55.5</td>
+<td>2.5 days</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Teaching interpretation:</strong> For this paper's setup, fresh data can be more valuable than repeated passes over the same data.</p>
+<h2 id="results_notes--table-6-large-scale-parallel-training">Table 6: Large-Scale Parallel Training</h2>
+<p><strong>Paper claim:</strong> Table 6 reports DistBelief distributed training results on Google News 6B data using 50 to 100 model replicas and Adagrad.</p>
+<p>Extracted values:</p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th style="text-align: right;">Dimensionality</th>
+<th style="text-align: right;">Training words</th>
+<th style="text-align: right;">Semantic</th>
+<th style="text-align: right;">Syntactic</th>
+<th style="text-align: right;">Total</th>
+<th>Training time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NNLM</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">6B</td>
+<td style="text-align: right;">34.2</td>
+<td style="text-align: right;">64.5</td>
+<td style="text-align: right;">50.8</td>
+<td>14 days x 180 CPU cores</td>
+</tr>
+<tr>
+<td>CBOW</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">6B</td>
+<td style="text-align: right;">57.3</td>
+<td style="text-align: right;">68.9</td>
+<td style="text-align: right;">63.7</td>
+<td>2 days x 140 CPU cores</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td style="text-align: right;">1000</td>
+<td style="text-align: right;">6B</td>
+<td style="text-align: right;">66.1</td>
+<td style="text-align: right;">65.1</td>
+<td style="text-align: right;">65.6</td>
+<td>2.5 days x 125 CPU cores</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Paper claim:</strong> CPU-core counts are estimates because datacenter machines were shared with production tasks.</p>
+<p><strong>Teaching interpretation:</strong> This table is the strongest support for the paper's scaling story: simpler models can train high-dimensional vectors much faster than the NNLM comparison while achieving better total accuracy on the reported task.</p>
+<p><strong>Lesson caution:</strong> The training-time comparison is not a clean single-machine benchmark. The paper itself warns that CPU usage fluctuated.</p>
+<h2 id="results_notes--table-7-microsoft-sentence-completion-challenge">Table 7: Microsoft Sentence Completion Challenge</h2>
+<p><strong>Paper claim:</strong> The Microsoft Sentence Completion Challenge has 1,040 sentences with one missing word and five candidate choices.</p>
+<p><strong>Paper claim:</strong> Skip-gram alone scores 48.0 accuracy. Combining Skip-gram scores with RNNLMs gives 58.9 accuracy, which the paper reports as a new state-of-the-art result at the time.</p>
+<p>Extracted values:</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th style="text-align: right;">Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4-gram</td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr>
+<td>Average LSA similarity</td>
+<td style="text-align: right;">49</td>
+</tr>
+<tr>
+<td>Log-bilinear model</td>
+<td style="text-align: right;">54.8</td>
+</tr>
+<tr>
+<td>RNNLMs</td>
+<td style="text-align: right;">55.4</td>
+</tr>
+<tr>
+<td>Skip-gram</td>
+<td style="text-align: right;">48.0</td>
+</tr>
+<tr>
+<td>Skip-gram + RNNLMs</td>
+<td style="text-align: right;">58.9</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Teaching interpretation:</strong> Skip-gram is not best alone on this task, but it provides complementary information when combined with RNNLMs.</p>
+<p><strong>Lesson guidance:</strong> Treat this as a secondary result, not the main storyline.</p>
+<h2 id="results_notes--table-8-learned-relationship-examples">Table 8: Learned Relationship Examples</h2>
+<p><strong>Paper claim:</strong> Table 8 shows word-pair relationship examples using Skip-gram vectors trained on 783M words with 300 dimensions.</p>
+<p><strong>Paper claim:</strong> The relationship is formed by subtracting two vectors and adding another. The text gives <code>Paris - France + Italy = Rome</code>.</p>
+<p>Selected examples from Table 8:</p>
+<table>
+<thead>
+<tr>
+<th>Relationship</th>
+<th>Example outputs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>France - Paris</td>
+<td>Italy: Rome; Japan: Tokyo</td>
+</tr>
+<tr>
+<td>big - bigger</td>
+<td>cold: colder; quick: quicker</td>
+</tr>
+<tr>
+<td>Miami - Florida</td>
+<td>Baltimore: Maryland; Dallas: Texas</td>
+</tr>
+<tr>
+<td>Einstein - scientist</td>
+<td>Mozart: violinist; Picasso: painter</td>
+</tr>
+<tr>
+<td>Microsoft - Windows</td>
+<td>Google: Android; Apple: iPhone</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Paper claim:</strong> The table's examples would score only about 60% under the paper's exact-match accuracy metric. Averaging ten examples instead of one to form the relationship vector improved the best models by about 10 percentage points absolute.</p>
+<p><strong>Teaching interpretation:</strong> The examples are memorable, but they should not be used as proof that the model understands facts in a human sense. They show that repeated textual patterns can create useful geometry.</p>
+<h2 id="results_notes--overall-result-story">Overall Result Story</h2>
+<p><strong>Paper claim:</strong> The paper reports that high-quality word vectors can be trained with simple architectures compared with feedforward and recurrent neural network language models.</p>
+<p><strong>Paper claim:</strong> Lower computational complexity makes it possible to compute accurate high-dimensional vectors from much larger datasets.</p>
+<p><strong>Teaching interpretation:</strong> The paper's story has two halves:</p>
+<ol>
+<li>A learning trick: train vectors by predicting words from local context.</li>
+<li>An efficiency trick: simplify the architecture so it can scale to much more text.</li>
+</ol>
+<h2 id="results_notes--what-the-results-do-not-prove">What the Results Do Not Prove</h2>
+<p>Do not overclaim these points in later artifacts:</p>
+<ul>
+<li>The results do not prove that vectors understand meaning like humans.</li>
+<li>The results do not prove that analogy arithmetic always works.</li>
+<li>The results do not prove that Word2Vec invented word vectors or distributed representations.</li>
+<li>The results do not make CBOW or Skip-gram universally best for every NLP task.</li>
+<li>The "one trillion words" statement in the conclusion is a forward-looking expectation, not a completed experiment in the paper.</li>
+</ul>
+<h2 id="results_notes--exact-result-claims-worth-preserving">Exact Result Claims Worth Preserving</h2>
+<ul>
+<li>The paper's test set has 8,869 semantic and 10,675 syntactic questions.</li>
+<li>CBOW predicts the current word from context; Skip-gram predicts context words from the current word.</li>
+<li>Table 3: CBOW achieves 64 syntactic accuracy, while Skip-gram achieves 55 semantic accuracy in the 640-dimensional architecture comparison.</li>
+<li>Table 4: Skip-gram with 300 dimensions and 783M words reports total 53.3, higher than the selected authors' NNLM row at total 50.8.</li>
+<li>Table 6: 1000-dimensional CBOW and Skip-gram trained on 6B words report total 63.7 and 65.6 respectively, compared with NNLM total 50.8.</li>
+<li>Table 7: Skip-gram alone is 48.0 on sentence completion, but Skip-gram plus RNNLMs is 58.9.</li>
+</ul>
+<h2 id="results_notes--visual-recommendations-for-later-phases">Visual Recommendations for Later Phases</h2>
+<p>No visuals are created in this phase, but the results should later be visualized carefully:</p>
+<ul>
+<li>Use a compact architecture comparison chart from Table 3.</li>
+<li>Use a data-versus-dimension heatmap or small matrix from Table 2 only after verifying table values against the PDF.</li>
+<li>Use a restrained summary chart for Table 6 to show the scale/training-time tradeoff.</li>
+<li>Use an analogy pipeline diagram: relationship pair -&gt; vector expression -&gt; nearest-neighbor search -&gt; exact-match scoring.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_summary" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_summary.md</p>
+        <h1>Source Summary: Word2Vec</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_summary--source-summary-word2vec">Source Summary: Word2Vec</h1>
+<h2 id="source_summary--source-inventory">Source Inventory</h2>
+<p>Primary source:</p>
+<ul>
+<li><code>raw/papers/word2vec.pdf</code></li>
+<li>Title: "Efficient Estimation of Word Representations in Vector Space"</li>
+<li>Authors: Tomas Mikolov, Kai Chen, Greg Corrado, Jeffrey Dean</li>
+<li>arXiv version shown in PDF: <code>arXiv:1301.3781v3 [cs.CL] 7 Sep 2013</code></li>
+<li>PDF metadata: 12 pages, unencrypted, generated by LaTeX/pdfTeX</li>
+</ul>
+<p>Topic constraints:</p>
+<ul>
+<li>Audience: undergraduate beginner</li>
+<li>Teaching style required by <code>topic.yaml</code>: motivation before mechanics, intuition before equations, examples before abstraction, visuals where they reduce cognitive load</li>
+<li>Source policy: <code>raw/</code> is human-owned and must not be overwritten</li>
+</ul>
+<h2 id="source_summary--extraction-notes-and-caveats">Extraction Notes and Caveats</h2>
+<p>Local text extraction with <code>pdftotext -layout raw/papers/word2vec.pdf -</code> was reliable enough for this source map. The title, abstract, body sections, equations, Figure 1 caption, tables, examples, conclusion, follow-up work, and references were readable.</p>
+<p>Known caveats:</p>
+<ul>
+<li>The architecture diagram in Figure 1 appears as rough text layout. Any final visual should be redrawn after visual inspection of the PDF page, not copied from text extraction.</li>
+<li>Tables 1-8 are readable in extracted text, but final numeric tables or charts should be checked against the PDF page rendering before publication.</li>
+<li>Some typography is degraded by extraction: smart quotes, accented names, mathematical spacing, <code>log2</code>, and "Unigram perplexity" formatting should be checked before exact reproduction.</li>
+<li>No additional extraction is required to begin the compiled wiki phase. Minimum later inspection: visually inspect Figure 1 and Tables 1-8 before creating visuals or final result summaries.</li>
+</ul>
+<h2 id="source_summary--high-level-paper-claim-map">High-Level Paper Claim Map</h2>
+<p>The paper proposes two model architectures for learning continuous word vector representations from very large text corpora:</p>
+<ul>
+<li>Continuous Bag-of-Words, abbreviated CBOW</li>
+<li>Continuous Skip-gram</li>
+</ul>
+<p>The paper's central motivation is that many NLP systems treated words as atomic vocabulary indices, which is simple and robust but does not encode word similarity. The authors argue that simple scaling of traditional techniques is insufficient in some settings, and that distributed word representations can help.</p>
+<p>The paper's central engineering claim is that simpler log-linear architectures can learn useful high-dimensional word vectors at much lower computational cost than heavier neural language models. This lower cost makes it feasible to train on much larger corpora and vocabularies.</p>
+<p>The paper evaluates learned vectors using syntactic and semantic regularity questions, including analogy-style vector operations. The authors report that CBOW and Skip-gram achieve strong accuracy compared with prior neural models, with Skip-gram especially strong on semantic questions in several reported comparisons.</p>
+<p>Important caution for later lesson writing:</p>
+<ul>
+<li>The paper does not claim to invent continuous or distributed word representations. It explicitly says these have a long history and cites prior work.</li>
+<li>Vector arithmetic examples should be presented as empirical regularities of trained vectors, not as guaranteed symbolic reasoning.</li>
+<li>The paper's strongest claims are bounded by its tasks, datasets, and exact-match evaluation metric.</li>
+</ul>
+<h2 id="source_summary--section-by-section-source-map">Section-by-Section Source Map</h2>
+<h3 id="source_summary--abstract">Abstract</h3>
+<p>Source claims:</p>
+<ul>
+<li>The authors propose two new model architectures for continuous word representations from very large datasets.</li>
+<li>They measure representation quality using word similarity tasks and compare against earlier neural-network-based techniques.</li>
+<li>They report large accuracy improvements at lower computational cost.</li>
+<li>They state that high-quality vectors can be learned from a 1.6 billion word dataset in less than a day.</li>
+<li>They report state-of-the-art performance on their syntactic and semantic word similarity test set.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Good source for the overall promise: better vectors, cheaper training, large data.</li>
+<li>Avoid opening the beginner lesson with performance claims alone; first explain why word vectors are needed.</li>
+</ul>
+<h3 id="source_summary--1-introduction">1. Introduction</h3>
+<p>Source claims:</p>
+<ul>
+<li>Many NLP systems represented words as atomic units, with no notion of similarity between words.</li>
+<li>Atomic word representations have practical advantages: simplicity, robustness, and compatibility with large-scale simple models such as n-grams.</li>
+<li>The authors argue that simple scaling has limits in tasks where relevant high-quality data is limited, such as speech recognition and machine translation.</li>
+<li>They identify distributed word representations as a successful concept and cite neural-network-based language models as outperforming n-gram models.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use this section to motivate one-hot or index-style word representations before introducing dense vectors.</li>
+<li>Explain "atomic" as "word identity only": the model knows <code>cat</code> and <code>dog</code> are different IDs, but not that they are semantically related.</li>
+</ul>
+<h3 id="source_summary--11-goals-of-the-paper">1.1 Goals of the Paper</h3>
+<p>Source claims:</p>
+<ul>
+<li>The paper aims to learn high-quality word vectors from billions of words and vocabularies with millions of words.</li>
+<li>The authors say previous architectures had not, to their knowledge, been successfully trained beyond a few hundred million words with only modest dimensionality.</li>
+<li>The desired vectors should support multiple degrees of similarity, not just nearest-neighbor similarity.</li>
+<li>The paper uses word offset operations, including the famous <code>King - Man + Woman</code> example from prior work, as motivation for preserving linear regularities.</li>
+<li>The authors design a comprehensive test set for syntactic and semantic regularities.</li>
+<li>The paper studies how training time and accuracy depend on vector dimensionality and amount of training data.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Introduce vector offsets only after the reader understands vectors as learned points.</li>
+<li>Make clear that the paper is trying to improve accuracy of these operations, not merely show amusing examples.</li>
+</ul>
+<h3 id="source_summary--12-previous-work">1.2 Previous Work</h3>
+<p>Source claims:</p>
+<ul>
+<li>Continuous vector representations of words have a long history.</li>
+<li>The paper discusses feedforward neural network language models with projection and hidden layers.</li>
+<li>It cites earlier work where word vectors were learned first and then used in an NNLM.</li>
+<li>The authors directly extend that simpler two-step direction and focus on learning word vectors.</li>
+<li>Existing word vectors had been used to improve or simplify NLP applications.</li>
+<li>The authors characterize most prior architectures as more computationally expensive than the architecture they extend, except for some log-bilinear variants.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use this section to prevent overclaiming historical novelty.</li>
+<li>Frame Word2Vec as a practical architecture/scaling contribution in an ongoing line of representation-learning work.</li>
+</ul>
+<h3 id="source_summary--2-model-architectures">2. Model Architectures</h3>
+<p>Source claims:</p>
+<ul>
+<li>The paper focuses on distributed word representations learned by neural networks.</li>
+<li>It compares architectures using computational complexity: the number of parameters that must be accessed to fully train the model.</li>
+<li>The authors want to maximize accuracy while minimizing computational complexity.</li>
+</ul>
+<p>Equation:</p>
+<ul>
+<li>Equation (1): <code>O = E x T x Q</code></li>
+<li>Meaning from the paper:</li>
+<li><code>E</code>: number of training epochs</li>
+<li><code>T</code>: number of words in the training set</li>
+<li><code>Q</code>: architecture-specific cost per training example</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Explain Equation (1) as bookkeeping: total work equals passes through data times number of tokens times work per token.</li>
+<li>Do not start with this equation; use it after a concrete training example.</li>
+</ul>
+<h3 id="source_summary--21-feedforward-neural-net-language-model">2.1 Feedforward Neural Net Language Model</h3>
+<p>Source claims:</p>
+<ul>
+<li>The feedforward NNLM has input, projection, hidden, and output layers.</li>
+<li>It encodes <code>N</code> previous words with <code>1-of-V</code> coding, where <code>V</code> is vocabulary size.</li>
+<li>The projection layer has dimensionality <code>N x D</code>, using a shared projection matrix.</li>
+<li>The expensive part is computation between dense projection and hidden layers, plus output over the vocabulary.</li>
+<li>Hierarchical softmax or other strategies can reduce the full-vocabulary output cost.</li>
+<li>The paper uses hierarchical softmax with a Huffman binary tree, where frequent words get shorter codes.</li>
+</ul>
+<p>Equation:</p>
+<ul>
+<li>Equation (2): <code>Q = N x D + N x D x H + H x V</code></li>
+<li>The paper identifies <code>H x V</code> as a dominating term before output optimizations, and says much remaining complexity comes from <code>N x D x H</code>.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use NNLM only as contrast. For beginners, avoid going deeply into all NNLM mechanics unless needed to explain why CBOW/Skip-gram are cheaper.</li>
+<li>Explain hierarchical softmax as reducing "score every word" into "walk a tree path."</li>
+</ul>
+<h3 id="source_summary--22-recurrent-neural-net-language-model">2.2 Recurrent Neural Net Language Model</h3>
+<p>Source claims:</p>
+<ul>
+<li>RNNLMs address feedforward NNLM limitations such as fixed context length.</li>
+<li>RNNs use time-delayed recurrent connections in the hidden layer to represent information from the past.</li>
+<li>The model has input, hidden, and output layers, but no projection layer in the description here.</li>
+</ul>
+<p>Equation:</p>
+<ul>
+<li>Equation (3): <code>Q = H x H + H x V</code></li>
+<li>With hierarchical softmax, <code>H x V</code> can be reduced to <code>H x log2(V)</code>, leaving <code>H x H</code> as much of the complexity.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use RNNLM as a second contrast point: more expressive sequence modeling but still computationally heavy.</li>
+<li>Avoid making the lesson about RNNs; only include enough to support the paper's comparison.</li>
+</ul>
+<h3 id="source_summary--23-parallel-training-of-neural-networks">2.3 Parallel Training of Neural Networks</h3>
+<p>Source claims:</p>
+<ul>
+<li>The authors implemented several models on Google's DistBelief distributed framework.</li>
+<li>The system runs multiple replicas in parallel and synchronizes gradient updates through centralized servers.</li>
+<li>It uses mini-batch asynchronous gradient descent with Adagrad.</li>
+<li>The paper says using 100 or more replicas, each with many CPU cores, was common in this framework.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use this later, in the results section, to explain why the paper cares about engineering scalability.</li>
+<li>For beginners, define distributed training only at a high level.</li>
+</ul>
+<h3 id="source_summary--3-new-log-linear-models">3. New Log-linear Models</h3>
+<p>Source claims:</p>
+<ul>
+<li>The authors propose two new architectures intended to minimize computational complexity.</li>
+<li>The main observation is that much complexity in earlier neural models comes from the non-linear hidden layer.</li>
+<li>The authors explore simpler models that may represent data less precisely but can train on much more data efficiently.</li>
+<li>The architectures follow earlier work where word vectors are learned first and an NNLM is trained on top later.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>This is the conceptual pivot of the lesson: remove expensive hidden-layer machinery and train word vectors through simple prediction tasks.</li>
+</ul>
+<h3 id="source_summary--31-continuous-bag-of-words-model">3.1 Continuous Bag-of-Words Model</h3>
+<p>Source claims:</p>
+<ul>
+<li>CBOW is similar to a feedforward NNLM with the non-linear hidden layer removed.</li>
+<li>The projection layer is shared for all words; context word vectors are averaged because all words are projected into the same position.</li>
+<li>Word order in the history does not influence the projection.</li>
+<li>The model also uses future words, not just previous words.</li>
+<li>The paper reports best performance for a log-linear classifier with four future and four history words as input, predicting the current middle word.</li>
+<li>The architecture is shown in Figure 1.</li>
+</ul>
+<p>Equation:</p>
+<ul>
+<li>Equation (4): <code>Q = N x D + D x log2(V)</code></li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Teach CBOW as "use surrounding words to guess the missing middle word."</li>
+<li>Emphasize that CBOW ignores order in this architecture, which is why it is a bag-of-words-style model.</li>
+</ul>
+<h3 id="source_summary--32-continuous-skip-gram-model">3.2 Continuous Skip-gram Model</h3>
+<p>Source claims:</p>
+<ul>
+<li>Skip-gram is similar to CBOW but reverses the prediction direction.</li>
+<li>It uses the current word as input and predicts words within a range before and after it.</li>
+<li>Increasing the range can improve vector quality but increases computational complexity.</li>
+<li>More distant words are sampled less often because they are usually less related to the current word.</li>
+<li>In the experiments, the paper uses <code>C = 10</code>.</li>
+</ul>
+<p>Equation:</p>
+<ul>
+<li>Equation (5): <code>Q = C x (D + D x log2(V))</code></li>
+<li><code>C</code> is the maximum distance of words.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Teach Skip-gram as "use one center word to guess its neighbors."</li>
+<li>Carefully avoid reversing CBOW and Skip-gram in later artifacts.</li>
+</ul>
+<h3 id="source_summary--figure-1">Figure 1</h3>
+<p>Figure:</p>
+<ul>
+<li>Figure 1 title/caption: "New model architectures. The CBOW architecture predicts the current word based on the context, and the Skip-gram predicts surrounding words given the current word."</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Redraw as two clean side-by-side diagrams:</li>
+<li>CBOW: <code>w(t-2), w(t-1), w(t+1), w(t+2)</code> -&gt; shared projection/sum -&gt; <code>w(t)</code></li>
+<li>Skip-gram: <code>w(t)</code> -&gt; projection -&gt; <code>w(t-2), w(t-1), w(t+1), w(t+2)</code></li>
+</ul>
+<p>Visual inspection required:</p>
+<ul>
+<li>Yes. The extracted text gives the structure and caption but not a publication-quality diagram.</li>
+</ul>
+<h3 id="source_summary--4-results">4. Results</h3>
+<p>Source claims:</p>
+<ul>
+<li>The paper argues that looking only at nearest-neighbor examples is insufficient for evaluating vector quality.</li>
+<li>It frames analogy-style questions as a harder similarity task.</li>
+<li>Example task: find the word similar to <code>small</code> in the same sense that <code>biggest</code> is similar to <code>big</code>.</li>
+<li>The paper computes <code>vector("biggest") - vector("big") + vector("small")</code>, then searches by cosine distance and discards input question words.</li>
+<li>The correct answer in the example is <code>smallest</code>.</li>
+<li>The paper says high-dimensional vectors trained on large data can answer subtle semantic relationships, such as country-capital relationships.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use this section to explain evaluation after the reader understands vectors.</li>
+<li>Explain exact-match scoring and why synonyms can be counted as wrong.</li>
+</ul>
+<h3 id="source_summary--41-task-description">4.1 Task Description</h3>
+<p>Source claims:</p>
+<ul>
+<li>The Semantic-Syntactic Word Relationship test set contains five semantic question types and nine syntactic question types.</li>
+<li>The paper reports 8,869 semantic and 10,675 syntactic questions.</li>
+<li>Questions were created by manually making lists of similar word pairs and connecting pairs to form questions.</li>
+<li>The test set includes only single-token words, excluding multi-word entities such as "New York."</li>
+<li>A question is correct only if the closest computed vector is exactly the same as the expected answer.</li>
+<li>Synonyms are counted as mistakes.</li>
+<li>The paper says 100% accuracy is likely impossible because the models lack input information about word morphology.</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Table 1: examples of five semantic and nine syntactic relationship categories.</li>
+<li>Categories shown:</li>
+<li>Common capital city</li>
+<li>All capital cities</li>
+<li>Currency</li>
+<li>City-in-state</li>
+<li>Man-Woman</li>
+<li>Adjective to adverb</li>
+<li>Opposite</li>
+<li>Comparative</li>
+<li>Superlative</li>
+<li>Present Participle</li>
+<li>Nationality adjective</li>
+<li>Past tense</li>
+<li>Plural nouns</li>
+<li>Plural verbs</li>
+</ul>
+<p>Visual/table inspection required:</p>
+<ul>
+<li>Table 1 is readable from text extraction, but inspect the PDF before reproducing exact examples.</li>
+</ul>
+<h3 id="source_summary--42-maximization-of-accuracy">4.2 Maximization of Accuracy</h3>
+<p>Source claims:</p>
+<ul>
+<li>The authors used Google News data with about 6B tokens and restricted vocabulary to the 1 million most frequent words.</li>
+<li>They first evaluated models on training-data subsets with vocabulary restricted to the 30k most frequent words.</li>
+<li>They report that after some point, increasing only dimensions or only training data gives diminishing improvements.</li>
+<li>The paper says data amount and vector dimensionality should be increased together.</li>
+<li>The authors note that, from Equation (4), doubling training data is roughly like doubling vector size in computational cost.</li>
+<li>For Tables 2 and 4, the authors used three epochs of stochastic gradient descent and backpropagation, starting learning rate 0.025, linearly decreased toward zero.</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Table 2: CBOW accuracy on a subset of the Semantic-Syntactic test set with limited vocabulary.</li>
+<li>Dimensions shown: 50, 100, 300, 600.</li>
+<li>Training-word subsets shown: 24M, 49M, 98M, 196M, 391M, 783M.</li>
+<li>Accuracy trend: larger vector dimensionality and more training data generally improve accuracy, with diminishing returns.</li>
+<li>Notable endpoint from extracted table: 600-dimensional vectors trained on 783M words reach 50.4 accuracy on this subset.</li>
+</ul>
+<p>Visual/table inspection required:</p>
+<ul>
+<li>Yes before final charting. The table is readable, but a chart should be created from checked numeric values.</li>
+</ul>
+<h3 id="source_summary--43-comparison-of-model-architectures">4.3 Comparison of Model Architectures</h3>
+<p>Source claims:</p>
+<ul>
+<li>The paper compares RNNLM, NNLM, CBOW, and Skip-gram using the same data and 640-dimensional vectors.</li>
+<li>It also evaluates on a syntactic relationship test set from prior work.</li>
+<li>The data for this comparison consists of several LDC corpora: 320M words and 82K vocabulary.</li>
+<li>A previously trained RNNLM took about 8 weeks on a single CPU.</li>
+<li>The NNLM used DistBelief parallel training with a history of 8 previous words.</li>
+<li>The paper states that CBOW works better than NNLM on syntactic tasks and about the same on semantic tasks.</li>
+<li>Skip-gram is slightly worse than CBOW on syntactic tasks but much better on semantic tasks in Table 3.</li>
+</ul>
+<p>Tables:</p>
+<ul>
+<li>Table 3: architecture comparison with 640-dimensional vectors.</li>
+<li>RNNLM: semantic 9, syntactic 36, MSR syntactic test 35.</li>
+<li>NNLM: semantic 23, syntactic 53, MSR syntactic test 47.</li>
+<li>CBOW: semantic 24, syntactic 64, MSR syntactic test 61.</li>
+<li>Skip-gram: semantic 55, syntactic 59, MSR syntactic test 56.</li>
+<li>Table 4: comparison against publicly available vectors and the authors' models.</li>
+<li>Best total shown in Table 4: Skip-gram, 300 dimensions, 783M words, semantic 50.0, syntactic 55.9, total 53.3.</li>
+<li>CBOW, 300 dimensions, 783M words: semantic 15.5, syntactic 53.1, total 36.1.</li>
+<li>The authors' NNLM at 100 dimensions and 6B words: semantic 34.2, syntactic 64.5, total 50.8.</li>
+<li>Table 5: one epoch versus three epochs.</li>
+<li>Training on twice as much data for one epoch gives comparable or better results than three epochs on the same data in the reported cases.</li>
+<li>One-epoch Skip-gram, 600 dimensions, 783M words: total 55.5, training time 2.5 days.</li>
+<li>One-epoch Skip-gram, 300 dimensions, 1.6B words: total 53.8, training time 2 days.</li>
+</ul>
+<p>Visual/table inspection required:</p>
+<ul>
+<li>Yes. Use extracted numbers for planning, but verify before final charts.</li>
+</ul>
+<h3 id="source_summary--44-large-scale-parallel-training-of-models">4.4 Large Scale Parallel Training of Models</h3>
+<p>Source claims:</p>
+<ul>
+<li>The authors used DistBelief with 50 to 100 replicas and Adagrad on Google News 6B data.</li>
+<li>CPU-core counts are estimates because datacenter machines were shared with production tasks.</li>
+<li>Distributed framework overhead makes CBOW and Skip-gram CPU usage closer than in single-machine implementations.</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Table 6: DistBelief comparison.</li>
+<li>NNLM, 100 dimensions, 6B words: semantic 34.2, syntactic 64.5, total 50.8, training time 14 days x 180 CPU cores.</li>
+<li>CBOW, 1000 dimensions, 6B words: semantic 57.3, syntactic 68.9, total 63.7, training time 2 days x 140 CPU cores.</li>
+<li>Skip-gram, 1000 dimensions, 6B words: semantic 66.1, syntactic 65.1, total 65.6, training time 2.5 days x 125 CPU cores.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Strong evidence for the paper's "scalable training" story.</li>
+<li>Explain that CPU-core/day comparisons are approximate in this table.</li>
+</ul>
+<h3 id="source_summary--45-microsoft-research-sentence-completion-challenge">4.5 Microsoft Research Sentence Completion Challenge</h3>
+<p>Source claims:</p>
+<ul>
+<li>The challenge has 1040 sentences, each with one missing word and five candidate choices.</li>
+<li>Skip-gram was trained with 640-dimensional vectors on 50M words provided in the challenge.</li>
+<li>The sentence score is computed by using the unknown word as input and predicting all surrounding words in the sentence.</li>
+<li>Skip-gram alone scores 48.0 accuracy, below some previous approaches.</li>
+<li>Combining Skip-gram scores with RNNLMs gives 58.9 accuracy, which the authors report as a new state-of-the-art result at the time.</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Table 7: sentence completion comparison.</li>
+<li>4-gram: 39</li>
+<li>Average LSA similarity: 49</li>
+<li>Log-bilinear model: 54.8</li>
+<li>RNNLMs: 55.4</li>
+<li>Skip-gram: 48.0</li>
+<li>Skip-gram + RNNLMs: 58.9</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>This is a secondary result. Use it to show vectors can complement other language models, not as the main lesson thread.</li>
+</ul>
+<h3 id="source_summary--5-examples-of-the-learned-relationships">5. Examples of the Learned Relationships</h3>
+<p>Source claims:</p>
+<ul>
+<li>Table 8 shows examples of word-pair relationships using the best word vectors from Table 4: Skip-gram trained on 783M words with 300 dimensions.</li>
+<li>The relationship is formed by subtracting two vectors and adding another.</li>
+<li>Example in text: <code>Paris - France + Italy = Rome</code>.</li>
+<li>The authors say the table's examples would score only about 60% under their exact-match accuracy metric.</li>
+<li>Averaging ten examples instead of one to form a relationship vector improved the best models by about 10 percentage points absolute on the semantic-syntactic test.</li>
+<li>The authors mention selecting the out-of-list word by averaging vectors and finding the most distant word.</li>
+</ul>
+<p>Table:</p>
+<ul>
+<li>Table 8 relationship examples include:</li>
+<li>France - Paris -&gt; Italy: Rome, Japan: Tokyo, Florida: Tallahassee</li>
+<li>big - bigger -&gt; small: larger, cold: colder, quick: quicker</li>
+<li>Miami - Florida -&gt; Baltimore: Maryland, Dallas: Texas, Kona: Hawaii</li>
+<li>Einstein - scientist -&gt; Messi: midfielder, Mozart: violinist, Picasso: painter</li>
+<li>Sarkozy - France -&gt; Berlusconi: Italy, Merkel: Germany, Koizumi: Japan</li>
+<li>copper - Cu -&gt; zinc: Zn, gold: Au, uranium: plutonium</li>
+<li>Berlusconi - Silvio -&gt; Sarkozy: Nicolas, Putin: Medvedev, Obama: Barack</li>
+<li>Microsoft - Windows -&gt; Google: Android, IBM: Linux, Apple: iPhone</li>
+<li>Microsoft - Ballmer -&gt; Google: Yahoo, IBM: McNealy, Apple: Jobs</li>
+<li>Japan - sushi -&gt; Germany: bratwurst, France: tapas, USA: pizza</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use only a few examples in the beginner lesson.</li>
+<li>Include caveat that some examples are imperfect or culturally/time-dependent and exact-match scoring is strict.</li>
+</ul>
+<h3 id="source_summary--6-conclusion">6. Conclusion</h3>
+<p>Source claims:</p>
+<ul>
+<li>The paper concludes that high-quality word vectors can be trained using simple architectures compared with feedforward and recurrent neural network models.</li>
+<li>The lower computational complexity allows accurate high-dimensional vectors to be computed from much larger datasets.</li>
+<li>The authors claim DistBelief should make it possible to train CBOW and Skip-gram on corpora with one trillion words and essentially unlimited vocabulary size.</li>
+<li>The paper expects high-quality word vectors to become an important building block for future NLP applications.</li>
+<li>The authors mention applications and related areas: SemEval-2012 Task 2, sentiment analysis, paraphrase detection, knowledge base extension and verification, and machine translation.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>Use conclusion claims carefully; some are forward-looking expectations, not completed experiments in the paper.</li>
+</ul>
+<h3 id="source_summary--7-follow-up-work">7. Follow-Up Work</h3>
+<p>Source claims:</p>
+<ul>
+<li>After the initial paper version, the authors published single-machine multi-threaded C++ code for CBOW and Skip-gram.</li>
+<li>They report training speed in the order of billions of words per hour for typical hyperparameters.</li>
+<li>They also published more than 1.4 million named-entity vectors trained on more than 100 billion words.</li>
+<li>The paper references upcoming NIPS 2013 follow-up work.</li>
+</ul>
+<p>Teaching use:</p>
+<ul>
+<li>This can explain why "Word2Vec" is often associated with practical released tooling.</li>
+<li>Keep it separate from the main paper's original experimental results.</li>
+</ul>
+<h2 id="source_summary--equation-map">Equation Map</h2>
+<table>
+<thead>
+<tr>
+<th>Equation</th>
+<th>Location</th>
+<th>Formula</th>
+<th>Source meaning</th>
+<th>Beginner explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(1)</td>
+<td>Section 2</td>
+<td><code>O = E x T x Q</code></td>
+<td>Total training complexity is proportional to epochs, training words, and model-specific work per training example.</td>
+<td>Total work grows with how many passes you make, how much text you process, and how expensive each word is to train on.</td>
+</tr>
+<tr>
+<td>(2)</td>
+<td>Section 2.1</td>
+<td><code>Q = N x D + N x D x H + H x V</code></td>
+<td>Feedforward NNLM cost per example.</td>
+<td>The hidden layer and vocabulary output make the older model expensive.</td>
+</tr>
+<tr>
+<td>(3)</td>
+<td>Section 2.2</td>
+<td><code>Q = H x H + H x V</code></td>
+<td>RNNLM cost per example.</td>
+<td>Recurrent hidden-state computation and vocabulary output drive cost.</td>
+</tr>
+<tr>
+<td>(4)</td>
+<td>Section 3.1</td>
+<td><code>Q = N x D + D x log2(V)</code></td>
+<td>CBOW cost with hierarchical softmax.</td>
+<td>CBOW avoids the non-linear hidden layer, making each training case cheaper.</td>
+</tr>
+<tr>
+<td>(5)</td>
+<td>Section 3.2</td>
+<td><code>Q = C x (D + D x log2(V))</code></td>
+<td>Skip-gram cost with context range <code>C</code>.</td>
+<td>Skip-gram repeats prediction for context words, so wider windows cost more.</td>
+</tr>
+</tbody>
+</table>
+<p>Formula caveat:</p>
+<ul>
+<li>Before exact publication, check mathematical notation against the PDF. The text extraction is readable but not ideal for typography.</li>
+</ul>
+<h2 id="source_summary--figure-and-table-map">Figure and Table Map</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Location</th>
+<th>What it contains</th>
+<th>Use in later phases</th>
+<th>Needs visual inspection?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Figure 1</td>
+<td>Section 3.2 / page 5 in extracted flow</td>
+<td>CBOW and Skip-gram architecture diagrams</td>
+<td>Redraw as clean teaching diagrams</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Table 1</td>
+<td>Section 4.1</td>
+<td>Example semantic and syntactic question categories</td>
+<td>Use to explain evaluation categories</td>
+<td>Yes before reproducing exact examples</td>
+</tr>
+<tr>
+<td>Table 2</td>
+<td>Section 4.2</td>
+<td>CBOW accuracy by vector dimensionality and training words</td>
+<td>Use for data/dimension tradeoff chart</td>
+<td>Yes before charting</td>
+</tr>
+<tr>
+<td>Table 3</td>
+<td>Section 4.3</td>
+<td>RNNLM, NNLM, CBOW, Skip-gram architecture comparison</td>
+<td>Use for architecture comparison</td>
+<td>Yes before charting</td>
+</tr>
+<tr>
+<td>Table 4</td>
+<td>Section 4.3</td>
+<td>Public vectors and authors' vectors comparison</td>
+<td>Use selectively, not as a large beginner table</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Table 5</td>
+<td>Section 4.3</td>
+<td>One epoch versus three epochs</td>
+<td>Use for training-data versus epochs point</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Table 6</td>
+<td>Section 4.4</td>
+<td>DistBelief large-scale comparison</td>
+<td>Use for scaling claim</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Table 7</td>
+<td>Section 4.5</td>
+<td>Microsoft Sentence Completion Challenge</td>
+<td>Optional secondary result</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Table 8</td>
+<td>Section 5</td>
+<td>Example learned relationships</td>
+<td>Use for analogy examples with caveats</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source_summary--core-claims-to-preserve">Core Claims to Preserve</h2>
+<ul>
+<li>Words represented as atomic indices have no built-in similarity.</li>
+<li>Distributed continuous word vectors can encode useful similarity patterns.</li>
+<li>The paper proposes CBOW and Skip-gram as simpler architectures for learning vectors efficiently.</li>
+<li>CBOW predicts a current/middle word from surrounding context.</li>
+<li>Skip-gram predicts surrounding words from the current word.</li>
+<li>Much of the efficiency story comes from avoiding expensive non-linear hidden layers and using hierarchical softmax.</li>
+<li>Vector quality is evaluated with semantic and syntactic analogy-style questions using cosine nearest-neighbor search.</li>
+<li>Larger vectors and more training data generally help, but they must be balanced against compute.</li>
+<li>Skip-gram is stronger on semantic analogies in the paper's key architecture comparisons; CBOW is fast and performs strongly on syntactic questions.</li>
+<li>Exact-match analogy accuracy is strict and can count synonyms or plausible alternatives as mistakes.</li>
+</ul>
+<h2 id="source_summary--claims-requiring-careful-wording">Claims Requiring Careful Wording</h2>
+<ul>
+<li>"State of the art": The paper uses this phrase for its test set and the Microsoft Sentence Completion combination result. In the lesson, tie the phrase to the paper's time and task.</li>
+<li>"Semantic meaning": The paper demonstrates regularities in vector space. Do not imply the vectors understand meaning like a human.</li>
+<li>"King - Man + Woman = Queen": The paper cites this as prior observation and motivation, not as the paper's only or main result.</li>
+<li>"One trillion words" and "unlimited vocabulary": In the conclusion this is a forward-looking scalability claim about what should be possible with DistBelief, not a completed reported experiment.</li>
+<li>"Word2Vec invented embeddings": Do not say this. The paper explicitly cites a long history of continuous vector representations.</li>
+</ul>
+<h2 id="source_summary--beginner-teaching-anchors-from-the-source">Beginner Teaching Anchors from the Source</h2>
+<p>Use these as source-grounded bridges into later wiki and lesson work:</p>
+<ul>
+<li>Atomic word IDs are easy but cannot express similarity.</li>
+<li>A context window creates training examples from ordinary text.</li>
+<li>CBOW is a "fill in the middle word" game.</li>
+<li>Skip-gram is a "guess nearby words" game.</li>
+<li>Hierarchical softmax turns a huge word-choice problem into a tree-walking problem.</li>
+<li>Analogy questions test whether similar relationships become similar vector offsets.</li>
+<li>Exact-match scores are useful but imperfect.</li>
+</ul>
+<h2 id="source_summary--open-checks-for-later-phases">Open Checks for Later Phases</h2>
+<ul>
+<li>Visually inspect Figure 1 before redrawing architecture diagrams.</li>
+<li>Verify all table numbers against PDF screenshots before using them in charts or final lesson prose.</li>
+<li>Decide whether the final lesson should include all equations or only Equations (1), (4), and (5), with NNLM/RNNLM equations summarized.</li>
+<li>If code demos are later created, keep them toy-sized and clearly separate them from the paper's large-scale experiments.</li>
+</ul>
+      </div>
+    </article>
+    
+    </main>
+  </div>
+</body>
+</html>

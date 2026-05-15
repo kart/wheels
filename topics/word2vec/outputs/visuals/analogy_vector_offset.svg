@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Analogy as a vector offset</title>
+  <desc id="desc">A diagram showing two similar relationship arrows in vector space, from France to Paris and Italy to Rome, as an intuition for analogy evaluation.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #1f2933; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 16px; font-weight: 650; }
+      .small { font-size: 14px; fill: #4b5563; }
+      .panel { fill: #ffffff; stroke: #c7cdd4; stroke-width: 1.5; }
+      .axis { stroke: #c7cdd4; stroke-width: 1.2; }
+      .point { fill: #2f80ed; stroke: #ffffff; stroke-width: 2; }
+      .target { fill: #ef7d32; stroke: #ffffff; stroke-width: 2; }
+      .offset { stroke: #2563eb; stroke-width: 3; marker-end: url(#arrow); }
+      .ghost { stroke: #2563eb; stroke-width: 2; stroke-dasharray: 6 6; marker-end: url(#arrow); }
+      .caption { font-size: 15px; fill: #374151; }
+    </style>
+  </defs>
+  <rect width="960" height="520" fill="#f7f9fc"/>
+  <text x="40" y="46" class="title">Analogy questions test reusable relationship directions</text>
+  <text x="40" y="76" class="small">Illustrative geometry for the paper's vector arithmetic evaluation, not actual coordinates.</text>
+  <rect x="65" y="105" width="830" height="320" rx="8" class="panel"/>
+  <line x1="120" y1="365" x2="850" y2="365" class="axis"/>
+  <line x1="120" y1="365" x2="120" y2="135" class="axis"/>
+
+  <circle cx="245" cy="310" r="9" class="point"/><text x="190" y="333" class="label">France</text>
+  <circle cx="370" cy="205" r="9" class="target"/><text x="382" y="210" class="label">Paris</text>
+  <line x1="254" y1="302" x2="360" y2="213" class="offset"/>
+
+  <circle cx="585" cy="315" r="9" class="point"/><text x="545" y="340" class="label">Italy</text>
+  <circle cx="710" cy="210" r="9" class="target"/><text x="724" y="215" class="label">Rome</text>
+  <line x1="594" y1="307" x2="700" y2="218" class="ghost"/>
+
+  <text x="220" y="162" class="small">known offset</text>
+  <text x="574" y="165" class="small">apply similar offset</text>
+  <text x="310" y="462" class="label">Paris - France + Italy -> nearest vector: Rome</text>
+  <text x="40" y="496" class="caption">Caption: Analogy questions test whether relationship directions in vector space can transfer from one word pair to another.</text>
+</svg>

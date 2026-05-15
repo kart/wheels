@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Hierarchical softmax as a tree path</title>
+  <desc id="desc">A diagram showing hierarchical softmax as a binary tree path to a target word, with frequent words shown nearer the root.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/>
+    </marker>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #1f2933; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 16px; font-weight: 650; }
+      .small { font-size: 14px; fill: #4b5563; }
+      .node { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; }
+      .target { fill: #fff3df; stroke: #ef7d32; stroke-width: 2; }
+      .frequent { fill: #eef8ee; stroke: #238636; stroke-width: 1.8; }
+      .edge { stroke: #94a3b8; stroke-width: 2; }
+      .path { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .caption { font-size: 15px; fill: #374151; }
+    </style>
+  </defs>
+  <rect width="960" height="520" fill="#f7f9fc"/>
+  <text x="40" y="46" class="title">Hierarchical softmax: predict by walking a tree</text>
+  <text x="40" y="76" class="small">Paper claim: a Huffman tree gives frequent words shorter paths than rare words.</text>
+
+  <circle cx="480" cy="130" r="28" class="node"/><text x="471" y="136" class="label">?</text>
+  <circle cx="320" cy="230" r="28" class="frequent"/><text x="302" y="236" class="label">the</text>
+  <circle cx="640" cy="230" r="28" class="node"/><text x="631" y="236" class="label">?</text>
+  <circle cx="540" cy="335" r="28" class="target"/><text x="522" y="341" class="label">fox</text>
+  <circle cx="740" cy="335" r="28" class="node"/><text x="730" y="341" class="label">?</text>
+  <circle cx="690" cy="430" r="28" class="node"/><text x="672" y="436" class="label">rare</text>
+  <circle cx="790" cy="430" r="28" class="node"/><text x="774" y="436" class="label">word</text>
+
+  <line x1="456" y1="146" x2="344" y2="214" class="edge"/>
+  <line x1="504" y1="146" x2="616" y2="214" class="edge"/>
+  <line x1="622" y1="250" x2="558" y2="315" class="edge"/>
+  <line x1="658" y1="250" x2="722" y2="315" class="edge"/>
+  <line x1="726" y1="360" x2="704" y2="405" class="edge"/>
+  <line x1="754" y1="360" x2="776" y2="405" class="edge"/>
+  <path d="M500 150 L620 220 L558 318" class="path"/>
+
+  <text x="98" y="194" class="label">Short path for frequent word</text>
+  <text x="96" y="220" class="small">Fewer decisions for common words.</text>
+  <text x="96" y="357" class="label">Longer paths for rarer words</text>
+  <text x="96" y="383" class="small">Still far cheaper than scoring every vocabulary item at once.</text>
+  <text x="40" y="488" class="caption">Caption: Hierarchical softmax turns a large vocabulary prediction into a path through a binary tree.</text>
+</svg>

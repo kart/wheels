@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">One-hot word IDs versus dense word vectors</title>
+  <desc id="desc">A teaching diagram contrasting sparse one-hot identity vectors with an illustrative dense vector space where related words can be near each other.</desc>
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; fill: #1f2933; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 17px; font-weight: 650; }
+      .small { font-size: 14px; fill: #4b5563; }
+      .tiny { font-size: 12px; fill: #4b5563; }
+      .panel { fill: #ffffff; stroke: #c7cdd4; stroke-width: 1.5; }
+      .cell { fill: #f4f7fb; stroke: #c7cdd4; stroke-width: 1; }
+      .active { fill: #2f80ed; }
+      .axis { stroke: #9aa5b1; stroke-width: 1.2; }
+      .point { stroke: #ffffff; stroke-width: 2; }
+      .cluster-a { fill: #2f80ed; }
+      .cluster-b { fill: #ef7d32; }
+      .caption { font-size: 15px; fill: #374151; }
+    </style>
+  </defs>
+  <rect width="960" height="540" fill="#f7f9fc"/>
+  <text x="40" y="48" class="title">From word identity to learned similarity</text>
+
+  <rect x="40" y="82" width="405" height="360" rx="8" class="panel"/>
+  <text x="65" y="118" class="label">One-hot / atomic IDs</text>
+  <text x="65" y="143" class="small">Different words occupy separate slots.</text>
+  <text x="65" y="168" class="small">The representation itself has no similarity signal.</text>
+  <text x="66" y="214" class="tiny">cat</text>
+  <text x="66" y="260" class="tiny">dog</text>
+  <text x="66" y="306" class="tiny">car</text>
+  <text x="66" y="352" class="tiny">engine</text>
+  <g transform="translate(130 190)">
+    <rect x="0" y="0" width="54" height="34" class="cell"/><rect x="54" y="0" width="54" height="34" class="cell"/><rect x="108" y="0" width="54" height="34" class="cell"/><rect x="162" y="0" width="54" height="34" class="cell"/><rect x="0" y="0" width="54" height="34" class="active"/>
+    <rect x="0" y="46" width="54" height="34" class="cell"/><rect x="54" y="46" width="54" height="34" class="cell"/><rect x="108" y="46" width="54" height="34" class="cell"/><rect x="162" y="46" width="54" height="34" class="cell"/><rect x="54" y="46" width="54" height="34" class="active"/>
+    <rect x="0" y="92" width="54" height="34" class="cell"/><rect x="54" y="92" width="54" height="34" class="cell"/><rect x="108" y="92" width="54" height="34" class="cell"/><rect x="162" y="92" width="54" height="34" class="cell"/><rect x="108" y="92" width="54" height="34" class="active"/>
+    <rect x="0" y="138" width="54" height="34" class="cell"/><rect x="54" y="138" width="54" height="34" class="cell"/><rect x="108" y="138" width="54" height="34" class="cell"/><rect x="162" y="138" width="54" height="34" class="cell"/><rect x="162" y="138" width="54" height="34" class="active"/>
+    <text x="22" y="22" font-size="13" fill="#ffffff">1</text><text x="76" y="68" font-size="13" fill="#ffffff">1</text><text x="130" y="114" font-size="13" fill="#ffffff">1</text><text x="184" y="160" font-size="13" fill="#ffffff">1</text>
+  </g>
+
+  <rect x="515" y="82" width="405" height="360" rx="8" class="panel"/>
+  <text x="540" y="118" class="label">Dense learned vectors</text>
+  <text x="540" y="143" class="small">Words become points in a learned space.</text>
+  <text x="540" y="168" class="small">Related words can be close or point similar ways.</text>
+  <line x1="570" y1="385" x2="875" y2="385" class="axis"/>
+  <line x1="570" y1="385" x2="570" y2="205" class="axis"/>
+  <circle cx="635" cy="260" r="9" class="point cluster-a"/><text x="650" y="265" class="small">cat</text>
+  <circle cx="675" cy="250" r="9" class="point cluster-a"/><text x="690" y="255" class="small">dog</text>
+  <circle cx="770" cy="330" r="9" class="point cluster-b"/><text x="785" y="335" class="small">car</text>
+  <circle cx="812" cy="315" r="9" class="point cluster-b"/><text x="827" y="320" class="small">engine</text>
+  <path d="M620 282 C650 300, 682 298, 704 275" fill="none" stroke="#2f80ed" stroke-width="2" stroke-dasharray="5 5"/>
+  <path d="M758 350 C784 365, 824 355, 842 333" fill="none" stroke="#ef7d32" stroke-width="2" stroke-dasharray="5 5"/>
+  <text x="590" y="414" class="tiny">Illustrative 2D projection, not paper data</text>
+
+  <text x="40" y="488" class="caption">Caption: One-hot vectors identify words with separate slots. Dense word vectors can represent graded relationships learned from context.</text>
+</svg>

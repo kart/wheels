@@ -1,0 +1,64 @@
+id: word2vec
+title: 'Word2Vec: Efficient Estimation of Word Representations in Vector Space'
+goal: 'Understand the Word2Vec paper deeply and produce a beginner-friendly, intuition-first
+  explanation with visuals, examples, optional code, and an HTML preview.
+
+  '
+audience:
+  level: undergraduate beginner
+  description: 'The reader has undergraduate-level technical maturity. Their math
+    may be weak, but they are capable of understanding if ideas are built up with
+    examples, intuition, diagrams, and gradual explanations. Assume coding experience
+    is novice to beginner.
+
+    '
+  expectations:
+  - Explain motivation before mechanics.
+  - Use examples before abstraction.
+  - Introduce equations only after intuition.
+  - If code is included, explain the idea before the code.
+  - Code must be well-commented and educational.
+  - Avoid long walls of text.
+  - Use visuals wherever they reduce cognitive load.
+source_policy:
+  raw_is_human_owned: true
+  do_not_overwrite_raw: true
+  pdf_to_text_optional: true
+  use_extracted_text_only_if_needed: true
+available_sources:
+- path: raw/papers/word2vec.pdf
+  type: paper
+  role: primary_source
+desired_outputs:
+- generated plan
+- compiled wiki
+- deep-dive lesson
+- visual plan
+- generated visual assets
+- preview.html
+- reviewer report
+- fix log
+- publish pack later
+rules:
+- Stay grounded in the provided sources.
+- Clearly separate paper claims from later interpretation.
+- Prefer intuition before math.
+- Prefer examples before abstraction.
+- Do not generate shallow summaries.
+- Do not assume the reader is a coding expert.
+- Do not create publish drafts until the lesson has been reviewed.
+- Use templates/article_shapes.md for the final lesson/blog structure.
+- Use prompts/audience_profiles.md for audience expectations.
+- Make outputs/preview.html look like a reader-facing blog preview.
+- Make outputs/publish/blog.md copy-pasteable into karthik.dev/_posts/.
+- Use the publish_target.asset_base_path for final blog image links.
+audience_profile: beginner_technical
+article_shape: paper_deep_dive
+publish_target:
+  format: jekyll_markdown
+  layout: default
+  category: Paper Reading
+  asset_base_path: /assets/images
+  blog_output: outputs/publish/blog.md
+  preview_output: outputs/preview.html
+  asset_filename_prefix: word2vec-

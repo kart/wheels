@@ -1,0 +1,476 @@
+topic_id: word2vec
+title: "Word2Vec: Efficient Estimation of Word Representations in Vector Space"
+plan_status: draft
+
+source_reading:
+  sources_read:
+    - path: topic.yaml
+      role: topic brief and audience constraints
+    - path: raw/papers/word2vec.pdf
+      role: primary source paper
+  pdf_readability:
+    status: readable
+    method: "Local pdftotext extraction from the 12-page PDF was usable for planning."
+    caveat: >
+      The main text, equations, figure caption, tables, examples, conclusion, and
+      references were readable. If later lesson work needs exact table formatting,
+      figure recreation, or citation checking, re-extract the specific pages or
+      inspect the PDF visually.
+    minimum_extraction_needed_later: >
+      No extra extraction is required for the initial wiki. For the lesson and
+      visuals, extract or manually inspect Figure 1 and Tables 1-8 to avoid copying
+      layout errors from plain text.
+  grounding_notes:
+    - "Primary source claims should be attributed to the Mikolov et al. paper."
+    - "Later terminology such as 'embeddings' may be used as interpretation, but should be separated from what the paper itself emphasizes: continuous vector representations, CBOW, Skip-gram, and linear regularities."
+    - "Do not overstate Word2Vec as the invention of word vectors; the paper explicitly situates itself in prior work on distributed representations and neural language models."
+
+teaching_decision:
+  audience: undergraduate beginner
+  best_teaching_path: >
+    Teach Word2Vec as a response to a concrete problem first: one-hot word IDs
+    cannot express similarity, while dense vectors can place related words near
+    each other. Build from toy contexts and prediction games before introducing
+    CBOW, Skip-gram, complexity formulas, hierarchical softmax, and evaluation.
+  narrative_spine:
+    - "Words as isolated IDs are simple but waste similarity information."
+    - "A model can learn useful word vectors by solving a prediction task over surrounding words."
+    - "CBOW predicts the center word from context; Skip-gram predicts context from the center word."
+    - "Removing expensive hidden layers makes training scalable on very large text."
+    - "Vector quality is tested through similarity and analogy-style regularities, not just by looking at nearest neighbors."
+  difficulty_management:
+    - "Use small sentences and tiny vocabularies before paper-scale terms such as V, D, N, C, and T."
+    - "Explain equations as cost bookkeeping rather than abstract math."
+    - "Delay hierarchical softmax until the reader understands why predicting over a huge vocabulary is expensive."
+    - "Clarify that vector arithmetic works statistically and imperfectly, not as symbolic reasoning."
+
+proposed_wiki_structure:
+  - file: wiki/source_summary.md
+    purpose: "Concise source-grounded summary of the paper's goals, proposed models, experiments, and conclusions."
+    sections:
+      - "Bibliographic identity and paper goal"
+      - "Problem setting: atomic word IDs versus continuous representations"
+      - "Prior model families discussed in the paper"
+      - "Main contributions claimed by the paper"
+      - "Experiments and evaluation tasks"
+      - "Important limitations and cautions"
+  - file: wiki/concepts.md
+    purpose: "Reusable explanations of technical concepts needed for the lesson."
+    sections:
+      - "Vocabulary, one-hot encoding, and dense vectors"
+      - "Distributed word representations"
+      - "Language modeling versus representation learning"
+      - "Context windows"
+      - "Projection layer and averaging"
+      - "Log-linear classifier"
+      - "CBOW"
+      - "Skip-gram"
+      - "Hierarchical softmax and Huffman trees"
+      - "Cosine similarity and analogy questions"
+      - "Semantic versus syntactic regularities"
+  - file: wiki/architecture_notes.md
+    purpose: "Paper-grounded comparison of NNLM, RNNLM, CBOW, and Skip-gram."
+    sections:
+      - "Why older neural language models were costly"
+      - "Feedforward NNLM architecture and cost terms"
+      - "RNNLM architecture and cost terms"
+      - "CBOW architecture and training target"
+      - "Skip-gram architecture and training target"
+      - "Complexity comparison in beginner-readable language"
+  - file: wiki/results_notes.md
+    purpose: "Structured notes on the evaluation method and results tables."
+    sections:
+      - "Semantic-Syntactic Word Relationship test set"
+      - "How analogy evaluation works"
+      - "Accuracy trends across data size, dimensionality, and architecture"
+      - "Reported examples of learned relationships"
+      - "Sentence completion challenge result"
+      - "What the results do and do not prove"
+
+proposed_lesson_structure:
+  - title: "Why Word2Vec Was Needed"
+    goal: "Motivate dense word vectors from the limitations of treating words as unrelated IDs."
+    include:
+      - "Toy vocabulary example"
+      - "Contrast between exact word identity and graded similarity"
+      - "Source-grounded note on scaling simple models versus using more advanced techniques"
+  - title: "The Core Trick: Learn Vectors by Predicting Nearby Words"
+    goal: "Introduce the prediction task before architecture names."
+    include:
+      - "Small sentence with a highlighted center word and context"
+      - "Explanation that useful vectors emerge as model parameters"
+      - "No equations yet"
+  - title: "CBOW: Guess the Word from Its Neighbors"
+    goal: "Explain CBOW as context-to-center prediction."
+    include:
+      - "Step-by-step toy example"
+      - "Averaging context vectors"
+      - "Why word order is ignored in this model"
+  - title: "Skip-gram: Guess the Neighbors from the Word"
+    goal: "Explain Skip-gram as center-to-context prediction."
+    include:
+      - "Step-by-step toy example"
+      - "Context window size and distant-word sampling intuition"
+      - "Comparison to CBOW"
+  - title: "Why the Paper Cares So Much About Speed"
+    goal: "Make computational complexity approachable."
+    include:
+      - "Vocabulary-size bottleneck"
+      - "Hidden layer cost in NNLM and RNNLM"
+      - "Why removing the hidden layer helps"
+      - "Hierarchical softmax as a decision tree idea"
+  - title: "How Do We Know the Vectors Are Good?"
+    goal: "Explain evaluation through similarity and analogy-style regularities."
+    include:
+      - "Cosine similarity intuition"
+      - "big:bigger :: small:?"
+      - "Paris - France + Italy style relation"
+      - "Semantic versus syntactic question categories"
+  - title: "What the Results Say"
+    goal: "Summarize paper findings without turning tables into a wall of numbers."
+    include:
+      - "CBOW is fast and strong on syntactic questions"
+      - "Skip-gram is especially strong on semantic questions in the reported comparisons"
+      - "More data and larger vectors generally help, with tradeoffs"
+      - "Distributed training makes larger runs feasible"
+  - title: "What to Take Away"
+    goal: "Close with accurate implications and limitations."
+    include:
+      - "Word2Vec learns useful geometry from local context prediction"
+      - "Vector arithmetic is an empirical regularity, not guaranteed symbolic meaning"
+      - "The paper's models became important because they made useful vectors cheaper to train at scale"
+
+concepts_needing_intuition:
+  - concept: "one-hot word identity"
+    intuition: "A dictionary index can identify a word but cannot tell whether two words are related."
+  - concept: "dense vector representation"
+    intuition: "A word becomes a point in a learned map where nearby points often behave similarly."
+  - concept: "distributional learning from context"
+    intuition: "Words that appear in similar neighborhoods are pushed toward similar useful representations."
+  - concept: "projection layer"
+    intuition: "The lookup step that retrieves the current learned vector for each word."
+  - concept: "CBOW averaging"
+    intuition: "Combine nearby context words into one rough clue about the missing center word."
+  - concept: "Skip-gram prediction"
+    intuition: "Use one word as a clue to predict several neighbors."
+  - concept: "hierarchical softmax"
+    intuition: "Guess a word by walking a binary decision tree instead of scoring every word in the vocabulary."
+  - concept: "cosine similarity"
+    intuition: "Compare directions in vector space rather than raw coordinate sizes."
+  - concept: "word analogy arithmetic"
+    intuition: "Some learned differences between vectors behave like reusable relationship directions."
+  - concept: "training complexity"
+    intuition: "Count how much work the model does for each training word and how that scales with data, vector size, and vocabulary size."
+
+concepts_needing_examples:
+  - concept: "atomic words versus similar words"
+    example: "cat, dog, car, engine in a tiny vocabulary"
+  - concept: "context window"
+    example: "the quick brown fox jumps over the lazy dog"
+  - concept: "CBOW"
+    example: "Given 'the quick ___ fox', predict 'brown'."
+  - concept: "Skip-gram"
+    example: "Given 'brown', predict 'quick' and 'fox'."
+  - concept: "syntactic regularity"
+    example: "big:bigger :: small:larger or cold:colder, matching paper-style examples while explaining imperfect matches."
+  - concept: "semantic regularity"
+    example: "France:Paris :: Italy:Rome."
+  - concept: "model comparison"
+    example: "Compare a model with a costly hidden layer to CBOW/Skip-gram using a simplified cost story."
+  - concept: "evaluation exactness"
+    example: "If the closest vector is 'Rome', the analogy is counted correct; close but non-exact answers may still be meaningful but not score."
+
+concepts_needing_visuals:
+  - "One-hot vectors versus dense vectors"
+  - "Words as points in a 2D teaching map"
+  - "Context window around a center word"
+  - "CBOW architecture"
+  - "Skip-gram architecture"
+  - "Hierarchical softmax tree"
+  - "Vector analogy as an arrow offset"
+  - "Training-cost comparison across NNLM, RNNLM, CBOW, and Skip-gram"
+  - "Evaluation pipeline from trained vectors to analogy accuracy"
+
+proposed_visual_assets:
+  - id: one_hot_vs_dense
+    type: diagram
+    output_path: outputs/visuals/one_hot_vs_dense.svg
+    purpose: "Show why one-hot IDs do not encode similarity while dense vectors can."
+    content: "Left: sparse table with one active cell per word. Right: small 2D map with related words closer together."
+  - id: context_window
+    type: diagram
+    output_path: outputs/visuals/context_window.svg
+    purpose: "Explain center word, history words, future words, and window size."
+    content: "A sentence strip with the center word highlighted and surrounding context tokens bracketed."
+  - id: cbow_flow
+    type: architecture_diagram
+    output_path: outputs/visuals/cbow_flow.svg
+    purpose: "Teach CBOW prediction direction."
+    content: "Context words feed into shared vector lookup, vectors are averaged/summed, model predicts the center word."
+    source_note: "Based on Figure 1 of the paper, but redrawn educationally rather than copied."
+  - id: skipgram_flow
+    type: architecture_diagram
+    output_path: outputs/visuals/skipgram_flow.svg
+    purpose: "Teach Skip-gram prediction direction."
+    content: "Center word feeds into vector lookup, model predicts multiple surrounding words."
+    source_note: "Based on Figure 1 of the paper, but redrawn educationally rather than copied."
+  - id: hierarchical_softmax_tree
+    type: diagram
+    output_path: outputs/visuals/hierarchical_softmax_tree.svg
+    purpose: "Make the vocabulary-size bottleneck concrete."
+    content: "Binary tree path to a target word, with frequent words shown as shorter paths in a Huffman-style intuition."
+  - id: analogy_vector_offset
+    type: diagram
+    output_path: outputs/visuals/analogy_vector_offset.svg
+    purpose: "Explain vector arithmetic through reusable relationship arrows."
+    content: "Two parallel arrow offsets, e.g. France to Paris and Italy to Rome, with cosine nearest-neighbor search."
+  - id: complexity_comparison
+    type: chart
+    output_path: outputs/visuals/complexity_comparison.svg
+    purpose: "Compare where computation is spent in NNLM, RNNLM, CBOW, and Skip-gram."
+    content: "Qualitative bar chart using simplified labels, not a misleading exact numeric chart."
+  - id: evaluation_pipeline
+    type: flowchart
+    output_path: outputs/visuals/evaluation_pipeline.svg
+    purpose: "Show how analogy questions become an accuracy score."
+    content: "Question pair -> vector expression -> nearest vector search -> exact-match scoring."
+
+proposed_code_demos:
+  include_code: true
+  rationale: >
+    A small educational code demo will help novice readers see that Word2Vec is a
+    prediction-training setup, but it should not attempt to reproduce the paper's
+    large-scale results.
+  demos:
+    - id: toy_context_pairs
+      output_path: outputs/code/toy_context_pairs.py
+      purpose: "Generate CBOW and Skip-gram training examples from a tiny list of tokenized sentences."
+      teaching_value: "Clarifies center word, context window, and direction of prediction."
+      dependencies: "Python standard library only."
+    - id: tiny_skipgram_training_optional
+      output_path: outputs/code/tiny_skipgram_training.py
+      purpose: "Train a tiny Skip-gram-style embedding model on a miniature corpus."
+      teaching_value: "Shows vectors as learned parameters and nearest-neighbor inspection."
+      dependencies: "Prefer numpy only if already available; otherwise keep as pseudocode or omit from final lesson."
+      caution: "State clearly that tiny toy data will not produce paper-quality analogies."
+    - id: analogy_with_pregiven_vectors
+      output_path: outputs/code/analogy_demo.py
+      purpose: "Demonstrate cosine similarity and vector arithmetic with small hand-made or preloaded vectors."
+      teaching_value: "Separates analogy mechanics from expensive training."
+
+html_preview_strategy:
+  output_path: outputs/preview.html
+  approach: >
+    Build a single-page educational preview of the final lesson after the lesson
+    and visuals exist. The first screen should start with the actual teaching
+    content, not a marketing hero.
+  layout:
+    - "Sticky table of contents on desktop; collapsible/simple top navigation on mobile."
+    - "Short sections with nearby diagrams, captions, and callout boxes for paper claims versus interpretation."
+    - "Use progressive disclosure for equations: intuition first, then formula, then plain-English reading."
+    - "Code demos should be presented in readable blocks with explanatory text before each block."
+  visual_integration:
+    - "Place CBOW and Skip-gram diagrams directly beside their explanations."
+    - "Place analogy vector diagram beside the evaluation section."
+    - "Use tables sparingly; convert results into annotated summary cards or compact comparison charts when possible."
+  accessibility:
+    - "All diagrams need descriptive alt text and captions."
+    - "Avoid color-only distinctions; include labels and arrows."
+    - "Keep typography readable on mobile and avoid long uninterrupted paragraphs."
+
+review_strategy:
+  reviewer_role: "Reviewer writes reports only and must not edit lesson, wiki, output, visual, or raw files."
+  review_outputs:
+    - path: reviews/reviewer_report.md
+      purpose: "Audit source fidelity, pedagogy, visuals, code demos, and preview quality."
+  checks:
+    - "Verify every paper claim in the lesson is supported by the PDF or explicitly marked as interpretation."
+    - "Check that the lesson does not imply Word2Vec invented distributed representations."
+    - "Check CBOW and Skip-gram directions are never reversed."
+    - "Check complexity explanations preserve the key paper idea: hidden layers and full-vocabulary output are expensive, and the proposed log-linear models reduce cost."
+    - "Check analogy examples are described as empirical regularities with imperfect accuracy."
+    - "Check all visuals are educational, correctly labeled, and placed near relevant text."
+    - "Check beginner accessibility: motivation before mechanics, examples before equations, and no unexplained formulas."
+    - "Run code demos if present and confirm outputs match lesson claims."
+    - "Inspect preview on desktop and mobile widths for text overlap, unreadable code, broken images, or missing captions."
+
+fix_strategy:
+  fixer_role: "Fixer validates reviewer comments before applying them."
+  fix_outputs:
+    - path: reviews/fix_log.md
+      purpose: "Record accepted fixes, rejected reviewer comments, rationale, and verification."
+  process:
+    - "Classify each reviewer finding as source-fidelity, pedagogy, visual, code, preview, or style."
+    - "Validate the finding against the PDF, topic.yaml, AGENTS.md, and generated artifacts."
+    - "Apply only validated fixes; document rejected or modified suggestions with reasons."
+    - "After fixes, re-run relevant code demos and re-check preview rendering."
+    - "Ensure no raw files are modified during fixing."
+
+execution_phases:
+  - id: phase_01_source_extraction_and_source_map
+    name: "Source extraction and source map"
+    goal: "Create a source-grounded map of the paper's claims, equations, figures, tables, examples, and extraction caveats."
+    inputs:
+      - topic.yaml
+      - raw/
+    outputs:
+      - "wiki/source_summary.md"
+    instructions:
+      - "Extract paper text page-by-page or section-by-section."
+      - "Create a source map of the paper's claims, equations, figure, tables, and examples."
+      - "Flag any tables or figures that require visual inspection."
+    completion_check:
+      - "wiki/source_summary.md exists and is grounded in raw/papers/word2vec.pdf."
+      - "Any PDF extraction limitations are explicitly noted."
+      - "Raw files remain unchanged."
+  - id: phase_02_compiled_wiki
+    name: "Compiled wiki"
+    goal: "Compile beginner-readable concept, architecture, and results notes that preserve paper fidelity."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/
+      - wiki/source_summary.md
+    outputs:
+      - "wiki/concepts.md"
+      - "wiki/architecture_notes.md"
+      - "wiki/results_notes.md"
+    instructions:
+      - "Compile beginner-readable concept notes grounded in the source."
+      - "Separate paper claims from explanatory interpretation."
+      - "Record exact terms and equations needed for the final lesson."
+    completion_check:
+      - "All wiki files exist at the listed paths."
+      - "CBOW and Skip-gram descriptions match the paper's prediction directions."
+      - "Paper claims are distinguishable from teaching interpretation."
+  - id: phase_03_lesson_outline_and_draft
+    name: "Lesson outline and draft"
+    goal: "Draft the beginner-friendly lesson using the planned narrative, examples, and visual placeholders."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+    outputs:
+      - "outputs/lesson.md"
+    instructions:
+      - "Draft the lesson following the proposed lesson structure."
+      - "Use examples before equations in each technical section."
+      - "Insert visual placeholders with captions where each visual belongs."
+    completion_check:
+      - "outputs/lesson.md exists."
+      - "The lesson starts with motivation before mechanics."
+      - "Visual placeholders and captions are present near the relevant explanations."
+  - id: phase_04_visual_asset_production
+    name: "Visual asset production"
+    goal: "Create educational visuals that explain mechanisms, comparisons, and evaluation without decorative filler."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+      - outputs/lesson.md
+      - raw/
+    outputs:
+      - "outputs/visuals/*.svg"
+      - "outputs/visual_plan.md"
+    instructions:
+      - "Create educational diagrams from the proposed visual assets list."
+      - "Inspect Figure 1 and relevant tables before redrawing architecture/result visuals."
+      - "Check labels, arrows, captions, and consistency with lesson text."
+    completion_check:
+      - "Planned visual assets exist under outputs/visuals/."
+      - "outputs/visual_plan.md documents visual purpose, source grounding, and placement."
+      - "Visual labels, arrows, and captions do not contradict the lesson or paper."
+  - id: phase_05_code_demos
+    name: "Code demos"
+    goal: "Produce small educational code demos only where they improve understanding for novice readers."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+      - outputs/lesson.md
+    outputs:
+      - "outputs/code/*.py"
+    instructions:
+      - "Implement only demos that add real learning value."
+      - "Keep dependencies minimal and comments educational."
+      - "Run demos and capture expected behavior for the lesson."
+    completion_check:
+      - "Included code demos exist under outputs/code/ or are explicitly omitted with rationale."
+      - "Runnable demos have been executed successfully."
+      - "The lesson explains each code idea before showing code."
+  - id: phase_06_html_preview
+    name: "HTML preview"
+    goal: "Build a responsive single-page preview that integrates the lesson, visuals, and code demos."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visuals/
+      - outputs/code/
+    outputs:
+      - "outputs/preview.html"
+    instructions:
+      - "Convert lesson, visuals, and code demos into a responsive single-page preview."
+      - "Verify local rendering and image paths."
+      - "Check desktop and mobile layouts."
+    completion_check:
+      - "outputs/preview.html exists and loads local visual assets."
+      - "Desktop and mobile layouts have no obvious text overlap or broken images."
+      - "Code blocks are readable on narrow screens."
+  - id: phase_07_reviewer_audit
+    name: "Reviewer audit"
+    goal: "Audit the generated artifacts without editing them."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/
+      - wiki/
+      - outputs/
+    outputs:
+      - "reviews/reviewer_report.md"
+    instructions:
+      - "Reviewer audits only and writes a report."
+      - "Reviewer checks source fidelity, clarity, visuals, code, preview, and rule compliance."
+    completion_check:
+      - "reviews/reviewer_report.md exists."
+      - "The report lists findings without modifying wiki, lesson, output, visual, or raw files."
+      - "The report covers source fidelity, pedagogy, visuals, code, preview, and rule compliance."
+  - id: phase_08_fixer_loop
+    name: "Fixer loop"
+    goal: "Validate reviewer findings, apply justified fixes, and document decisions."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/
+      - wiki/
+      - outputs/
+      - reviews/reviewer_report.md
+    outputs:
+      - "reviews/fix_log.md"
+      - "updated lesson, visuals, code, and preview as needed"
+    instructions:
+      - "Validate reviewer findings."
+      - "Apply accepted fixes."
+      - "Document fix decisions and verification."
+    completion_check:
+      - "reviews/fix_log.md exists."
+      - "Each reviewer finding is marked accepted, rejected, or modified with rationale."
+      - "Relevant artifacts are rechecked after fixes."
+  - id: phase_09_publish_pack_preparation
+    name: "Publish pack preparation"
+    goal: "Prepare publish-ready materials only after review and fixes are complete."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+      - outputs/
+      - reviews/reviewer_report.md
+      - reviews/fix_log.md
+    outputs:
+      - "outputs/publish_pack/"
+    instructions:
+      - "Prepare only after review and fixes are complete."
+      - "Include final lesson, visuals, preview, code demos, and source/fidelity notes."
+    completion_check:
+      - "outputs/publish_pack/ exists only after the reviewed and fixed artifacts are ready."
+      - "The publish pack includes final lesson, visuals, preview, code demos if used, and source/fidelity notes."
