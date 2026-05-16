@@ -24,6 +24,8 @@ Publish target:
 | Source file | Publish asset | Destination in karthik.dev | Referenced in blog section |
 | --- | --- | --- | --- |
 | `../visuals/one_hot_vs_dense.svg` | `assets/word2vec-one-hot-vs-dense.svg` | `assets/images/word2vec-one-hot-vs-dense.svg` | The Problem Before the Paper |
+| `../visuals/embedding_lookup_dot_product.svg` | `assets/word2vec-embedding-lookup-dot-product.svg` | `assets/images/word2vec-embedding-lookup-dot-product.svg` | Dense Word Vectors and the Embedding Matrix |
+| `../visuals/softmax_example.svg` | `assets/word2vec-softmax-example.svg` | `assets/images/word2vec-softmax-example.svg` | Tiny Math Tools We Need |
 | `../visuals/context_window.svg` | `assets/word2vec-context-window.svg` | `assets/images/word2vec-context-window.svg` | A Tiny Example |
 | `../visuals/cbow_flow.svg` | `assets/word2vec-cbow-flow.svg` | `assets/images/word2vec-cbow-flow.svg` | CBOW |
 | `../visuals/skipgram_flow.svg` | `assets/word2vec-skipgram-flow.svg` | `assets/images/word2vec-skipgram-flow.svg` | Skip-gram |
@@ -53,4 +55,3 @@ The final blog includes small excerpts rather than linking to local code files.
 - Keep all image filenames prefixed with `word2vec-` to avoid collisions in `~/karthik.dev/assets/images/`.
 - The visual assets are educational redraws, not copied paper diagrams.
 - The complexity visual is qualitative, not an exact numeric chart.
-

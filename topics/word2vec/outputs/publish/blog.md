@@ -11,13 +11,17 @@ Word2Vec is often introduced with the famous analogy:
 Paris - France + Italy -> Rome
 ```
 
+*This is part of a paper-reading series where we take foundational ML papers and rebuild the ideas from first principles. The goal is not just to remember the headline result, but to understand what problem the paper solved, what machinery it used, and where its claims stop.*
+
+> Paper: Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean, "Efficient Estimation of Word Representations in Vector Space" (2013).
+
 That example is memorable, but it is not the best place to start.
 
 The real starting point is much more basic: neural networks operate on numbers, not raw words. Before a model can learn anything from a sentence, the words have to become numeric inputs. The Word2Vec paper is about learning a particularly useful kind of numeric representation: dense word vectors that can be trained cheaply on very large text corpora.
 
 This post is a paper walkthrough of **"Efficient Estimation of Word Representations in Vector Space"** by Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean. It is beginner-friendly, but it is still a deep dive: we will build the first-principles bridge from word IDs to trainable vectors, then walk through the paper's older model comparisons, CBOW, Skip-gram, computational complexity, hierarchical softmax, analogy evaluation, results, and limitations.
 
-## 1. The Problem: Words Are Not Numbers
+## The Problem: Words Are Not Numbers
 
 A neural network cannot directly consume the string `"cat"`. It needs numbers.
 
@@ -34,7 +38,7 @@ This solves one problem: the model can now refer to words consistently. `cat` is
 
 But IDs alone are not enough. The number `0` is not "closer in meaning" to `1` than to `3`. It is just a label.
 
-## 2. One-Hot Vectors: Identity Without Similarity
+## One-Hot Vectors: Identity Without Similarity
 
 A common way to turn a word ID into a vector is **one-hot encoding**.
 
@@ -62,7 +66,7 @@ But they do not solve similarity. `cat`, `dog`, `car`, and `engine` are all equa
 
 The Word2Vec paper starts from a related complaint: many NLP systems treated words as atomic vocabulary entries, with no built-in notion of similarity. The paper does not claim that this representation is useless. It explicitly notes that simple atomic representations have practical advantages. The issue is that they do not directly express relationships between words.
 
-## 3. Dense Word Vectors and the Embedding Matrix
+## Dense Word Vectors and the Embedding Matrix
 
 A dense word vector is a shorter learned vector, such as:
 
@@ -88,9 +92,17 @@ car   │ -0.4    0.8    0.5   ...   │
         V rows, one row per vocabulary word
 ```
 
-If the vocabulary has `V` words and each dense vector has `N` dimensions, the matrix has shape `V x N`.
+If the vocabulary has `V` words and each dense vector has `D` dimensions, the matrix has shape `V x D`.
 
-A one-hot vector selects a row from this table. For example, if `dog` is `[0, 1, 0, 0]`, multiplying by the matrix picks the `dog` row. In practice, implementations usually do a direct lookup instead of literally multiplying by a mostly-zero vector.
+A one-hot vector selects a row from this table. For example, if `dog` is `[0, 1, 0, 0]`, multiplying by the matrix picks the `dog` row. This can be understood through dot products: each output coordinate is the dot product between the one-hot vector and one column of the matrix. The zeros erase every row except the row whose slot is `1`.
+
+<figure>
+  <img src="/assets/images/word2vec-embedding-lookup-dot-product.svg" alt="One-hot vector selecting a row from an embedding matrix">
+</figure>
+
+In practice, implementations usually do a direct lookup instead of literally multiplying by a mostly-zero vector. But the multiplication view is useful because it shows why this step is still a numeric neural-network operation.
+
+This lookup step is what the paper calls a **projection layer**. "Projection" can sound abstract, but here it is simple: take a word ID or one-hot vector and project it into a dense vector space by retrieving its current trainable row from the matrix. The projected vector is the dense representation used by the rest of the model.
 
 This is the first key bridge:
 
@@ -104,7 +116,98 @@ So what is being trained? At minimum:
 
 Training means: make a prediction, compare it with the correct word, and adjust these parameters so the next prediction is a little better. We do not need backpropagation math to understand the paper's main idea.
 
-## 4. The Paper's Goal
+## Tiny Math Tools We Need
+
+Before we get to the paper's architectures, we need a small prerequisite ladder. None of this needs advanced math, but the words show up later.
+
+### Dot Product
+
+A **dot product** multiplies matching positions in two vectors and adds the results.
+
+For two tiny vectors:
+
+```text
+a = [2, 1, 3]
+b = [4, 5, 6]
+```
+
+The dot product is:
+
+```text
+a dot b = (2 x 4) + (1 x 5) + (3 x 6)
+        = 8 + 5 + 18
+        = 31
+```
+
+That same operation does two useful jobs in this story.
+
+First, it can select values from an embedding matrix when the left vector is one-hot:
+
+```text
+[0, 1, 0, 0] dot [0.7, 0.6, -0.4, -0.5] = 0.6
+```
+
+The zeros remove the `cat`, `car`, and `engine` values. The `1` keeps the `dog` value.
+
+Second, a dot product can act like a compatibility score. If a context vector and an output-word vector point in similar directions, their dot product tends to be larger. That larger score can make the output word more likely after softmax.
+
+### Softmax
+
+A **softmax** turns a list of scores into probabilities that add up to 1.
+
+For example, if the model scores three possible words:
+
+```text
+fox: 4.0
+dog: 2.0
+engine: 0.5
+```
+
+softmax exponentiates each score, adds those positive values, and divides each value by the total:
+
+```text
+e^4.0   = 54.60
+e^2.0   = 7.39
+e^0.5   = 1.65
+total   = 63.64
+
+fox     = 54.60 / 63.64 = 85.8%
+dog     =  7.39 / 63.64 = 11.6%
+engine  =  1.65 / 63.64 =  2.6%
+```
+
+<figure>
+  <img src="/assets/images/word2vec-softmax-example.svg" alt="Softmax converting scores into probabilities">
+</figure>
+
+The highest score gets the highest probability, but the model still assigns some probability to the others.
+
+The expensive part is that a full softmax over a large vocabulary needs to score every possible word. If the vocabulary has one million words, that is one million output scores for one prediction.
+
+### Loss and Prediction Error
+
+A **loss** is a number that says how wrong the prediction was. If the correct word is `fox` and the model assigns high probability to `engine`, the loss is high. Training nudges parameters so the correct word gets a higher score next time.
+
+We do not need to derive gradients here. The important beginner idea is:
+
+> prediction error tells the model which vector rows and output parameters to adjust.
+
+### Cosine Similarity
+
+**Cosine similarity** compares vector direction. If vectors are arrows, it asks whether two arrows point the same way.
+
+For two vectors:
+
+```text
+a = [1, 0]
+b = [2, 0]
+```
+
+they point in the same direction, so their cosine similarity is high, even though one arrow is longer.
+
+This matters because the paper's analogy evaluation finds the nearest word using cosine distance.
+
+## The Paper's Goal
 
 The paper is not trying to prove that word vectors are a brand-new concept. It explicitly places itself in a history of continuous and distributed word representations.
 
@@ -119,7 +222,7 @@ The paper's story has two halves:
 1. Use local word prediction tasks to learn vectors.
 2. Make the architecture simple enough to scale.
 
-## 5. A Tiny Training Example
+## A Tiny Training Example
 
 Take this sentence:
 
@@ -147,7 +250,7 @@ This tiny window can generate prediction tasks. Depending on the architecture, t
 
 The learned vectors improve because the model repeatedly sees millions or billions of these small prediction problems.
 
-## 6. Prior Work: Neural Language Models
+## Prior Work: Neural Language Models
 
 Before introducing CBOW and Skip-gram, the paper reviews older neural language models. This section matters because the proposed models are designed as cheaper alternatives.
 
@@ -164,12 +267,12 @@ The paper discusses two prior model families:
 
 The paper does not need us to become experts in either model. It uses them as comparison points for computational cost.
 
-## 7. Feedforward NNLM: Useful but Expensive
+## Feedforward NNLM: Useful but Expensive
 
 The feedforward NNLM described in the paper has four conceptual stages:
 
 1. input words, represented with `1-of-V` one-hot coding
-2. a projection layer that looks up dense word vectors
+2. a projection layer, meaning an embedding lookup that retrieves dense vectors
 3. a hidden layer
 4. an output layer that predicts a word from the vocabulary
 
@@ -195,9 +298,26 @@ Read this as cost bookkeeping:
 
 The paper says the `H x V` term can dominate before output optimizations. Even after improving the output layer, the hidden-layer computation remains expensive.
 
+Here is a tiny numerical example. Suppose:
+
+- `N = 5` previous words
+- `D = 100` dimensions per word vector
+- `H = 500` hidden units
+- `V = 100,000` vocabulary words
+
+Then:
+
+```text
+N x D       = 5 x 100 = 500
+N x D x H   = 5 x 100 x 500 = 250,000
+H x V       = 500 x 100,000 = 50,000,000
+```
+
+This is why the output layer is such a bottleneck. Scoring a huge vocabulary can dominate everything else.
+
 This is the contrast Word2Vec exploits: can we learn useful vectors without this costly non-linear hidden layer?
 
-## 8. RNNLM: More Sequence Memory, More Cost
+## RNNLM: More Sequence Memory, More Cost
 
 An **RNNLM**, or recurrent neural net language model, is another word-prediction model. Unlike the feedforward NNLM, it has a recurrent hidden state that carries information through time.
 
@@ -219,9 +339,23 @@ Here:
 
 With hierarchical softmax, the output term can be reduced, but the recurrent hidden computation is still expensive.
 
+Numerical example:
+
+- `H = 500`
+- `V = 100,000`
+
+Then:
+
+```text
+H x H = 500 x 500 = 250,000
+H x V = 500 x 100,000 = 50,000,000
+```
+
+Again, the vocabulary output is huge before optimization, and the recurrent hidden-state update is still substantial.
+
 Again, the paper's point is not "RNNs are bad." The point is that heavier neural language models can be costly when the goal is to train word vectors from huge datasets.
 
-## 9. The Paper's Main Architecture Move
+## The Paper's Main Architecture Move
 
 The paper proposes simpler log-linear models. The main observation is that much of the cost in older neural language models comes from the non-linear hidden layer.
 
@@ -231,7 +365,7 @@ This is a tradeoff. The paper says the simpler models may represent the data les
 
 Now we can introduce the two new architectures.
 
-## 10. CBOW: Predict the Current Word from Context
+## CBOW: Predict the Current Word from Context
 
 CBOW stands for **Continuous Bag-of-Words**.
 
@@ -252,7 +386,7 @@ The surrounding words are clues. The missing current word is the target.
 Inside CBOW:
 
 1. The model looks up vectors for the context words.
-2. It combines them in the shared projection layer, roughly by averaging or summing.
+2. It combines those projected vectors, roughly by averaging or summing.
 3. It predicts the current middle word.
 4. Prediction error updates the word vectors and output parameters.
 
@@ -260,7 +394,7 @@ Inside CBOW:
   <img src="/assets/images/word2vec-cbow-flow.svg" alt="CBOW architecture flow">
 </figure>
 
-The "bag-of-words" part matters. In the paper's CBOW architecture, word order in the history does not influence the projection. The model also uses future words, not only previous words.
+The "bag-of-words" part matters. In the paper's CBOW architecture, word order in the history does not influence the projected context representation. The model also uses future words, not only previous words.
 
 The paper reports a strong CBOW setting with four future and four history words as input, predicting the current middle word.
 
@@ -279,7 +413,24 @@ Q = N x D + D x log2(V)
 
 The beginner reading: combine the context vectors, then do a cheaper tree-based prediction over the vocabulary.
 
-## 11. Skip-gram: Predict Context from the Current Word
+Numerical example:
+
+- `N = 8` context words
+- `D = 300` dimensions
+- `V = 1,000,000` vocabulary words
+- `log2(V)` is about `20`
+
+Then:
+
+```text
+N x D        = 8 x 300 = 2,400
+D x log2(V)  = 300 x 20 = 6,000
+Q             ≈ 8,400
+```
+
+That is much smaller than scoring every one of a million output words with a large hidden layer.
+
+## Skip-gram: Predict Context from the Current Word
 
 Skip-gram reverses CBOW's direction:
 
@@ -318,7 +469,21 @@ Q = C x (D + D x log2(V))
 
 The `C x` matters. Skip-gram may make multiple predictions around one center word, so a wider context window gives more training signal and more cost.
 
-## 12. What Is Actually Trained?
+Numerical example with the same `D = 300` and `V = 1,000,000`:
+
+```text
+D + D x log2(V) = 300 + (300 x 20) = 6,300
+```
+
+If `C = 5`, then:
+
+```text
+Q = 5 x 6,300 = 31,500
+```
+
+Skip-gram can be more expensive per center word because it predicts several context words. The tradeoff is that those extra prediction tasks can produce useful training signal.
+
+## What Is Actually Trained?
 
 At this point, it is worth making the training loop explicit.
 
@@ -341,7 +506,7 @@ The trained parameters include the input/projection vectors. The prediction side
 
 After training, the word-vector table is the artifact people usually want.
 
-## 13. Minimal Code Demo: Training Examples, Not Training
+## Minimal Code Demo: Training Examples, Not Training
 
 The code below does not train Word2Vec. It only shows how one sentence becomes CBOW and Skip-gram examples.
 
@@ -377,7 +542,7 @@ Skip-gram examples: current word -> surrounding word
 
 The `word@index` labels keep repeated words clear. The sentence contains `the` twice, so `the@0` and `the@6` are different token occurrences.
 
-## 14. Computational Complexity: The Paper's Efficiency Spine
+## Computational Complexity: The Paper's Efficiency Spine
 
 The paper compares architectures using computational complexity, described as the number of parameters that need to be accessed to fully train the model.
 
@@ -397,6 +562,15 @@ This formula is the paper's efficiency spine.
 
 If `Q` is high, large corpora are expensive. If `Q` is low, the model can afford more training words, larger vectors, or both.
 
+For example, suppose two models train for one epoch over `T = 1,000,000,000` words:
+
+```text
+Model A: Q = 50,000 units of work
+Model B: Q = 8,000 units of work
+```
+
+Ignoring constants, the second model is doing far less work per word. That is the scaling motivation behind the paper: reduce `Q` enough that much larger `T` becomes practical.
+
 <figure>
   <img src="/assets/images/word2vec-complexity-comparison.svg" alt="Qualitative complexity comparison">
 </figure>
@@ -412,7 +586,7 @@ The main comparison is:
 
 The proposed models are not deeper neural language models. They are simpler prediction models designed to learn word vectors efficiently.
 
-## 15. Hierarchical Softmax: Avoid Scoring Every Word
+## Hierarchical Softmax: Avoid Scoring Every Word
 
 A normal softmax over a large vocabulary asks the model to score every possible output word. If `V` is huge, this is expensive.
 
@@ -428,9 +602,21 @@ The paper uses a **Huffman tree**. A Huffman tree gives frequent words shorter p
 
 This is still part of training the word-prediction model. The model still makes predictions, receives error signals, and updates parameters. Hierarchical softmax just changes the output computation from "score every word" to "learn the decisions along this target word's path."
 
-## 16. Analogy Evaluation: What Is Being Tested?
+## Analogy Evaluation: What Is Being Tested?
 
 The paper argues that nearest-neighbor examples are not enough. It wants to test whether relationships between words are organized in vector space.
+
+The paper splits its analogy questions into two broad families:
+
+- **semantic** questions: meaning-like or world-relationship patterns, such as country-capital or city-state
+- **syntactic** questions: grammar or word-form patterns, such as comparative, superlative, plural, or past tense
+
+Examples:
+
+```text
+Semantic:  France : Paris :: Italy : ?
+Syntactic: big : bigger :: small : ?
+```
 
 An analogy question looks like:
 
@@ -482,7 +668,7 @@ word, score = nearest_word(query, vectors, excluded)
 
 This demonstrates vector arithmetic and nearest-neighbor search. It is not evidence that a tiny hand-made vector table understands geography.
 
-## 17. Experimental Results
+## Experimental Results
 
 The paper introduces a Semantic-Syntactic Word Relationship test set with:
 
@@ -531,7 +717,23 @@ The paper also evaluates on the Microsoft Sentence Completion Challenge. Skip-gr
 
 This is a secondary result for our purposes. The key point is that Skip-gram vectors provided useful complementary information.
 
-## 18. What the Paper Does Not Prove
+## Real-World Workflow: Training and Using Word2Vec
+
+In practice, using Word2Vec-like vectors follows a workflow like this:
+
+1. **Collect text.** Choose a corpus: product reviews, news articles, code comments, search queries, or another domain-specific text source.
+2. **Build a vocabulary.** Decide which tokens count as words, how to handle rare words, and how large `V` should be.
+3. **Choose an architecture.** Use CBOW when you want a fast context-to-word training signal, or Skip-gram when predicting surrounding words is a better fit.
+4. **Choose vector size `D`.** A larger `D` can store richer patterns, but costs more and needs enough data.
+5. **Generate training examples.** Slide a context window over text and create CBOW or Skip-gram prediction tasks.
+6. **Train.** Update the embedding/projection vectors and prediction parameters from prediction error.
+7. **Export vectors.** Save the learned word-vector table.
+8. **Use vectors downstream.** Compare words by cosine similarity, initialize another model, cluster related terms, or use vectors as features in a larger NLP system.
+9. **Evaluate carefully.** Check whether the vectors help on the task you actually care about, not only on nearest-neighbor examples.
+
+This workflow also shows why the paper's efficiency focus matters. If training is cheap enough, you can use more text, try larger vectors, and tune the model for the domain.
+
+## What the Paper Does Not Prove
 
 The paper's results are important, but they are bounded.
 
@@ -545,7 +747,7 @@ It does not prove that:
 
 The paper shows that simple context-prediction objectives can learn useful vector regularities on the evaluated tasks, especially when trained efficiently at scale.
 
-## 19. Common Misconceptions
+## Common Misconceptions
 
 **Misconception: Word2Vec stores definitions.**  
 No. It learns numeric vectors from prediction tasks over text.
@@ -562,7 +764,7 @@ No. It is an efficiency technique for output prediction. The semantic signal sti
 **Misconception: vector analogies are logic.**  
 No. They are empirical nearest-neighbor patterns in a learned vector space.
 
-## 20. Recap
+## Recap
 
 The paper's full arc is:
 
@@ -573,13 +775,14 @@ The paper's full arc is:
 5. CBOW and Skip-gram remove costly hidden-layer machinery
 6. hierarchical softmax reduces output prediction cost
 7. analogy evaluation tests whether relationships become reusable vector offsets
-8. the results support the paper's claim that simple architectures can learn useful high-dimensional vectors efficiently at scale
+8. a real workflow trains on a corpus, exports vectors, and evaluates whether they help downstream
+9. the results support the paper's claim that simple architectures can learn useful high-dimensional vectors efficiently at scale
 
 The durable lesson is not just "vectors can do analogies." It is:
 
 > A carefully chosen prediction task, made cheap enough to run at scale, can learn useful representations.
 
-## 21. What Came Next
+## What Came Next
 
 Word2Vec helped make dense word embeddings a standard part of NLP practice. Later systems used different architectures and objectives, but the broader idea remained influential: learn representations from data by solving prediction tasks.
 

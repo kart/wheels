@@ -62,3 +62,35 @@ publish_target:
   blog_output: outputs/publish/blog.md
   preview_output: outputs/preview.html
   asset_filename_prefix: word2vec-
+must_explain:
+- Neural networks operate on numeric inputs, not raw words.
+- Vocabulary to word-ID mapping.
+- One-hot vectors have dimension equal to vocabulary size.
+- One-hot vectors solve identity and fixed dimensionality, but not similarity.
+- Dense learned word vectors as lower-dimensional representations.
+- Embedding matrix as a trainable V x D table.
+- Projection layer / embedding lookup as selecting rows from the embedding matrix.
+- What parameters are trained in CBOW and Skip-gram.
+- 'CBOW forward path: context words -> vectors -> combined context -> prediction of
+  center word.'
+- 'Skip-gram forward path: center word -> vector -> predictions of context words.'
+- How prediction error updates parameters at an intuition level.
+- NNLM and RNNLM as prior work, and why they are discussed in the paper.
+- The paper's scaling bottleneck and computational-cost motivation.
+- Hierarchical softmax and Huffman tree intuition.
+- Semantic vs syntactic analogy questions.
+- Cosine similarity / cosine distance in evaluation.
+- Strict exact-match scoring and why synonyms can count as wrong.
+- Real-world workflow for training and using Word2Vec vectors.
+publish_repair_focus:
+- The final blog must be a paper deep dive, not a high-level overview.
+- Add prerequisite math and representation intuition before using softmax, dot product,
+  cosine similarity, or projection.
+- Explain embedding matrices deeply.
+- Explain how CBOW and Skip-gram training actually happens.
+- Use numerical examples for cost formulas.
+- 'Clarify prior work: NNLM and RNNLM are background models whose scaling bottlenecks
+  motivate the paper.'
+- Deepen hierarchical softmax and analogy-evaluation explanations.
+- Remove duplicate captions.
+- Fix any markdown or HTML rendering problems in preview.html.

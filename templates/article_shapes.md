@@ -105,3 +105,38 @@ Style notes:
 - Explain the key insight.
 - Dry-run visually before final code.
 - Code should be beginner-friendly and well-commented.
+
+---
+
+## Required Additions for paper_deep_dive
+
+A paper_deep_dive must be a real paper walkthrough, not just a polished overview.
+
+It should include:
+
+1. Why this paper/topic matters
+2. The problem before the paper
+3. Prerequisite ladder
+   - concepts, math, symbols, and mechanisms needed before the paper makes sense
+4. Tiny concrete example
+5. Prior work and bottleneck
+6. Section-by-section paper walkthrough
+7. Core mechanism deep dive
+8. Training / execution workflow
+9. Visual walkthrough
+10. Code or pseudocode if useful
+11. Experiments and results
+12. What the paper does not prove
+13. Real-world usage workflow
+14. Common misconceptions
+15. Recap
+16. What came next
+
+Required paper-deep-dive checks:
+
+- Do not introduce prior work without explaining why it appears.
+- Do not use formulas without explaining symbols and intuition.
+- Do not say "the model learns" without explaining what is trained.
+- Do not skip the paper's main mechanism.
+- Do not skip the experimental setup.
+- Do not turn the publish output into a short summary.

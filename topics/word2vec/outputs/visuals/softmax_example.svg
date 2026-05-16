@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" viewBox="0 0 960 520" role="img" aria-labelledby="title desc">
+  <title id="title">Softmax turns scores into probabilities</title>
+  <desc id="desc">Scores for fox, dog, and engine are exponentiated, summed, and normalized into probabilities. Fox has score 4.0 and becomes about 85.8 percent probability.</desc>
+  <style>
+    .bg { fill: #ffffff; }
+    .panel { fill: #f8fafc; stroke: #d1d5db; stroke-width: 1.5; }
+    .title { font: 700 25px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+    .label { font: 700 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #111827; }
+    .small { font: 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+    .tiny { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #4b5563; }
+    .cell { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1; }
+    .score { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; }
+    .exp { fill: #fef3c7; stroke: #d97706; stroke-width: 1.5; }
+    .prob { fill: #dcfce7; stroke: #16a34a; stroke-width: 1.5; }
+    .bar { fill: #16a34a; }
+    .arrow { stroke: #2563eb; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+    .caption { font: 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #374151; }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2563eb"/>
+    </marker>
+  </defs>
+  <rect class="bg" width="960" height="520"/>
+  <text x="40" y="46" class="title">Softmax: scores -> probabilities</text>
+  <text x="40" y="76" class="small">Example output scores for three possible target words.</text>
+
+  <rect x="50" y="115" width="205" height="235" rx="10" class="panel"/>
+  <text x="90" y="148" class="label">raw scores</text>
+  <g transform="translate(82,180)">
+    <rect x="0" y="0" width="140" height="38" class="score"/><text x="16" y="25" class="small">fox: 4.0</text>
+    <rect x="0" y="54" width="140" height="38" class="score"/><text x="16" y="79" class="small">dog: 2.0</text>
+    <rect x="0" y="108" width="140" height="38" class="score"/><text x="16" y="133" class="small">engine: 0.5</text>
+  </g>
+
+  <rect x="335" y="115" width="250" height="235" rx="10" class="panel"/>
+  <text x="390" y="148" class="label">exponentiate</text>
+  <text x="382" y="173" class="tiny">turn each score into a positive weight</text>
+  <g transform="translate(372,200)">
+    <rect x="0" y="0" width="176" height="34" class="exp"/><text x="15" y="23" class="small">e^4.0 = 54.60</text>
+    <rect x="0" y="48" width="176" height="34" class="exp"/><text x="15" y="71" class="small">e^2.0 = 7.39</text>
+    <rect x="0" y="96" width="176" height="34" class="exp"/><text x="15" y="119" class="small">e^0.5 = 1.65</text>
+  </g>
+  <text x="377" y="330" class="small">sum = 63.64</text>
+
+  <rect x="675" y="115" width="235" height="270" rx="10" class="panel"/>
+  <text x="735" y="148" class="label">normalize</text>
+  <text x="713" y="173" class="tiny">divide each weight by the sum</text>
+  <g transform="translate(705,205)">
+    <text x="0" y="14" class="small">fox</text>
+    <rect x="62" y="0" width="130" height="20" rx="4" fill="#e5e7eb"/>
+    <rect x="62" y="0" width="112" height="20" rx="4" class="bar"/>
+    <text x="0" y="43" class="tiny">54.60 / 63.64 = 85.8%</text>
+
+    <text x="0" y="83" class="small">dog</text>
+    <rect x="62" y="69" width="130" height="20" rx="4" fill="#e5e7eb"/>
+    <rect x="62" y="69" width="15" height="20" rx="4" class="bar"/>
+    <text x="0" y="112" class="tiny">7.39 / 63.64 = 11.6%</text>
+
+    <text x="0" y="152" class="small">engine</text>
+    <rect x="62" y="138" width="130" height="20" rx="4" fill="#e5e7eb"/>
+    <rect x="62" y="138" width="4" height="20" rx="4" class="bar"/>
+    <text x="0" y="181" class="tiny">1.65 / 63.64 = 2.6%</text>
+  </g>
+
+  <path d="M258 235 C292 235, 300 235, 334 235" class="arrow"/>
+  <path d="M588 235 C624 235, 638 235, 674 235" class="arrow"/>
+
+  <rect x="70" y="430" width="820" height="48" rx="10" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="95" y="460" class="caption">Caption: Softmax turns output scores into probabilities; full softmax is expensive when the vocabulary has many words.</text>
+</svg>

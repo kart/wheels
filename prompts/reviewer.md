@@ -96,3 +96,82 @@ Choose one:
 - Accept with minor fixes
 - Revise before continuing
 - Needs major correction
+
+## Additional Deep-Dive Review Checks
+
+When reviewing a lesson, preview, or publish draft, check the following:
+
+### Concept Dependency Checks
+
+- Are prerequisite concepts introduced before they are used?
+- Are terms like softmax, dot product, cosine similarity, projection, loss, gradient, cache, index, shard, queue, or complexity explained before use?
+- Are symbols defined before formulas?
+
+### Mechanism Checks
+
+Flag any place where the content says something "learns", "trains", "scales", "routes", "updates", or "optimizes" without explaining the mechanism.
+
+For ML topics, check:
+- What are the inputs?
+- What are the targets?
+- What parameters exist?
+- What prediction is made?
+- What error/loss signal exists?
+- What gets updated?
+
+For systems topics, check:
+- What request enters the system?
+- What services/components handle it?
+- What state changes?
+- What bottleneck is being addressed?
+
+For algorithm topics, check:
+- What work does brute force repeat?
+- What data structure or insight avoids that work?
+- What invariant makes the algorithm correct?
+
+### Formula Checks
+
+Every important formula should include:
+- symbol definitions
+- plain-English interpretation
+- numerical example if useful
+- why the formula matters
+
+### Visual Checks
+
+- Is there exactly one caption per visual?
+- Is the caption duplicated inside and outside the image?
+- Does the visual teach a specific idea?
+- Are arrows/directions/labels correct?
+- Are qualitative charts clearly marked as qualitative?
+- Are exact numeric charts sourced?
+- Are visuals placed near the relevant explanation?
+
+### Rendered Preview Checks
+
+Check the rendered preview as a reader experience, not only as an artifact.
+
+Flag:
+- unexpected heading numbering
+- broken markdown rendering
+- broken math rendering
+- broken image paths
+- duplicate captions
+- unreadable tables
+- unreadable code blocks
+- internal/debug content appearing too prominently
+- preview looking like a dashboard instead of a blog
+
+### Deep-Dive Completeness Checks
+
+For paper_deep_dive:
+- Does it walk through the paper or clearly cover every major paper section?
+- Does it explain prior work and bottlenecks?
+- Does it explain the paper's novelty?
+- Does it explain the mechanism deeply enough?
+- Does it explain experiments/results clearly?
+- Does it include caveats and what the paper does not prove?
+- Does it include a practical workflow where relevant?
+
+If the output is merely a high-level overview, mark it as needing revision.

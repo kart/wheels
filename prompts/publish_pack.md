@@ -65,3 +65,19 @@ asset_manifest.md should list:
 - Do not include internal reviewer/debug notes in blog.md.
 - Do not actually publish anything.
 
+
+## Deep-Dive Publish Requirements
+
+Do not compress the reviewed lesson into a short overview.
+
+For paper_deep_dive posts:
+- Preserve the deep-dive structure.
+- Include prerequisite intuition before the paper's mechanisms.
+- Include section-by-section paper coverage or a justified adapted walkthrough.
+- Explain what is being trained, updated, stored, computed, or optimized.
+- Include numerical examples after important formulas where useful.
+- Include a practical workflow section explaining how the idea would be used in reality.
+- Keep visuals near the relevant explanation.
+- Avoid duplicate captions.
+
+The final blog.md should feel like a reader-facing teaching article, not a summary of generated artifacts.

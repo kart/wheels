@@ -195,3 +195,103 @@ Fix applied:
 Remaining limitation:
 
 - The visible captions still live inside the SVG files. A future visual cleanup could remove those internal SVG captions and restore external HTML captions instead, but this pass used the smaller change.
+
+## Deep-dive repair pass
+
+Date: 2026-05-14
+
+Reason:
+
+- `AGENTS.md`, `topic.yaml`, `templates/article_shapes.md`, and `prompts/publish_pack.md` now require a stricter paper-deep-dive standard.
+- The previous repaired blog was deeper than the first publish draft, but still needed stronger prerequisite math, numerical formula examples, and a practical workflow section.
+
+Files changed:
+
+- `outputs/publish/blog.md`
+- `outputs/preview.html`
+- `reviews/fix_log.md`
+
+Changes applied:
+
+- Added the Jekyll paper-post context required by `AGENTS.md`:
+  - short italic series/context introduction
+  - paper citation blockquote
+- Added prerequisite math and representation explanations before later mechanisms use them:
+  - dot product as a compatibility score
+  - softmax as scores-to-probabilities, with the full-vocabulary cost problem
+  - loss/prediction error as the training signal
+  - cosine similarity as direction comparison for analogy evaluation
+- Added numerical examples after important cost formulas:
+  - feedforward NNLM `Q = N x D + N x D x H + H x V`
+  - RNNLM `Q = H x H + H x V`
+  - CBOW `Q = N x D + D x log2(V)`
+  - Skip-gram `Q = C x (D + D x log2(V))`
+  - total training cost `O = E x T x Q`
+- Strengthened semantic versus syntactic analogy explanation with concrete examples.
+- Added a real-world Word2Vec training and usage workflow:
+  - collect text
+  - build vocabulary
+  - choose architecture and vector size
+  - generate context-window examples
+  - train by updating embedding/projection and prediction parameters
+  - export vectors
+  - use and evaluate downstream
+- Regenerated `outputs/preview.html` from `outputs/publish/blog.md` so the reader-facing preview matches the final blog draft.
+
+Checks performed:
+
+- Jekyll front matter remains present.
+- Blog image paths use `/assets/images/word2vec-...`.
+- Preview image paths resolve to local `outputs/publish/assets/` files.
+- External duplicate `<figcaption>` captions remain removed.
+- No raw, topic, plan, wiki, lesson, or visual-plan files were modified.
+
+Remaining limitations:
+
+- The preview is still a local static rendering, not a full render inside the `karthik.dev` layout.
+- Existing SVGs still include their visible captions internally; this avoids duplicate captions now, but a future visual cleanup could move captions fully into HTML instead.
+- The article uses selected paper results rather than reproducing every table from the paper.
+
+## Specific reader-facing repair: headings, projection, dot product, and softmax
+
+Date: 2026-05-14
+
+Reason:
+
+- Reader feedback identified that numbered headings were unnecessary.
+- The article introduced one-hot row selection and projection without enough visual/mechanical explanation.
+- The dot-product prerequisite used an example that was too shallow to explain selection or projection.
+- The softmax prerequisite did not show actual probabilities for the example scores.
+
+Files changed:
+
+- `outputs/publish/blog.md`
+- `outputs/preview.html`
+- `outputs/visuals/embedding_lookup_dot_product.svg`
+- `outputs/visuals/softmax_example.svg`
+- `outputs/publish/assets/word2vec-embedding-lookup-dot-product.svg`
+- `outputs/publish/assets/word2vec-softmax-example.svg`
+- `outputs/publish/asset_manifest.md`
+- `reviews/fix_log.md`
+
+Changes applied:
+
+- Removed numeric prefixes from all `##` headings in the blog and regenerated preview navigation.
+- Added an embedding lookup / dot-product selection visual.
+- Explained projection before later casual use:
+  - projection is the embedding lookup step
+  - it maps a word ID or one-hot vector into dense vector space
+  - the projected vector is the trainable row used by the model
+- Reworked the dot-product prerequisite:
+  - included a multi-dimensional dot-product example
+  - explained how one-hot dot products select embedding-matrix values
+  - connected dot products to output compatibility scores
+- Reworked the softmax prerequisite:
+  - showed exponentiated values
+  - showed the normalized probabilities for `fox`, `dog`, and `engine`
+  - added a visual diagram for scores to probabilities
+- Updated the asset manifest to list the new visuals.
+
+Remaining limitations:
+
+- The new SVGs include their own visible captions, consistent with the existing visual style. The blog and preview keep external `<figcaption>` elements removed to avoid duplicate captions.
