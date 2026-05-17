@@ -237,3 +237,41 @@ Do not approve the section. Do not run reviewer behavior inside this skill. This
 - Preserve toy-to-real bridges.
 - Keep the section undergraduate-readable.
 - Keep artifacts section-local and reviewable.
+
+## Creativity Policy
+
+You may creatively improve clarity, examples, diagrams, code comments, toy demos, and toy-to-real bridges when fixing accepted issues.
+
+Creative fixes are allowed only when they directly address:
+
+- accepted reviewer findings
+- accepted user comments
+- clear section-local correctness or clarity gaps
+
+You must not:
+
+- broaden the section beyond its approved scope
+- introduce new unsupported claims
+- invent source results, citations, benchmarks, or production details
+- rewrite unrelated parts of the section just for style
+- change other sections
+- change topic-level outputs
+- approve the section on behalf of the user
+
+Any new claim must be grounded in `<TOPIC_DIR>/wiki/**`, section source notes, or clearly marked as interpretation.
+
+Prefer fixes that improve understanding, not merely polish wording.
+
+Preserve all existing guardrails:
+
+- one section only
+- validate findings before applying changes
+- track accepted/rejected/deferred findings in `fix_log.md`
+- section-local writes only
+- no `<TOPIC_DIR>/raw/**` modification
+- no `<TOPIC_DIR>/outputs/**` modification
+- no `<TOPIC_DIR>/reviews/**` modification
+- no final blog/preview assembly
+- no section approval by Codex
+- no reviewer behavior
+- no moving to the next section

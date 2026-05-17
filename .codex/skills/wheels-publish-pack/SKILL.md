@@ -262,3 +262,42 @@ Tell the user:
 - Avoid shallow summaries.
 - Avoid unsupported claims.
 - Keep the final output understandable to an undergraduate-level technical reader while still useful to an experienced CS learner.
+
+## Creativity Policy
+
+You may creatively adapt approved content for final blog, preview, Twitter/X, LinkedIn, and YouTube formats.
+
+You may creatively improve:
+
+- transitions between approved sections
+- headings and subheadings
+- article framing
+- social post hooks
+- thread sequencing
+- LinkedIn tone
+- YouTube narration structure
+- reader-facing polish
+
+You must not introduce new examples, claims, conclusions, comparisons, anecdotes, recommendations, benchmarks, or source interpretations that are not already present in approved section fragments or the assembled final blog.
+
+Format creatively; do not invent substantively.
+
+If a stronger idea, example, or claim would improve the publish pack but is not present in the approved material:
+
+- do not add it directly
+- record it as a suggested future addition in `<TOPIC_DIR>/outputs/publish/README.md`
+
+Preserve all existing guardrails:
+
+- assemble one topic only
+- require final audit readiness
+- require all sections `approved_by_user: true`
+- do not modify `<TOPIC_DIR>/sections/**`
+- do not modify `<TOPIC_DIR>/reviews/**`
+- do not modify `<TOPIC_DIR>/raw/**`
+- do not modify `<TOPIC_DIR>/wiki/**`
+- do not modify `<TOPIC_DIR>/plan.yaml`
+- do not modify `<TOPIC_DIR>/.wheels_state.json`
+- do not publish externally
+- do not copy files to external blog/static-site repos
+- do not run deployment commands

@@ -226,3 +226,40 @@ Do not run reviewer/fixer behavior inside this skill.
 - Preserve source fidelity.
 - Keep the section understandable to an undergraduate-level technical reader.
 - Make it useful to the actual learner, who may be experienced in computer science but is building systematic AI foundations.
+
+## Creativity Policy
+
+Be creatively ambitious inside the current section, but stay inside the section contract.
+
+You may creatively choose:
+
+- the clearest teaching mechanism
+- examples, analogies, and toy demos
+- visual, Manim, and diagram concepts
+- small explanatory code
+- section structure and narrative flow
+- toy-to-real bridge framing
+
+You must not creatively invent:
+
+- unsupported source claims
+- results not present in `<TOPIC_DIR>/wiki/**` or source anchors
+- fake citations
+- production details not grounded in sources or clearly marked as interpretation
+- content from future sections
+- changes to other sections or topic-level outputs
+
+Prefer memorable explanations over generic summaries.
+Prefer concrete mechanisms over abstract prose.
+Prefer a surprising but accurate toy example over a bland overview.
+
+Preserve all existing guardrails:
+
+- one section only
+- `TOPIC_DIR` and `SECTION_DIR` scoping
+- no `<TOPIC_DIR>/raw/**` modification
+- no `<TOPIC_DIR>/outputs/**` modification
+- no `<TOPIC_DIR>/reviews/**` modification
+- no final blog/preview assembly
+- no approval by Codex
+- no reviewer/fixer behavior
