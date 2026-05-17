@@ -1,0 +1,645 @@
+topic_id: glove
+plan_version: 2
+status: wiki_compiled_replanned
+
+source_reading:
+  pdf_direct_reading_status: readable_with_pdftotext
+  extraction_needed: false
+  notes: >
+    The primary source is topics/glove/raw/papers/glove.pdf, a 12-page paper.
+    Text extraction is usable. Figures, tables, and equations should still be
+    spot-checked visually before final publish prose because the PDF is a
+    two-column paper and charts are not available as exact tabular data.
+
+completed_phases:
+  - phase_01_source_extraction_and_source_map
+  - phase_02_compile_wiki
+
+teaching_strategy:
+  audience_summary: >
+    Beginner technical reader with undergraduate-level maturity, weak assumed
+    math, and novice-to-beginner coding skill.
+  explanation_style: >
+    Use an adapted paper-deep-dive structure: teach prerequisites before the
+    densest derivation, while preserving coverage of every major paper section.
+    Motivation comes before mechanics, examples before abstraction, and formula
+    notation before equations.
+  visual_strategy: >
+    Use small mechanism visuals: corpus-to-co-occurrence matrix, ice/steam ratio
+    table, objective-term anatomy, qualitative weighting curve, training
+    workflow, and evaluation map. Do not recreate exact chart curves unless
+    values are manually extracted.
+  code_strategy: >
+    Use only tiny educational Python snippets if they clarify co-occurrence
+    counts, ratios, or one weighted loss term. Do not imply toy code reproduces
+    paper-scale results.
+  source_fidelity_strategy: >
+    Distinguish "the paper reports" from later teaching interpretation. Keep
+    the paper's caveats around word2vec comparisons, corpus effects, and analogy
+    benchmarks near the relevant claims.
+
+proposed_wiki_structure:
+  - path: wiki/index.md
+    purpose: "Navigation and core source-claim summary."
+  - path: wiki/source_map.md
+    purpose: "Paper section, figure, table, equation, and experiment inventory."
+  - path: wiki/paper_walkthrough.md
+    purpose: "Source-grounded section-by-section paper notes."
+  - path: wiki/concepts.md
+    purpose: "Beginner prerequisite explanations."
+  - path: wiki/mechanism_notes.md
+    purpose: "GloVe derivation, objective, symbols, and tiny examples."
+  - path: wiki/experiments_and_results.md
+    purpose: "Evaluation setup, reported results, model analysis, and caveats."
+  - path: wiki/teaching_plan_notes.md
+    purpose: "Reader confusions, visuals, toy-to-real bridges, acceptance notes."
+  - path: wiki/glossary.md
+    purpose: "Symbols and terminology."
+  - path: wiki/open_questions.md
+    purpose: "Extraction caveats and non-overclaim warnings."
+
+reader_facing_section_plan:
+  structure_type: adapted_paper_deep_dive
+  justification: >
+    The GloVe paper's derivation is the conceptual center, but a beginner needs
+    co-occurrence, conditional probability, ratios, dot products, logs, and
+    weighted least squares before the paper's Section 3 is readable. The section
+    plan therefore teaches prerequisites just-in-time, while preserving coverage
+    of Abstract, Sections 1-5, tables, figures, experiments, model analysis,
+    runtime, and comparison caveats.
+  sections:
+    - id: phase_05_section_01_motivation
+      section_title: "Why GloVe Exists"
+      reader_question: "Why did the paper need a new word-vector model?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Abstract, Section 1
+        - wiki/source_map.md: Abstract, Introduction
+      prerequisite_concepts:
+        - word vector
+        - distributional meaning
+        - analogy as an evaluation probe
+      concepts_allowed:
+        - global matrix factorization
+        - local context-window methods
+        - why analogy structure matters
+        - source-claim versus interpretation boundary
+      visuals_code_expected:
+        visuals:
+          - "Contrast diagram: global counts versus local windows"
+        code: []
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-global-vs-local.svg
+        - outputs/preview.html
+      reviewer_report: reviews/phase_05_section_01_motivation_review.md
+      fix_log: reviews/phase_05_section_01_motivation_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_06_section_02_related_work."
+
+    - id: phase_06_section_02_related_work
+      section_title: "The Older Choices: Count Tables and Prediction Windows"
+      reader_question: "What were matrix factorization and window prediction methods each good and bad at?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Section 2
+        - wiki/concepts.md: context window, co-occurrence matrix
+      prerequisite_concepts:
+        - term-document matrix
+        - term-term matrix
+        - context window
+      concepts_allowed:
+        - LSA
+        - HAL
+        - PPMI and HPCA as count transformations
+        - skip-gram and CBOW at a high level
+        - why repeated local windows relate to global counts
+      visuals_code_expected:
+        visuals:
+          - "Mini corpus showing local windows accumulating into a count table"
+        code: []
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-window-to-counts.svg
+        - outputs/preview.html
+      reviewer_report: reviews/phase_06_section_02_related_work_review.md
+      fix_log: reviews/phase_06_section_02_related_work_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_07_section_03_ratio_insight."
+
+    - id: phase_07_section_03_ratio_insight
+      section_title: "The Ice/Steam Ratio Insight"
+      reader_question: "Why does GloVe start from ratios of co-occurrence probabilities?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Section 3 opening and Table 1
+        - wiki/mechanism_notes.md: Why Ratios
+        - wiki/concepts.md: conditional probability, probability ratios
+      prerequisite_concepts:
+        - co-occurrence count
+        - conditional probability
+        - ratio
+      concepts_allowed:
+        - discriminative context words
+        - non-discriminative context words
+        - Table 1 ice/steam example
+        - why ratios are more informative than raw probabilities
+      visuals_code_expected:
+        visuals:
+          - "Simplified ice/steam ratio table using sourced values"
+        code:
+          - "Optional tiny Python ratio calculation from dictionary counts"
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-ice-steam-ratios.svg
+        - outputs/code/glove_toy_ratios.py
+        - outputs/preview.html
+      reviewer_report: reviews/phase_07_section_03_ratio_insight_review.md
+      fix_log: reviews/phase_07_section_03_ratio_insight_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_08_section_04_objective_derivation."
+
+    - id: phase_08_section_04_objective_derivation
+      section_title: "From Ratios to the GloVe Objective"
+      reader_question: "How do the paper's desiderata become a trainable objective?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Section 3 equations 1-9
+        - wiki/mechanism_notes.md: derivation, core equation, objective, weighting function
+        - wiki/glossary.md: symbol glossary
+      prerequisite_concepts:
+        - vector difference
+        - dot product
+        - logarithm
+        - bias term
+        - squared error
+      concepts_allowed:
+        - function F and probability ratios
+        - vector differences as relation carriers
+        - dot product as scalar compatibility
+        - log-count equation
+        - word and context biases
+        - weighted least-squares objective
+        - weighting function with x_max and alpha
+      visuals_code_expected:
+        visuals:
+          - "Objective-term anatomy"
+          - "Qualitative weighting curve"
+        code:
+          - "Optional one-term weighted loss calculation"
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-objective-anatomy.svg
+        - outputs/visuals/glove-weighting-function.svg
+        - outputs/code/glove_one_loss_term.py
+        - outputs/preview.html
+      reviewer_report: reviews/phase_08_section_04_objective_derivation_review.md
+      fix_log: reviews/phase_08_section_04_objective_derivation_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_09_section_05_training_workflow."
+
+    - id: phase_09_section_05_training_workflow
+      section_title: "What Training Actually Changes"
+      reader_question: "What are the inputs, parameters, updates, and final outputs of GloVe training?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Sections 3.1, 3.2, 4.2
+        - wiki/mechanism_notes.md: Training Workflow
+        - wiki/concepts.md: word vectors and context vectors
+      prerequisite_concepts:
+        - sparse co-occurrence matrix
+        - nonzero entries
+        - parameter update
+      concepts_allowed:
+        - relationship to grouped window objectives
+        - complexity intuition
+        - vocabulary and context window choices
+        - distance weighting by 1/d
+        - AdaGrad at an intuition level
+        - W and Wtilde combined as W + Wtilde
+      visuals_code_expected:
+        visuals:
+          - "Corpus to co-occurrence matrix to sampled pair to parameter update"
+        code:
+          - "Optional tiny co-occurrence matrix builder"
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-training-workflow.svg
+        - outputs/code/glove_toy_cooccurrence.py
+        - outputs/preview.html
+      reviewer_report: reviews/phase_09_section_05_training_workflow_review.md
+      fix_log: reviews/phase_09_section_05_training_workflow_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_10_section_06_evaluation_results."
+
+    - id: phase_10_section_06_evaluation_results
+      section_title: "How the Paper Evaluates GloVe"
+      reader_question: "What evidence does the paper give that the vectors are useful?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Sections 4.1, 4.2, 4.3
+        - wiki/experiments_and_results.md: Evaluation Methods, Main Result Claims
+        - wiki/source_map.md: Tables 2-4
+      prerequisite_concepts:
+        - cosine similarity
+        - Spearman rank correlation
+        - downstream task
+      concepts_allowed:
+        - analogy benchmark
+        - word similarity tasks
+        - NER with CRF features
+        - corpora and training setup
+        - reported result tables with caveats
+      visuals_code_expected:
+        visuals:
+          - "Evaluation map: analogy, similarity, NER"
+        code: []
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-evaluation-map.svg
+        - outputs/preview.html
+      reviewer_report: reviews/phase_10_section_06_evaluation_results_review.md
+      fix_log: reviews/phase_10_section_06_evaluation_results_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_11_section_07_model_analysis."
+
+    - id: phase_11_section_07_model_analysis
+      section_title: "What Changes When You Vary Dimensions, Windows, Corpora, and Training Time"
+      reader_question: "What does the paper's model analysis teach about using GloVe?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Sections 4.4-4.7
+        - wiki/experiments_and_results.md: Model Analysis
+        - wiki/source_map.md: Figures 2-4
+      prerequisite_concepts:
+        - vector dimension
+        - symmetric versus asymmetric context
+        - corpus composition
+        - preprocessing cost versus training cost
+      concepts_allowed:
+        - diminishing returns after about 200 dimensions
+        - syntactic versus semantic context-window behavior
+        - corpus size and corpus composition caveat
+        - runtime split between building X and training
+        - controlled word2vec comparison and its caveat
+      visuals_code_expected:
+        visuals:
+          - "Qualitative model-analysis summary grid"
+        code: []
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-model-analysis-summary.svg
+        - outputs/preview.html
+      reviewer_report: reviews/phase_11_section_07_model_analysis_review.md
+      fix_log: reviews/phase_11_section_07_model_analysis_fix_log.md
+      approval_gate: "Stop and wait for user approval before phase_12_section_08_limits_and_recap."
+
+    - id: phase_12_section_08_limits_and_recap
+      section_title: "What GloVe Proves, What It Does Not, and How to Use It"
+      reader_question: "What should a practical reader take away from the paper?"
+      source_coverage:
+        - wiki/paper_walkthrough.md: Section 5
+        - wiki/open_questions.md: Claims Not To Overstate
+        - wiki/teaching_plan_notes.md: Toy-to-Real Bridges
+      prerequisite_concepts:
+        - source claim
+        - teaching interpretation
+        - pretrained vector workflow
+      concepts_allowed:
+        - paper conclusion
+        - practical train/use/evaluate workflow
+        - analogy benchmark caveats
+        - word2vec comparison caveats
+        - recap of mechanism
+        - what came next at a high level, only if clearly marked as context beyond the paper
+      visuals_code_expected:
+        visuals:
+          - "Practical workflow: train or download vectors, plug into task, evaluate"
+        code: []
+      scoped_outputs:
+        - outputs/lesson.md
+        - outputs/visual_plan.md
+        - outputs/visuals/glove-practical-workflow.svg
+        - outputs/preview.html
+      reviewer_report: reviews/phase_12_section_08_limits_and_recap_review.md
+      fix_log: reviews/phase_12_section_08_limits_and_recap_fix_log.md
+      approval_gate: "Stop and wait for user approval before final audit."
+
+execution_phases:
+  - id: phase_01_source_extraction_and_source_map
+    name: "Source extraction and source map"
+    goal: "Inventory the GloVe paper source and map paper sections, figures, tables, equations, and experiments."
+    inputs:
+      - topic.yaml
+      - raw/papers/glove.pdf
+      - prompts/audience_profiles.md
+      - templates/article_shapes.md
+    outputs:
+      - wiki/source_map.md
+      - wiki/open_questions.md
+    instructions:
+      - Completed. Preserve this phase id and outputs.
+      - Do not modify topic.yaml or raw/.
+    completion_check:
+      - wiki/source_map.md exists and maps all major paper sections.
+      - wiki/open_questions.md exists and records extraction caveats and non-overclaim warnings.
+
+  - id: phase_02_compile_wiki
+    name: "Compile source-grounded wiki"
+    goal: "Build the internal compiled understanding layer for GloVe."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/papers/glove.pdf
+      - wiki/source_map.md
+      - wiki/open_questions.md
+    outputs:
+      - wiki/index.md
+      - wiki/paper_walkthrough.md
+      - wiki/concepts.md
+      - wiki/mechanism_notes.md
+      - wiki/experiments_and_results.md
+      - wiki/teaching_plan_notes.md
+      - wiki/glossary.md
+    instructions:
+      - Completed. Preserve this phase id and outputs.
+      - Do not generate lesson prose, visuals, code, preview HTML, review files, or publish files.
+    completion_check:
+      - All listed wiki outputs exist.
+      - Wiki covers the paper's introduction, related work, model, experiments, model analysis, runtime, word2vec comparison, and conclusion.
+
+  - id: phase_03_refine_plan_after_wiki
+    name: "Refine plan after wiki"
+    goal: "Refine plan.yaml into appropriately sized reader-approved section phases after the wiki exists."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+      - wiki_preview/
+    outputs:
+      - plan.yaml
+    instructions:
+      - Preserve completed phases and completed phase ids.
+      - Replace broad future content work with explicit section phases.
+      - Do not generate lesson content during this phase.
+    completion_check:
+      - plan.yaml has execution_phases.
+      - Future reader-facing work is split into explicit, approval-gated sections.
+      - Completed phase ids are preserved.
+
+  - id: phase_04_create_lesson_outline
+    name: "Create approved lesson outline"
+    goal: "Create a skeletal outline aligned to the approved reader-facing section plan without drafting full prose."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    instructions:
+      - Do not run until the user approves or revises the section plan.
+      - Use reader_facing_section_plan as the section contract.
+      - Create headings and placeholders only, not full section prose.
+    completion_check:
+      - outputs/lesson.md contains only approved headings and brief placeholders.
+      - outputs/visual_plan.md contains planned visuals only.
+
+  - id: phase_05_section_01_motivation
+    name: "Section 1 local loop: Why GloVe Exists"
+    goal: "Draft, preview, review, and fix only Section 1."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-global-vs-local.svg
+      - outputs/preview.html
+      - reviews/phase_05_section_01_motivation_review.md
+      - reviews/phase_05_section_01_motivation_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_05_section_01_motivation.
+      - Update only this section and its directly related visual/preview material.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 1 is drafted and source-grounded.
+      - Section review and fix log exist.
+
+  - id: phase_06_section_02_related_work
+    name: "Section 2 local loop: Count Tables and Prediction Windows"
+    goal: "Draft, preview, review, and fix only Section 2."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-window-to-counts.svg
+      - outputs/preview.html
+      - reviews/phase_06_section_02_related_work_review.md
+      - reviews/phase_06_section_02_related_work_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_06_section_02_related_work.
+      - Update only this section and its directly related visual/preview material.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 2 is drafted and source-grounded.
+      - Section review and fix log exist.
+
+  - id: phase_07_section_03_ratio_insight
+    name: "Section 3 local loop: Ice/Steam Ratio Insight"
+    goal: "Draft, preview, review, and fix only Section 3."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-ice-steam-ratios.svg
+      - outputs/code/glove_toy_ratios.py
+      - outputs/preview.html
+      - reviews/phase_07_section_03_ratio_insight_review.md
+      - reviews/phase_07_section_03_ratio_insight_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_07_section_03_ratio_insight.
+      - Code is optional; include it only if it improves beginner understanding.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 3 explains Table 1 without overclaiming.
+      - Section review and fix log exist.
+
+  - id: phase_08_section_04_objective_derivation
+    name: "Section 4 local loop: GloVe Objective Derivation"
+    goal: "Draft, preview, review, and fix only Section 4."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-objective-anatomy.svg
+      - outputs/visuals/glove-weighting-function.svg
+      - outputs/code/glove_one_loss_term.py
+      - outputs/preview.html
+      - reviews/phase_08_section_04_objective_derivation_review.md
+      - reviews/phase_08_section_04_objective_derivation_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_08_section_04_objective_derivation.
+      - Every formula must define symbols, give a plain-English reading, and include a tiny example when useful.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 4 covers equations 1-9 at beginner level.
+      - Section review and fix log exist.
+
+  - id: phase_09_section_05_training_workflow
+    name: "Section 5 local loop: Training Workflow"
+    goal: "Draft, preview, review, and fix only Section 5."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-training-workflow.svg
+      - outputs/code/glove_toy_cooccurrence.py
+      - outputs/preview.html
+      - reviews/phase_09_section_05_training_workflow_review.md
+      - reviews/phase_09_section_05_training_workflow_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_09_section_05_training_workflow.
+      - Explain exactly what parameters change during training.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 5 separates fixed data from trained parameters.
+      - Section review and fix log exist.
+
+  - id: phase_10_section_06_evaluation_results
+    name: "Section 6 local loop: Evaluation Results"
+    goal: "Draft, preview, review, and fix only Section 6."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-evaluation-map.svg
+      - outputs/preview.html
+      - reviews/phase_10_section_06_evaluation_results_review.md
+      - reviews/phase_10_section_06_evaluation_results_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_10_section_06_evaluation_results.
+      - Frame results as paper-reported findings in the paper's setup.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 6 covers analogy, similarity, and NER evaluations.
+      - Section review and fix log exist.
+
+  - id: phase_11_section_07_model_analysis
+    name: "Section 7 local loop: Model Analysis"
+    goal: "Draft, preview, review, and fix only Section 7."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-model-analysis-summary.svg
+      - outputs/preview.html
+      - reviews/phase_11_section_07_model_analysis_review.md
+      - reviews/phase_11_section_07_model_analysis_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_11_section_07_model_analysis.
+      - Use qualitative chart summaries unless exact values are manually verified.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section 7 covers dimensions, windows, corpora, runtime, and word2vec comparison caveats.
+      - Section review and fix log exist.
+
+  - id: phase_12_section_08_limits_and_recap
+    name: "Section 8 local loop: Limits, Recap, and Practical Workflow"
+    goal: "Draft, preview, review, and fix only Section 8."
+    inputs:
+      - wiki/
+      - plan.yaml
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/visuals/glove-practical-workflow.svg
+      - outputs/preview.html
+      - reviews/phase_12_section_08_limits_and_recap_review.md
+      - reviews/phase_12_section_08_limits_and_recap_fix_log.md
+    instructions:
+      - Follow reader_facing_section_plan entry phase_12_section_08_limits_and_recap.
+      - Keep paper claims, limitations, and later interpretation clearly separated.
+      - Run a section reviewer pass, validate findings, apply accepted fixes, and log decisions.
+      - Stop and wait for user approval before final audit.
+    completion_check:
+      - Section 8 includes caveats, recap, and practical workflow.
+      - Section review and fix log exist.
+
+  - id: phase_90_final_reviewer_audit
+    name: "Final reviewer audit"
+    goal: "Audit the complete article after all approved sections are drafted and fixed."
+    inputs:
+      - prompts/reviewer.md
+      - wiki/
+      - outputs/
+      - reviews/*_fix_log.md
+    outputs:
+      - reviews/reviewer_report.md
+    instructions:
+      - Reviewer must not edit source, wiki, lesson, visual, code, or preview files.
+      - Check source fidelity, technical correctness, visual correctness, code correctness, explanation quality, and preview quality.
+    completion_check:
+      - reviews/reviewer_report.md exists.
+
+  - id: phase_91_final_fixer_loop
+    name: "Final fixer loop"
+    goal: "Validate and apply accepted final reviewer findings."
+    inputs:
+      - prompts/fixer.md
+      - reviews/reviewer_report.md
+      - outputs/
+    outputs:
+      - reviews/fix_log.md
+    instructions:
+      - Validate reviewer findings before applying fixes.
+      - Do not blindly apply reviewer feedback.
+      - Update preview.html after accepted content, visual, or code changes.
+    completion_check:
+      - reviews/fix_log.md exists.
+
+  - id: phase_99_publish_pack
+    name: "Publish pack"
+    goal: "Create the final Jekyll-ready publish package after review and fixes are complete."
+    inputs:
+      - prompts/publish_pack.md
+      - topic.yaml
+      - outputs/
+      - reviews/
+    outputs:
+      - outputs/publish/
+    instructions:
+      - Create outputs/publish/blog.md with Jekyll front matter.
+      - Use publish_target.asset_base_path and publish_target.asset_filename_prefix.
+      - Do not actually publish anything.
+    completion_check:
+      - outputs/publish/blog.md exists with Jekyll front matter.

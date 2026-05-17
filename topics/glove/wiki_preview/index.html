@@ -1,0 +1,1402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheels Wiki: glove</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --panel: #ffffff;
+      --ink: #202122;
+      --muted: #54595d;
+      --line: #a2a9b1;
+      --line-soft: #eaecf0;
+      --link: #0645ad;
+      --link-visited: #0b0080;
+      --code-bg: #f5f5f5;
+      --sidebar-width: 19rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:visited {
+      color: var(--link-visited);
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      padding: 1.1rem 1rem 2rem;
+    }
+
+    .brand {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .nav-list,
+    .page-toc {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-page {
+      margin: 0 0 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .nav-title {
+      display: block;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .nav-path {
+      margin-top: 0.18rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      overflow-wrap: anywhere;
+    }
+
+    .page-toc {
+      margin-top: 0.5rem;
+      font-size: 0.84rem;
+    }
+
+    .page-toc li {
+      margin: 0.18rem 0;
+    }
+
+    .toc-h2 {
+      padding-left: 0.65rem;
+    }
+
+    .toc-h3 {
+      padding-left: 1.25rem;
+    }
+
+    .content {
+      max-width: 72rem;
+      padding: 2rem clamp(1rem, 4vw, 4rem) 4rem;
+    }
+
+    .wiki-article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin: 0 0 2rem;
+      padding: clamp(1.1rem, 3vw, 2.25rem);
+    }
+
+    .article-header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+    }
+
+    .article-path {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      margin: 0 0 0.35rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      line-height: 1.28;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.55rem);
+    }
+
+    .article-body h1 {
+      margin-top: 0;
+      font-size: 1.9rem;
+    }
+
+    .article-body h2 {
+      border-bottom: 1px solid var(--line-soft);
+      margin-top: 2rem;
+      padding-bottom: 0.25rem;
+      font-size: 1.55rem;
+    }
+
+    .article-body h3 {
+      margin-top: 1.55rem;
+      font-size: 1.25rem;
+    }
+
+    p,
+    ul,
+    ol,
+    table,
+    pre,
+    blockquote {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.45rem;
+    }
+
+    li + li {
+      margin-top: 0.25rem;
+    }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+      padding: 0.1rem 0.22rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      overflow: auto;
+      padding: 0.9rem 1rem;
+    }
+
+    pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      width: max-content;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.62rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eaecf0;
+      font-weight: 650;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--line);
+      color: var(--muted);
+      padding-left: 1rem;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .wiki-article {
+        border-left: 0;
+        border-right: 0;
+        margin-left: -1rem;
+        margin-right: -1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1 class="brand-title">Wheels Wiki</h1>
+        <p class="brand-subtitle">glove</p>
+      </div>
+      <ol class="nav-list">
+            <li class="nav-page">
+              <a class="nav-title" href="#concepts">Concepts for Teaching GloVe</a>
+              <div class="nav-path">concepts.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#concepts--concepts-for-teaching-glove">Concepts for Teaching GloVe</a></li><li class="toc-h2"><a href="#concepts--distributional-meaning">Distributional Meaning</a></li><li class="toc-h2"><a href="#concepts--context-window">Context Window</a></li><li class="toc-h2"><a href="#concepts--co-occurrence-matrix">Co-occurrence Matrix</a></li><li class="toc-h2"><a href="#concepts--conditional-probability">Conditional Probability</a></li><li class="toc-h2"><a href="#concepts--probability-ratios">Probability Ratios</a></li><li class="toc-h2"><a href="#concepts--word-vectors-and-context-vectors">Word Vectors and Context Vectors</a></li><li class="toc-h2"><a href="#concepts--dot-product">Dot Product</a></li><li class="toc-h2"><a href="#concepts--bias-terms">Bias Terms</a></li><li class="toc-h2"><a href="#concepts--log-counts">Log Counts</a></li><li class="toc-h2"><a href="#concepts--weighted-least-squares">Weighted Least Squares</a></li><li class="toc-h2"><a href="#concepts--weighting-function">Weighting Function</a></li><li class="toc-h2"><a href="#concepts--analogy-evaluation">Analogy Evaluation</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#experiments_and_results">Experiments and Results Notes</a>
+              <div class="nav-path">experiments_and_results.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#experiments_and_results--experiments-and-results-notes">Experiments and Results Notes</a></li><li class="toc-h2"><a href="#experiments_and_results--evaluation-methods">Evaluation Methods</a></li><li class="toc-h3"><a href="#experiments_and_results--word-analogies">Word Analogies</a></li><li class="toc-h3"><a href="#experiments_and_results--word-similarity">Word Similarity</a></li><li class="toc-h3"><a href="#experiments_and_results--named-entity-recognition">Named Entity Recognition</a></li><li class="toc-h2"><a href="#experiments_and_results--corpora-and-training-details">Corpora and Training Details</a></li><li class="toc-h2"><a href="#experiments_and_results--main-result-claims">Main Result Claims</a></li><li class="toc-h2"><a href="#experiments_and_results--model-analysis">Model Analysis</a></li><li class="toc-h3"><a href="#experiments_and_results--vector-length-and-context-size">Vector Length and Context Size</a></li><li class="toc-h3"><a href="#experiments_and_results--corpus-size">Corpus Size</a></li><li class="toc-h3"><a href="#experiments_and_results--runtime">Runtime</a></li><li class="toc-h3"><a href="#experiments_and_results--comparison-with-word2vec">Comparison with word2vec</a></li><li class="toc-h2"><a href="#experiments_and_results--tables-and-figures-usage-guidance">Tables and Figures Usage Guidance</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#glossary">GloVe Glossary</a>
+              <div class="nav-path">glossary.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#glossary--glove-glossary">GloVe Glossary</a></li><li class="toc-h2"><a href="#glossary--symbol-glossary">Symbol Glossary</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#index">GloVe Wiki</a>
+              <div class="nav-path">index.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#index--glove-wiki">GloVe Wiki</a></li><li class="toc-h2"><a href="#index--primary-source">Primary Source</a></li><li class="toc-h2"><a href="#index--files">Files</a></li><li class="toc-h2"><a href="#index--core-source-claims">Core Source Claims</a></li><li class="toc-h2"><a href="#index--key-teaching-interpretation">Key Teaching Interpretation</a></li><li class="toc-h2"><a href="#index--do-not-overstate">Do Not Overstate</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#mechanism_notes">Mechanism Notes</a>
+              <div class="nav-path">mechanism_notes.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#mechanism_notes--mechanism-notes">Mechanism Notes</a></li><li class="toc-h2"><a href="#mechanism_notes--the-problem-the-model-is-solving">The Problem the Model Is Solving</a></li><li class="toc-h2"><a href="#mechanism_notes--notation">Notation</a></li><li class="toc-h2"><a href="#mechanism_notes--why-ratios">Why Ratios</a></li><li class="toc-h2"><a href="#mechanism_notes--from-ratios-to-vector-differences">From Ratios to Vector Differences</a></li><li class="toc-h2"><a href="#mechanism_notes--why-dot-products">Why Dot Products</a></li><li class="toc-h2"><a href="#mechanism_notes--why-logs-appear">Why Logs Appear</a></li><li class="toc-h2"><a href="#mechanism_notes--why-biases-appear">Why Biases Appear</a></li><li class="toc-h2"><a href="#mechanism_notes--the-core-matching-equation">The Core Matching Equation</a></li><li class="toc-h2"><a href="#mechanism_notes--the-training-objective">The Training Objective</a></li><li class="toc-h2"><a href="#mechanism_notes--weighting-function">Weighting Function</a></li><li class="toc-h2"><a href="#mechanism_notes--training-workflow">Training Workflow</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#open_questions">GloVe Open Questions and Caveats</a>
+              <div class="nav-path">open_questions.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#open_questions--glove-open-questions-and-caveats">GloVe Open Questions and Caveats</a></li><li class="toc-h2"><a href="#open_questions--extraction-caveats">Extraction Caveats</a></li><li class="toc-h2"><a href="#open_questions--claims-not-to-overstate">Claims Not To Overstate</a></li><li class="toc-h2"><a href="#open_questions--visual-verification-needed-later">Visual Verification Needed Later</a></li><li class="toc-h2"><a href="#open_questions--teaching-risks">Teaching Risks</a></li><li class="toc-h2"><a href="#open_questions--minimum-additional-extraction-needed">Minimum Additional Extraction Needed</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#paper_walkthrough">Paper Walkthrough Notes</a>
+              <div class="nav-path">paper_walkthrough.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#paper_walkthrough--paper-walkthrough-notes">Paper Walkthrough Notes</a></li><li class="toc-h2"><a href="#paper_walkthrough--abstract">Abstract</a></li><li class="toc-h2"><a href="#paper_walkthrough--1-introduction">1 Introduction</a></li><li class="toc-h2"><a href="#paper_walkthrough--2-related-work">2 Related Work</a></li><li class="toc-h2"><a href="#paper_walkthrough--3-the-glove-model">3 The GloVe Model</a></li><li class="toc-h2"><a href="#paper_walkthrough--31-relationship-to-other-models">3.1 Relationship to Other Models</a></li><li class="toc-h2"><a href="#paper_walkthrough--32-complexity">3.2 Complexity</a></li><li class="toc-h2"><a href="#paper_walkthrough--4-experiments">4 Experiments</a></li><li class="toc-h2"><a href="#paper_walkthrough--41-evaluation-methods">4.1 Evaluation Methods</a></li><li class="toc-h2"><a href="#paper_walkthrough--42-corpora-and-training-details">4.2 Corpora and Training Details</a></li><li class="toc-h2"><a href="#paper_walkthrough--43-results">4.3 Results</a></li><li class="toc-h2"><a href="#paper_walkthrough--44-vector-length-and-context-size">4.4 Vector Length and Context Size</a></li><li class="toc-h2"><a href="#paper_walkthrough--45-corpus-size">4.5 Corpus Size</a></li><li class="toc-h2"><a href="#paper_walkthrough--46-runtime">4.6 Runtime</a></li><li class="toc-h2"><a href="#paper_walkthrough--47-comparison-with-word2vec">4.7 Comparison with word2vec</a></li><li class="toc-h2"><a href="#paper_walkthrough--5-conclusion">5 Conclusion</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_map">GloVe Source Map</a>
+              <div class="nav-path">source_map.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_map--glove-source-map">GloVe Source Map</a></li><li class="toc-h2"><a href="#source_map--source-inventory">Source Inventory</a></li><li class="toc-h2"><a href="#source_map--paper-level-claim-boundary">Paper-Level Claim Boundary</a></li><li class="toc-h2"><a href="#source_map--section-map">Section Map</a></li><li class="toc-h3"><a href="#source_map--abstract">Abstract</a></li><li class="toc-h3"><a href="#source_map--1-introduction">1 Introduction</a></li><li class="toc-h3"><a href="#source_map--2-related-work">2 Related Work</a></li><li class="toc-h3"><a href="#source_map--3-the-glove-model">3 The GloVe Model</a></li><li class="toc-h3"><a href="#source_map--31-relationship-to-other-models">3.1 Relationship to Other Models</a></li><li class="toc-h3"><a href="#source_map--32-complexity-of-the-model">3.2 Complexity of the Model</a></li><li class="toc-h3"><a href="#source_map--4-experiments">4 Experiments</a></li><li class="toc-h3"><a href="#source_map--41-evaluation-methods">4.1 Evaluation Methods</a></li><li class="toc-h3"><a href="#source_map--42-corpora-and-training-details">4.2 Corpora and Training Details</a></li><li class="toc-h3"><a href="#source_map--43-results">4.3 Results</a></li><li class="toc-h3"><a href="#source_map--44-model-analysis-vector-length-and-context-size">4.4 Model Analysis: Vector Length and Context Size</a></li><li class="toc-h3"><a href="#source_map--45-model-analysis-corpus-size">4.5 Model Analysis: Corpus Size</a></li><li class="toc-h3"><a href="#source_map--46-model-analysis-run-time">4.6 Model Analysis: Run-time</a></li><li class="toc-h3"><a href="#source_map--47-model-analysis-comparison-with-word2vec">4.7 Model Analysis: Comparison with word2vec</a></li><li class="toc-h3"><a href="#source_map--5-conclusion">5 Conclusion</a></li><li class="toc-h2"><a href="#source_map--tables-and-figures">Tables and Figures</a></li><li class="toc-h2"><a href="#source_map--equation-inventory">Equation Inventory</a></li><li class="toc-h2"><a href="#source_map--evaluation-artifacts">Evaluation Artifacts</a></li><li class="toc-h2"><a href="#source_map--extraction-caveats">Extraction Caveats</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#teaching_plan_notes">Teaching Plan Notes</a>
+              <div class="nav-path">teaching_plan_notes.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#teaching_plan_notes--teaching-plan-notes">Teaching Plan Notes</a></li><li class="toc-h2"><a href="#teaching_plan_notes--reader-prerequisite-ladder">Reader Prerequisite Ladder</a></li><li class="toc-h2"><a href="#teaching_plan_notes--likely-reader-confusions">Likely Reader Confusions</a></li><li class="toc-h2"><a href="#teaching_plan_notes--visual-opportunities">Visual Opportunities</a></li><li class="toc-h2"><a href="#teaching_plan_notes--toy-to-real-bridges">Toy-to-Real Bridges</a></li><li class="toc-h2"><a href="#teaching_plan_notes--section-planning-recommendation">Section Planning Recommendation</a></li><li class="toc-h2"><a href="#teaching_plan_notes--acceptance-criteria-for-later-prose">Acceptance Criteria for Later Prose</a></li></ol>
+            </li>
+            </ol>
+    </aside>
+    <main class="content">
+      
+    <article id="concepts" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">concepts.md</p>
+        <h1>Concepts for Teaching GloVe</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="concepts--concepts-for-teaching-glove">Concepts for Teaching GloVe</h1>
+<h2 id="concepts--distributional-meaning">Distributional Meaning</h2>
+<p>Source grounding:
+- The paper assumes word occurrence statistics are the primary information source for unsupervised word-vector learning.</p>
+<p>Beginner explanation:
+- A word's meaning can be approximated by the company it keeps. If two words appear near similar context words, they may have related meanings or grammatical roles.</p>
+<p>Common confusion:
+- Similar contexts do not guarantee identical meanings. <code>ice</code> and <code>steam</code> both appear with <code>water</code>, but they contrast on <code>solid</code> and <code>gas</code>.</p>
+<h2 id="concepts--context-window">Context Window</h2>
+<p>Source grounding:
+- The paper constructs co-occurrence counts from context windows and usually uses ten words left and ten words right.
+- It also discusses symmetric and asymmetric context windows.</p>
+<p>Beginner explanation:
+- Pick a target word in a corpus. Words nearby are counted as its context. A symmetric window looks both left and right. An asymmetric window can look only to one side.</p>
+<h2 id="concepts--co-occurrence-matrix">Co-occurrence Matrix</h2>
+<p>Source grounding:
+- The paper defines <code>X</code> as the word-word co-occurrence matrix.
+- <code>X_ij</code> is the number of times word <code>j</code> appears in the context of word <code>i</code>.</p>
+<p>Beginner explanation:
+- Imagine a large table. Rows are target words, columns are context words, and each cell stores how often that pair was observed.</p>
+<p>Tiny example:</p>
+<p>If <code>ice</code> has context counts:</p>
+<table>
+<thead>
+<tr>
+<th>context</th>
+<th style="text-align: right;">count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>solid</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr>
+<td>gas</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr>
+<td>water</td>
+<td style="text-align: right;">300</td>
+</tr>
+</tbody>
+</table>
+<p>Then the row for <code>ice</code> contains those counts in the corresponding columns.</p>
+<h2 id="concepts--conditional-probability">Conditional Probability</h2>
+<p>Source grounding:
+- The paper defines <code>P_ij = P(j | i) = X_ij / X_i</code>.</p>
+<p>Beginner explanation:
+- <code>P(j | i)</code> means: among all context positions around word <code>i</code>, what fraction were word <code>j</code>?</p>
+<p>Tiny example:
+- If <code>ice</code> has 10,000 total context counts and <code>solid</code> appears 19 times around it, then <code>P(solid | ice) = 19 / 10000 = 0.0019</code>.</p>
+<h2 id="concepts--probability-ratios">Probability Ratios</h2>
+<p>Source grounding:
+- Table 1 compares <code>P(k | ice) / P(k | steam)</code> for context words.
+- The paper argues ratios highlight meaning-relevant contrasts better than raw probabilities.</p>
+<p>Beginner explanation:
+- A ratio asks, "Is this context word more characteristic of <code>ice</code> or of <code>steam</code>?"
+- A ratio near 1 means the context word does not distinguish the targets.
+- A large ratio favors the first target.
+- A small ratio favors the second target.</p>
+<h2 id="concepts--word-vectors-and-context-vectors">Word Vectors and Context Vectors</h2>
+<p>Source grounding:
+- The paper uses word vectors <code>w</code> and separate context vectors <code>wtilde</code>.
+- It later uses <code>W + Wtilde</code> as final word vectors.</p>
+<p>Beginner explanation:
+- During training, each word has a vector for when it is the target and another vector for when it appears as context.
+- These are both adjustable lists of numbers.
+- After training, the paper combines them by adding the two vectors for each word.</p>
+<h2 id="concepts--dot-product">Dot Product</h2>
+<p>Source grounding:
+- The paper uses <code>w_i^T wtilde_j</code> in the model.</p>
+<p>Beginner explanation:
+- A dot product turns two vectors into one score. In GloVe, that score is part of the model's prediction for how strongly a target word and context word co-occur.</p>
+<p>Tiny example:
+- If <code>w_i = [2, 1]</code> and <code>wtilde_j = [3, 4]</code>, then the dot product is <code>2*3 + 1*4 = 10</code>.</p>
+<h2 id="concepts--bias-terms">Bias Terms</h2>
+<p>Source grounding:
+- The paper adds <code>b_i</code> and <code>btilde_j</code> to restore symmetry and absorb frequency-related terms.</p>
+<p>Beginner explanation:
+- Some words are common in many contexts. Biases give the model a way to account for broad frequency effects instead of forcing every frequency pattern into the vector dimensions.</p>
+<h2 id="concepts--log-counts">Log Counts</h2>
+<p>Source grounding:
+- The model targets <code>log(X_ij)</code> for nonzero counts.</p>
+<p>Beginner explanation:
+- Counts can span huge ranges. Logs compress them and turn multiplicative relationships into additive ones, which fits vector differences and dot products more naturally.</p>
+<h2 id="concepts--weighted-least-squares">Weighted Least Squares</h2>
+<p>Source grounding:
+- GloVe minimizes a weighted squared error between predicted log counts and observed log counts.</p>
+<p>Beginner explanation:
+- For each observed word-context pair, the model predicts a number. The training penalty is large when the prediction is far from the target log count.
+- The weight decides how much that pair should matter.</p>
+<p>Tiny example:
+- Suppose a pair has target <code>log(X_ij) = 3.0</code>.
+- The current model predicts <code>2.4</code>.
+- The error is <code>2.4 - 3.0 = -0.6</code>.
+- The squared error is <code>0.36</code>.
+- If the weight is <code>0.5</code>, the weighted contribution is <code>0.18</code>.</p>
+<h2 id="concepts--weighting-function">Weighting Function</h2>
+<p>Source grounding:
+- The paper defines <code>f(x)</code> with cutoff <code>x_max</code> and exponent <code>alpha</code>.
+- It uses <code>x_max = 100</code> and <code>alpha = 3/4</code>.</p>
+<p>Beginner explanation:
+- Very rare pairs can be noisy.
+- Very frequent pairs can dominate.
+- The weighting function gives small counts a smaller voice, increases their influence as counts become more reliable, and caps the influence of very frequent pairs.</p>
+<h2 id="concepts--analogy-evaluation">Analogy Evaluation</h2>
+<p>Source grounding:
+- The paper uses questions like <code>a is to b as c is to ?</code>.
+- It answers with the vector closest to <code>w_b - w_a + w_c</code> by cosine similarity.</p>
+<p>Beginner explanation:
+- This benchmark checks whether a relationship appears as a reusable direction in vector space.</p>
+<p>Caveat:
+- It is a benchmark for vector structure, not a full test of language understanding.</p>
+      </div>
+    </article>
+    
+
+    <article id="experiments_and_results" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">experiments_and_results.md</p>
+        <h1>Experiments and Results Notes</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="experiments_and_results--experiments-and-results-notes">Experiments and Results Notes</h1>
+<h2 id="experiments_and_results--evaluation-methods">Evaluation Methods</h2>
+<h3 id="experiments_and_results--word-analogies">Word Analogies</h3>
+<p>Source claims:
+- The analogy task has 19,544 questions.
+- It has semantic and syntactic subsets.
+- The model answers <code>a is to b as c is to ?</code> by finding the word vector closest to <code>w_b - w_a + w_c</code> using cosine similarity.</p>
+<p>Teaching interpretation:
+- This evaluates whether relationships are represented as directions in vector space.
+- It does not prove that the model understands the words.</p>
+<h3 id="experiments_and_results--word-similarity">Word Similarity</h3>
+<p>Source claims:
+- Datasets: WordSim-353, MC, RG, SCWS, RW.
+- The paper computes vector similarity and compares ranking with human judgments using Spearman rank correlation.</p>
+<p>Teaching interpretation:
+- Similarity tasks test pairwise closeness, which is different from analogy structure.</p>
+<h3 id="experiments_and_results--named-entity-recognition">Named Entity Recognition</h3>
+<p>Source claims:
+- Uses CoNLL-2003 English benchmark.
+- Tests include CoNLL-03, ACE, and MUC7.
+- Adds 50-dimensional word-vector features to a CRF with discrete features.</p>
+<p>Teaching interpretation:
+- NER is downstream evidence: vectors are useful as features in another model.</p>
+<h2 id="experiments_and_results--corpora-and-training-details">Corpora and Training Details</h2>
+<p>Source claims:
+- Corpora:
+  - Wikipedia 2010: 1B tokens
+  - Wikipedia 2014: 1.6B tokens
+  - Gigaword 5: 4.3B tokens
+  - Gigaword 5 + Wikipedia 2014: 6B tokens
+  - Common Crawl: 42B tokens
+- Additional 840B-token corpus is mentioned for scalability but not directly comparable.
+- Vocabulary is usually 400,000 words; Common Crawl uses about 2 million.
+- Context window defaults to ten words left and ten words right.
+- Distance weighting contributes <code>1/d</code> for words <code>d</code> positions apart.
+- Hyperparameters:
+  - <code>x_max = 100</code>
+  - <code>alpha = 3/4</code>
+  - AdaGrad
+  - initial learning rate <code>0.05</code>
+  - 50 iterations for vectors under 300 dimensions
+  - 100 iterations otherwise
+- Final vectors use <code>W + Wtilde</code>.</p>
+<h2 id="experiments_and_results--main-result-claims">Main Result Claims</h2>
+<p>Source claims:
+- Table 2: GloVe is strong on word analogies and reports 75.0 overall accuracy for 300-dimensional vectors trained on 42B tokens.
+- Table 3: GloVe performs strongly across word similarity datasets.
+- Table 4: GloVe has the top reported values for Dev, ACE, and MUC7 NER settings; HPCA is slightly better on the CoNLL test set.</p>
+<p>Important caveat:
+- Results should be phrased as "in the paper's setup" or "the paper reports."</p>
+<h2 id="experiments_and_results--model-analysis">Model Analysis</h2>
+<h3 id="experiments_and_results--vector-length-and-context-size">Vector Length and Context Size</h3>
+<p>Source claims:
+- Diminishing returns appear above about 200 dimensions.
+- Smaller/asymmetric windows help syntactic analogy performance.
+- Larger windows help semantic information more often because semantic cues may be less local.</p>
+<p>Teaching interpretation:
+- Syntax often depends on nearby word order.
+- Semantics can depend on broader topical context.</p>
+<h3 id="experiments_and_results--corpus-size">Corpus Size</h3>
+<p>Source claims:
+- Syntactic analogy performance improves monotonically with corpus size in Figure 3.
+- Semantic analogy performance does not.
+- The paper suggests Wikipedia's coverage of locations and updates may help city/country analogies.</p>
+<p>Teaching interpretation:
+- Dataset composition and corpus composition interact.</p>
+<h3 id="experiments_and_results--runtime">Runtime</h3>
+<p>Source claims:
+- Building the co-occurrence matrix and training are separate costs.
+- For a 6B-token corpus, 400,000 vocabulary, and 10-word symmetric context:
+  - building <code>X</code> takes about 85 minutes on one thread of the specified machine
+  - one 300-dimensional training iteration takes 14 minutes on 32 cores</p>
+<p>Teaching interpretation:
+- GloVe's "global" approach pays a preprocessing cost to build <code>X</code>, then trains from compacted counts.</p>
+<h3 id="experiments_and_results--comparison-with-word2vec">Comparison with word2vec</h3>
+<p>Source claims:
+- The paper explicitly says a rigorous quantitative comparison is complicated by many sensitive parameters.
+- It controls vector length, context window size, corpus, and vocabulary size.
+- It uses training time as the comparison axis by varying GloVe iterations and word2vec negative samples.
+- In Figure 4, GloVe outperforms CBOW and skip-gram under the paper's controlled setup.</p>
+<p>Teaching interpretation:
+- The fair claim is not "GloVe always beats word2vec." The fair claim is "under this controlled setup in the paper, GloVe performed better and reached strong results faster."</p>
+<h2 id="experiments_and_results--tables-and-figures-usage-guidance">Tables and Figures Usage Guidance</h2>
+<ul>
+<li>Table 1 can be converted into a simplified teaching table because the values are visible and central to the mechanism.</li>
+<li>Figure 1 can be recreated qualitatively to explain weighting.</li>
+<li>Figures 2-4 should be summarized qualitatively unless exact chart values are manually extracted.</li>
+<li>Tables 2-4 can be quoted selectively after visual cross-checking.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="glossary" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">glossary.md</p>
+        <h1>GloVe Glossary</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="glossary--glove-glossary">GloVe Glossary</h1>
+<ul>
+<li><code>AdaGrad</code>: optimization method used by the paper to update model parameters during training.</li>
+<li><code>analogy task</code>: benchmark where the model answers questions of the form <code>a is to b as c is to ?</code>.</li>
+<li><code>asymmetric context window</code>: context window that looks only to one side of the target word.</li>
+<li><code>bias</code>: extra scalar parameter for a target or context word that helps account for broad frequency effects.</li>
+<li><code>CBOW</code>: continuous bag-of-words model; predicts a word from its context.</li>
+<li><code>co-occurrence</code>: event where a word appears within another word's context window.</li>
+<li><code>co-occurrence matrix</code>: table <code>X</code> whose entry <code>X_ij</code> stores how often context word <code>j</code> appears near target word <code>i</code>.</li>
+<li><code>context vector</code>: vector <code>wtilde_j</code> for a word when it is used in the context role.</li>
+<li><code>context window</code>: span of nearby words counted around a target word.</li>
+<li><code>cosine similarity</code>: measure of vector direction similarity used by the paper for analogy answers.</li>
+<li><code>dot product</code>: operation turning two vectors into one scalar score; in GloVe it contributes to the predicted log co-occurrence count.</li>
+<li><code>GloVe</code>: Global Vectors; the paper's global log-bilinear regression model for word representation.</li>
+<li><code>global statistics</code>: aggregate counts collected over the corpus, rather than individual local windows considered one at a time.</li>
+<li><code>HPCA</code>: Hellinger PCA, a matrix-factorization-related baseline discussed in the paper.</li>
+<li><code>LSA</code>: latent semantic analysis, a matrix factorization method using term-document matrices.</li>
+<li><code>NER</code>: named entity recognition, a task of identifying entities such as persons, locations, and organizations.</li>
+<li><code>nonzero entry</code>: a co-occurrence matrix cell with count greater than zero.</li>
+<li><code>PPMI</code>: positive pointwise mutual information, a co-occurrence transformation discussed in related work.</li>
+<li><code>semantic analogy</code>: analogy involving meaning-like relations, often people or places in the paper's examples.</li>
+<li><code>skip-gram</code>: local context-window model that predicts context from a word.</li>
+<li><code>softmax</code>: normalized exponential function used in prediction models to produce probabilities over vocabulary items.</li>
+<li><code>Spearman rank correlation</code>: rank-based correlation used to compare model similarity scores with human similarity judgments.</li>
+<li><code>symmetric context window</code>: context window that looks both left and right of the target word.</li>
+<li><code>syntactic analogy</code>: analogy involving grammatical form, such as tense or adjective form.</li>
+<li><code>term-document matrix</code>: matrix whose rows are words/terms and columns are documents.</li>
+<li><code>term-term matrix</code>: matrix whose rows and columns are both words/terms.</li>
+<li><code>weighted least squares</code>: objective that penalizes squared prediction errors, with each error multiplied by a weight.</li>
+<li><code>word vector</code>: vector <code>w_i</code> for a word when it is used in the target role.</li>
+<li><code>x_max</code>: cutoff in the GloVe weighting function, set to 100 in the paper's experiments.</li>
+<li><code>alpha</code>: exponent in the GloVe weighting function, set to 3/4 in the paper's experiments.</li>
+</ul>
+<h2 id="glossary--symbol-glossary">Symbol Glossary</h2>
+<ul>
+<li><code>V</code>: vocabulary size.</li>
+<li><code>C</code>: corpus; <code>|C|</code> is corpus size.</li>
+<li><code>X</code>: word-word co-occurrence matrix.</li>
+<li><code>X_ij</code>: count of word <code>j</code> appearing in the context of word <code>i</code>.</li>
+<li><code>X_i</code>: sum of co-occurrence counts in row <code>i</code>, <code>sum_k X_ik</code>.</li>
+<li><code>P_ij</code>: conditional probability <code>P(j | i) = X_ij / X_i</code>.</li>
+<li><code>w_i</code>: target-word vector for word <code>i</code>.</li>
+<li><code>w_j</code>: target-word vector for word <code>j</code>.</li>
+<li><code>wtilde_k</code>: context-word vector for word <code>k</code>.</li>
+<li><code>b_i</code>: target-word bias.</li>
+<li><code>btilde_j</code>: context-word bias.</li>
+<li><code>F</code>: function used in the derivation to connect vectors to probability ratios.</li>
+<li><code>f(x)</code>: weighting function applied to co-occurrence count <code>x</code>.</li>
+<li><code>J</code>: objective/cost function minimized during training.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="index" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">index.md</p>
+        <h1>GloVe Wiki</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="index--glove-wiki">GloVe Wiki</h1>
+<p>This wiki is the source-grounded understanding layer for <code>topics/glove</code>. It is not the final lesson and should not be published directly.</p>
+<h2 id="index--primary-source">Primary Source</h2>
+<ul>
+<li><code>raw/papers/glove.pdf</code></li>
+<li>"GloVe: Global Vectors for Word Representation"</li>
+<li>Jeffrey Pennington, Richard Socher, Christopher D. Manning</li>
+</ul>
+<h2 id="index--files">Files</h2>
+<ul>
+<li><code>source_map.md</code>: inventory of paper sections, figures, tables, equations, experiments, and extraction caveats.</li>
+<li><code>paper_walkthrough.md</code>: source-grounded section-by-section notes.</li>
+<li><code>concepts.md</code>: beginner-facing prerequisite concepts and intuition.</li>
+<li><code>mechanism_notes.md</code>: derivation and objective notes with symbols and toy examples.</li>
+<li><code>experiments_and_results.md</code>: evaluation setup, reported results, model analysis, runtime, and comparison caveats.</li>
+<li><code>teaching_plan_notes.md</code>: likely reader confusions, visual opportunities, and section-planning guidance.</li>
+<li><code>glossary.md</code>: symbols and terms.</li>
+<li><code>open_questions.md</code>: extraction caveats and non-overclaim rules.</li>
+</ul>
+<h2 id="index--core-source-claims">Core Source Claims</h2>
+<ul>
+<li>GloVe is presented as a global log-bilinear regression model for word representations.</li>
+<li>The model is motivated from ratios of co-occurrence probabilities, not only from raw co-occurrence probabilities.</li>
+<li>The paper positions GloVe between global matrix factorization methods and local context-window prediction methods.</li>
+<li>The objective trains on nonzero word-word co-occurrence counts with a weighting function.</li>
+<li>In the paper's experiments, GloVe performs strongly on word analogy, word similarity, and named entity recognition tasks.</li>
+</ul>
+<h2 id="index--key-teaching-interpretation">Key Teaching Interpretation</h2>
+<p>The shortest beginner path is:</p>
+<ol>
+<li>Words can be represented by the contexts they appear in.</li>
+<li>Raw co-occurrence counts are noisy because common words appear with many words.</li>
+<li>Ratios compare two target words against the same context word and can reveal a contrast.</li>
+<li>GloVe asks vectors to encode those contrasts through dot products and vector differences.</li>
+<li>Training adjusts word vectors, context vectors, and biases so predicted log co-occurrence counts match observed log counts, with weighting to reduce the influence of extremely rare and extremely frequent pairs.</li>
+</ol>
+<h2 id="index--do-not-overstate">Do Not Overstate</h2>
+<ul>
+<li>Treat the results as the paper's reported 2014 experimental findings.</li>
+<li>Do not claim analogy benchmarks prove semantic understanding.</li>
+<li>Do not claim GloVe universally beats every later word embedding method.</li>
+<li>Do not reproduce exact chart curves unless manually verified.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="mechanism_notes" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">mechanism_notes.md</p>
+        <h1>Mechanism Notes</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="mechanism_notes--mechanism-notes">Mechanism Notes</h1>
+<h2 id="mechanism_notes--the-problem-the-model-is-solving">The Problem the Model Is Solving</h2>
+<p>Source claim:
+- The paper wants a word-vector model that uses global corpus co-occurrence statistics while producing vector spaces with useful linear substructure.</p>
+<p>Teaching interpretation:
+- The training signal is not a human label. It is the co-occurrence table extracted from text.
+- The model changes vectors and biases until their scores match observed log co-occurrence counts.</p>
+<h2 id="mechanism_notes--notation">Notation</h2>
+<ul>
+<li><code>V</code>: vocabulary size.</li>
+<li><code>X</code>: word-word co-occurrence matrix.</li>
+<li><code>X_ij</code>: count of context word <code>j</code> near target word <code>i</code>.</li>
+<li><code>X_i</code>: total number of context-word counts around target word <code>i</code>, <code>sum_k X_ik</code>.</li>
+<li><code>P_ij</code>: conditional probability <code>P(j | i) = X_ij / X_i</code>.</li>
+<li><code>w_i</code>: target-word vector for word <code>i</code>.</li>
+<li><code>wtilde_j</code>: context-word vector for word <code>j</code>.</li>
+<li><code>b_i</code>: target-word bias.</li>
+<li><code>btilde_j</code>: context-word bias.</li>
+<li><code>f(X_ij)</code>: weighting function for a count.</li>
+<li><code>J</code>: total training objective to minimize.</li>
+</ul>
+<h2 id="mechanism_notes--why-ratios">Why Ratios</h2>
+<p>Source claim:
+- The paper argues that <code>P_ik / P_jk</code> is better than raw probabilities for isolating what distinguishes two words.</p>
+<p>Plain-English reading:
+- Compare two target words, <code>i</code> and <code>j</code>, against the same probe context <code>k</code>.
+- If the ratio is high, <code>k</code> is more characteristic of <code>i</code>.
+- If the ratio is low, <code>k</code> is more characteristic of <code>j</code>.
+- If the ratio is near 1, <code>k</code> does not distinguish them.</p>
+<p>Tiny example:
+- Suppose <code>P(solid | ice) = 0.0019</code>.
+- Suppose <code>P(solid | steam) = 0.00022</code>.
+- The ratio is about <code>0.0019 / 0.00022 = 8.6</code>.
+- So <code>solid</code> is much more diagnostic for <code>ice</code> than for <code>steam</code>.</p>
+<h2 id="mechanism_notes--from-ratios-to-vector-differences">From Ratios to Vector Differences</h2>
+<p>Source claim:
+- The paper wants a function <code>F</code> that maps word vectors to the probability ratio.</p>
+<p>Teaching interpretation:
+- If analogies are represented by vector offsets, then the difference between two word vectors should carry information about what distinguishes them.
+- That is why the paper moves from <code>F(w_i, w_j, wtilde_k)</code> to a function involving <code>w_i - w_j</code>.</p>
+<h2 id="mechanism_notes--why-dot-products">Why Dot Products</h2>
+<p>Source claim:
+- The right-hand side of the ratio equation is a scalar, while the model arguments are vectors.
+- The paper uses a dot product to produce a scalar.</p>
+<p>Plain-English reading:
+- The dot product scores how compatible a target-word difference is with a context word.</p>
+<h2 id="mechanism_notes--why-logs-appear">Why Logs Appear</h2>
+<p>Source claim:
+- With the chosen homomorphism, <code>F = exp</code>, leading to a log relation:
+  - <code>w_i^T wtilde_k = log(P_ik) = log(X_ik) - log(X_i)</code></p>
+<p>Teaching interpretation:
+- Ratios multiply and divide.
+- Vector differences add and subtract.
+- Logs turn multiplication/division into addition/subtraction, making the algebra fit vector-space operations.</p>
+<h2 id="mechanism_notes--why-biases-appear">Why Biases Appear</h2>
+<p>Source claim:
+- <code>log(X_i)</code> is independent of context word <code>k</code>, so it can be absorbed into a bias for target word <code>i</code>.
+- A context bias restores symmetry.</p>
+<p>Plain-English reading:
+- Biases let the model handle broad word-frequency effects separately from the semantic/syntactic dimensions in the vectors.</p>
+<h2 id="mechanism_notes--the-core-matching-equation">The Core Matching Equation</h2>
+<p>Source claim:
+- The paper reaches:</p>
+<pre><code class="language-text">w_i^T wtilde_j + b_i + btilde_j = log(X_ij)
+</code></pre>
+<p>Symbols:
+- <code>w_i^T wtilde_j</code>: compatibility score between target word <code>i</code> and context word <code>j</code>.
+- <code>b_i</code>: target-word bias.
+- <code>btilde_j</code>: context-word bias.
+- <code>log(X_ij)</code>: compressed observed co-occurrence count.</p>
+<p>Plain-English reading:
+- The model should predict the log count of a word-context pair from their vectors and biases.</p>
+<h2 id="mechanism_notes--the-training-objective">The Training Objective</h2>
+<p>Source claim:
+- The GloVe objective is:</p>
+<pre><code class="language-text">J = sum_{i,j=1}^V f(X_ij) (w_i^T wtilde_j + b_i + btilde_j - log X_ij)^2
+</code></pre>
+<p>Plain-English reading:
+- For every observed word-context pair, compare the model's predicted log count to the true log count.
+- Square the error so larger misses hurt more.
+- Multiply by a weight so not every pair matters equally.
+- Add all weighted errors.</p>
+<p>What changes during training:
+- <code>w_i</code>
+- <code>wtilde_j</code>
+- <code>b_i</code>
+- <code>btilde_j</code></p>
+<p>What does not change during training:
+- the corpus
+- the co-occurrence counts <code>X_ij</code>
+- the target log counts</p>
+<p>Tiny one-term example:
+- Observed count: <code>X_ij = 20</code>
+- Target: <code>log(20) ~= 3.00</code>
+- Current dot-plus-bias prediction: <code>2.50</code>
+- Error: <code>2.50 - 3.00 = -0.50</code>
+- Squared error: <code>0.25</code>
+- If <code>f(20) ~= 0.30</code>, this pair contributes about <code>0.075</code> to <code>J</code>.</p>
+<h2 id="mechanism_notes--weighting-function">Weighting Function</h2>
+<p>Source claim:
+- The paper uses:</p>
+<pre><code class="language-text">f(x) = (x / x_max)^alpha, if x &lt; x_max
+f(x) = 1, otherwise
+</code></pre>
+<p>with <code>x_max = 100</code> and <code>alpha = 3/4</code> in experiments.</p>
+<p>Plain-English reading:
+- Below the cutoff, larger counts get more trust.
+- At and above the cutoff, counts stop gaining extra influence.</p>
+<p>Tiny example with <code>x_max = 100</code>, <code>alpha = 3/4</code>:
+- Count <code>1</code>: weight <code>1 / 100</code> to the <code>3/4</code> power, about <code>0.032</code>.
+- Count <code>10</code>: weight <code>10 / 100</code> to the <code>3/4</code> power, about <code>0.178</code>.
+- Count <code>100</code>: weight <code>1</code>.
+- Count <code>1000</code>: capped at <code>1</code>.</p>
+<h2 id="mechanism_notes--training-workflow">Training Workflow</h2>
+<p>Source-grounded steps:
+1. Tokenize and lowercase the corpus.
+2. Choose a vocabulary.
+3. Slide a context window across the corpus.
+4. Build a word-word co-occurrence matrix <code>X</code>, with distance weighting <code>1/d</code>.
+5. Initialize word vectors, context vectors, and biases.
+6. Sample nonzero entries of <code>X</code>.
+7. Use AdaGrad to adjust parameters and reduce the weighted squared error.
+8. Use <code>W + Wtilde</code> as final vectors.</p>
+<p>Teaching caveat:
+- This workflow is paper-scale. A toy code demo should only illustrate the mechanics on a tiny corpus.</p>
+      </div>
+    </article>
+    
+
+    <article id="open_questions" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">open_questions.md</p>
+        <h1>GloVe Open Questions and Caveats</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="open_questions--glove-open-questions-and-caveats">GloVe Open Questions and Caveats</h1>
+<h2 id="open_questions--extraction-caveats">Extraction Caveats</h2>
+<ul>
+<li>The PDF text is readable, but the source is two-column academic layout. Some passages appear side-by-side in extracted text.</li>
+<li>Equations need visual cross-checking before final prose, especially superscripts, subscripts, tildes, and summation limits.</li>
+<li>Figures 1-4 are chart/vector content. Do not invent exact plotted values from the images.</li>
+<li>Table 2 needs visual cross-checking before exact row-by-row use because extraction interleaves it with nearby text.</li>
+</ul>
+<h2 id="open_questions--claims-not-to-overstate">Claims Not To Overstate</h2>
+<ul>
+<li>The paper's 75% analogy result is a reported result in its experimental setup, not a universal property of GloVe.</li>
+<li>"GloVe outperforms word2vec" should be stated as the paper's controlled 2014 comparison, with the paper's own caveat that rigorous comparison is complicated by many parameters.</li>
+<li>The paper argues that count-based and prediction-based methods both probe co-occurrence statistics; it does not prove that all count-based methods are always better.</li>
+<li>Analogy performance should not be framed as proof that vectors understand language.</li>
+<li>The complexity analysis relies on assumptions about co-occurrence distributions and observed corpora; present the practical intuition before the asymptotic derivation.</li>
+</ul>
+<h2 id="open_questions--visual-verification-needed-later">Visual Verification Needed Later</h2>
+<ul>
+<li>Figure 1: confirm shape and labels of the weighting function before recreating a simplified teaching version.</li>
+<li>Figure 2: use only qualitative claims unless exact plotted values are manually extracted.</li>
+<li>Figure 3: use only qualitative claims unless exact plotted values are manually extracted.</li>
+<li>Figure 4: use only qualitative claims unless exact plotted values are manually extracted.</li>
+<li>Tables 1, 3, and 4 are readable enough for source notes, but final publish text should still check exact numbers against the PDF.</li>
+</ul>
+<h2 id="open_questions--teaching-risks">Teaching Risks</h2>
+<ul>
+<li>Readers may not know what a co-occurrence matrix is; introduce it before <code>X_ij</code>.</li>
+<li>Readers may not know conditional probability; introduce <code>P(j | i)</code> with a tiny count example.</li>
+<li>Readers may not know dot products; explain them as a compatibility score before using the formula.</li>
+<li>Readers may not know least squares; explain it as "make the predicted number close to the observed number, with bigger penalties for bigger mistakes."</li>
+<li>Readers may not know why logs appear; explain count ranges and multiplicative ratios before log equations.</li>
+<li>Readers may confuse word vectors and context vectors; keep their roles explicit until the final <code>W + Wtilde</code> note.</li>
+</ul>
+<h2 id="open_questions--minimum-additional-extraction-needed">Minimum Additional Extraction Needed</h2>
+<ul>
+<li>No additional OCR is needed for the main text.</li>
+<li>Manual PDF spot checks are needed before final authoring for equations, Table 2, and chart labels.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="paper_walkthrough" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">paper_walkthrough.md</p>
+        <h1>Paper Walkthrough Notes</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="paper_walkthrough--paper-walkthrough-notes">Paper Walkthrough Notes</h1>
+<h2 id="paper_walkthrough--abstract">Abstract</h2>
+<p>Source claims:
+- The paper says recent word-vector methods can capture fine-grained semantic and syntactic regularities through vector arithmetic, but the source of those regularities was unclear.
+- It proposes a global log-bilinear regression model.
+- It says the model combines strengths of global matrix factorization and local context-window methods.
+- It trains on nonzero elements of a word-word co-occurrence matrix.
+- It reports 75% on a word analogy task and stronger performance than related models on similarity tasks and NER.</p>
+<p>Teaching interpretation:
+- The abstract sets up a mechanism question: why should arithmetic on word vectors work at all?
+- The final article should make the model feel like a response to that question, not just a new objective function.</p>
+<h2 id="paper_walkthrough--1-introduction">1 Introduction</h2>
+<p>Source claims:
+- Semantic vector-space models represent each word with a real-valued vector.
+- Such vectors can support information retrieval, document classification, question answering, NER, and parsing.
+- Traditional intrinsic evaluation often looks at distance or angle between word-vector pairs.
+- Mikolov et al.'s analogy evaluation probes finer vector-space structure through vector differences.
+- The paper gives the example <code>king - queen = man - woman</code>.
+- The introduction identifies two major families:
+  - global matrix factorization, such as LSA
+  - local context-window methods, such as skip-gram
+- The paper's stated critique:
+  - LSA-like methods use global statistics but underperform on analogies.
+  - Skip-gram-like methods can do better on analogies but do not directly operate on global co-occurrence counts.
+- The proposed model is a weighted least-squares model over global word-word co-occurrence counts.</p>
+<p>Teaching interpretation:
+- A beginner needs "global" and "local" anchored in a corpus example.
+- The analogy example should be introduced as an evaluation signal for vector-space structure, not as proof of meaning.</p>
+<h2 id="paper_walkthrough--2-related-work">2 Related Work</h2>
+<p>Source claims:
+- Matrix factorization methods have roots in LSA.
+- LSA uses term-document matrices.
+- HAL uses term-term matrices, where rows and columns correspond to words and entries are context co-occurrence counts.
+- Frequent words can dominate raw co-occurrence similarity without contributing much semantic relatedness.
+- COALS, PPMI, and HPCA are discussed as transformations that address raw-count problems.
+- Shallow window-based methods learn word representations through local prediction tasks.
+- The paper connects Bengio et al., Collobert and Weston, skip-gram, CBOW, vLBL, and ivLBL.
+- Skip-gram and ivLBL predict context from word; CBOW and vLBL predict word from context.
+- The paper argues window-based models do not directly use aggregate co-occurrence counts and therefore do not exploit repeated statistics as efficiently.</p>
+<p>Teaching interpretation:
+- The useful contrast is not "old bad, new good." It is:
+  - count methods see the whole count table but may not shape vectors well for analogies
+  - window prediction methods shape vectors well but process many repeated local examples
+  - GloVe tries to preserve both global counts and linear vector structure</p>
+<h2 id="paper_walkthrough--3-the-glove-model">3 The GloVe Model</h2>
+<p>Source claims:
+- All unsupervised word-vector methods ultimately rely on word occurrence statistics.
+- The paper defines:
+  - <code>X</code>: word-word co-occurrence matrix
+  - <code>X_ij</code>: number of times word <code>j</code> appears in the context of word <code>i</code>
+  - <code>X_i = sum_k X_ik</code>: total context occurrences for word <code>i</code>
+  - <code>P_ij = P(j | i) = X_ij / X_i</code>
+- The paper uses <code>ice</code> and <code>steam</code> to show that ratios of probabilities can distinguish relevant context words better than raw probabilities.
+- For <code>solid</code>, <code>P(solid | ice) / P(solid | steam)</code> is large.
+- For <code>gas</code>, the ratio is small.
+- For <code>water</code> and <code>fashion</code>, the ratio is close to one.
+- The paper argues the appropriate starting point should be ratios of co-occurrence probabilities.
+- The most general first model uses a function <code>F(w_i, w_j, wtilde_k) = P_ik / P_jk</code>.
+- The paper then imposes desiderata:
+  - encode the ratio in vector differences
+  - use a dot product to keep the scalar/vector relationship simple
+  - preserve symmetry between word and context roles
+- These choices lead to a log-count relationship with biases:
+  - <code>w_i^T wtilde_k + b_i + btilde_k = log(X_ik)</code>
+- Because log zero is undefined and rare co-occurrences are noisy, the final objective is weighted:
+  - <code>J = sum f(X_ij) (w_i^T wtilde_j + b_i + btilde_j - log X_ij)^2</code>
+- The weighting function should:
+  - give zero weight to zero counts
+  - not overweight rare co-occurrences
+  - not overweight very frequent co-occurrences
+- The paper uses <code>x_max = 100</code> and <code>alpha = 3/4</code>.</p>
+<p>Teaching interpretation:
+- The derivation can be taught as a series of constraints:
+  - "What should vectors preserve?"
+  - "How can a vector difference become a scalar comparison?"
+  - "Why do logs turn ratios into differences?"
+  - "Why do biases absorb broad frequency effects?"
+  - "Why should rare pairs count less?"</p>
+<h2 id="paper_walkthrough--31-relationship-to-other-models">3.1 Relationship to Other Models</h2>
+<p>Source claims:
+- The paper starts from a softmax probability <code>Q_ij</code> for context word <code>j</code> given word <code>i</code>.
+- It writes the objective for skip-gram/ivLBL-like methods as the sum of log probabilities over corpus windows.
+- By grouping identical word-context pairs, the paper rewrites the objective in terms of the co-occurrence matrix <code>X</code>.
+- It interprets the grouped objective as a weighted sum of cross-entropies.
+- It criticizes cross-entropy and softmax normalization as potentially costly or undesirable for long-tailed distributions.
+- It then motivates a least-squares objective on unnormalized log quantities, leading to an objective equivalent to the GloVe cost.</p>
+<p>Teaching interpretation:
+- This section is a bridge: the paper is saying local-window objectives also imply global co-occurrence statistics when grouped.
+- It is useful for explaining why GloVe is not a totally separate universe from prediction models.</p>
+<h2 id="paper_walkthrough--32-complexity">3.2 Complexity</h2>
+<p>Source claims:
+- GloVe's cost depends on the number of nonzero elements in <code>X</code>.
+- It scales no worse than <code>O(|V|^2)</code>, but the paper argues this worst case is loose.
+- The paper assumes word co-occurrences follow a power-law-like pattern and derives a tighter practical relation to corpus size.
+- For the corpora studied, the paper observes an exponent near <code>1.25</code> and concludes the number of nonzero co-occurrences grows like <code>O(|C|^0.8)</code>.
+- The paper concludes this is better than the worst case and somewhat better than online window methods that scale like <code>O(|C|)</code>.</p>
+<p>Teaching interpretation:
+- The main beginner takeaway: GloVe does not train on every possible word pair. It trains where the co-occurrence count is nonzero.
+- The asymptotic details can be a small sidebar.</p>
+<h2 id="paper_walkthrough--4-experiments">4 Experiments</h2>
+<p>Source claims:
+- The paper evaluates on word analogies, word similarity datasets, and NER.</p>
+<h2 id="paper_walkthrough--41-evaluation-methods">4.1 Evaluation Methods</h2>
+<p>Source claims:
+- The analogy dataset contains 19,544 questions.
+- It has semantic and syntactic subsets.
+- The model answers <code>a is to b as c is to ?</code> by finding <code>d</code> closest to <code>w_b - w_a + w_c</code> under cosine similarity.
+- Similarity evaluations include WordSim-353, MC, RG, SCWS, and RW.
+- Similarity is scored with Spearman rank correlation against human judgments.
+- NER uses CoNLL-2003 English and tests on CoNLL-03, ACE, and MUC7.
+- The NER setup adds 50-dimensional word vectors as continuous features to a CRF with discrete features.</p>
+<p>Teaching interpretation:
+- Each evaluation probes a different behavior:
+  - analogy: vector offset structure
+  - similarity: pairwise similarity alignment with human judgments
+  - NER: downstream feature usefulness</p>
+<h2 id="paper_walkthrough--42-corpora-and-training-details">4.2 Corpora and Training Details</h2>
+<p>Source claims:
+- Corpora include 1B-token Wikipedia 2010, 1.6B-token Wikipedia 2014, 4.3B-token Gigaword 5, 6B-token Gigaword 5 + Wikipedia 2014, and 42B-token Common Crawl.
+- The paper mentions an 840B-token web corpus for scalability but says it is not directly comparable.
+- It uses Stanford tokenizer, lowercasing, and a 400,000-word vocabulary for most corpora.
+- Common Crawl uses about 2 million words.
+- Context-window co-occurrences are distance-weighted by <code>1/d</code>.
+- Experiments use <code>x_max = 100</code>, <code>alpha = 3/4</code>, AdaGrad, stochastic sampling of nonzero entries, and learning rate 0.05.
+- Default context is 10 words to the left and right.
+- Final vectors use <code>W + Wtilde</code>.</p>
+<p>Teaching interpretation:
+- Training changes the entries of <code>W</code>, <code>Wtilde</code>, and the bias terms.
+- The observed counts <code>X_ij</code> do not change during training; they are the fixed target signal.</p>
+<h2 id="paper_walkthrough--43-results">4.3 Results</h2>
+<p>Source claims:
+- On analogy tasks, GloVe performs better than listed baselines in Table 2, with 75.0 overall for 300-dimensional vectors on 42B tokens.
+- The paper states its word2vec-tool results are stronger than some previously published results due to choices such as negative sampling, number of negative samples, and corpus.
+- On similarity tasks, Table 3 reports GloVe strong across the listed datasets.
+- On NER, Table 4 reports GloVe leading Dev, ACE, and MUC7, while HPCA is slightly higher on the CoNLL test set.</p>
+<p>Teaching interpretation:
+- The final article should not overfit the narrative to a single table.
+- Results should be framed as evidence across intrinsic and downstream tasks.</p>
+<h2 id="paper_walkthrough--44-vector-length-and-context-size">4.4 Vector Length and Context Size</h2>
+<p>Source claims:
+- Figure 2 reports diminishing returns above roughly 200 dimensions.
+- Syntactic performance is better with small and asymmetric windows.
+- Semantic information is more often non-local and benefits from larger windows.</p>
+<p>Teaching interpretation:
+- This is a good place to explain why word order and nearby words matter more for syntax.</p>
+<h2 id="paper_walkthrough--45-corpus-size">4.5 Corpus Size</h2>
+<p>Source claims:
+- Figure 3 reports syntactic analogy performance improving monotonically with corpus size.
+- Semantic analogy performance does not follow the same monotonic pattern.
+- The paper suggests Wikipedia may help location-based analogies because it covers many places and is updated.</p>
+<p>Teaching interpretation:
+- More data can help, but corpus composition matters.</p>
+<h2 id="paper_walkthrough--46-runtime">4.6 Runtime</h2>
+<p>Source claims:
+- Runtime has two parts: building <code>X</code> and training.
+- For 6B tokens, 400,000 vocabulary, 10-word symmetric context:
+  - building <code>X</code> takes about 85 minutes on one thread on the specified machine
+  - one 300-dimensional training iteration takes 14 minutes using all 32 cores</p>
+<p>Teaching interpretation:
+- Distinguish preprocessing from optimization.</p>
+<h2 id="paper_walkthrough--47-comparison-with-word2vec">4.7 Comparison with word2vec</h2>
+<p>Source claims:
+- The paper says rigorous comparison is complicated by parameter sensitivity.
+- It controls vector length, context window size, corpus, and vocabulary size.
+- It compares GloVe training iterations against CBOW/skip-gram negative samples as a training-time proxy.
+- Figure 4 reports GloVe outperforming word2vec under those controlled settings.
+- The paper says word2vec performance can decrease beyond about 10 negative samples.</p>
+<p>Teaching interpretation:
+- Keep the caveat in the same paragraph as the comparison.</p>
+<h2 id="paper_walkthrough--5-conclusion">5 Conclusion</h2>
+<p>Source claims:
+- The paper returns to whether word representations are better learned from count-based or prediction-based methods.
+- It argues both classes probe corpus co-occurrence statistics.
+- It says count-based methods can be efficient at capturing global statistics.
+- It presents GloVe as combining count-data benefits with linear substructures common in prediction-based methods.
+- It concludes GloVe outperforms other models on analogy, similarity, and NER in the paper's experiments.</p>
+<p>Teaching interpretation:
+- The final section should recap mechanism, not just results.</p>
+      </div>
+    </article>
+    
+
+    <article id="source_map" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_map.md</p>
+        <h1>GloVe Source Map</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_map--glove-source-map">GloVe Source Map</h1>
+<h2 id="source_map--source-inventory">Source Inventory</h2>
+<ul>
+<li>Topic: <code>glove</code></li>
+<li>Primary source: <code>topics/glove/raw/papers/glove.pdf</code></li>
+<li>Paper title: "GloVe: Global Vectors for Word Representation"</li>
+<li>Authors: Jeffrey Pennington, Richard Socher, Christopher D. Manning</li>
+<li>PDF metadata: 12 pages, created by TeX/pdfTeX, not encrypted</li>
+<li>Text extraction status: usable with <code>pdftotext -layout</code></li>
+<li>Article shape: <code>paper_deep_dive</code></li>
+<li>Audience profile: <code>beginner_technical</code></li>
+</ul>
+<h2 id="source_map--paper-level-claim-boundary">Paper-Level Claim Boundary</h2>
+<p>Claims below are source-grounded notes from the paper unless marked as "teaching interpretation."</p>
+<p>The paper presents GloVe as a global log-bilinear regression model for unsupervised word representation learning. It argues that useful linear structure in word vectors can be motivated from ratios of word-word co-occurrence probabilities, and it trains on nonzero entries of a word-word co-occurrence matrix. The abstract reports 75% on a word analogy task and says the model also outperforms related models on similarity tasks and named entity recognition.</p>
+<h2 id="source_map--section-map">Section Map</h2>
+<h3 id="source_map--abstract">Abstract</h3>
+<p>Source coverage:
+- States the problem: recent word-vector methods capture semantic and syntactic regularities, but the origin of those regularities had remained opaque.
+- Frames GloVe as combining advantages of global matrix factorization and local context-window methods.
+- Claims efficient use of corpus statistics by training on nonzero co-occurrence matrix entries.
+- Reports 75% performance on a word analogy task and stronger performance on similarity and NER tasks.</p>
+<p>Later teaching needs:
+- Explain "nonzero co-occurrence entries" before using it.
+- Avoid presenting 75% as timeless state of the art; it is the paper's reported result.</p>
+<h3 id="source_map--1-introduction">1 Introduction</h3>
+<p>Source coverage:
+- Motivates semantic vector space models for applications such as information retrieval, document classification, question answering, NER, and parsing.
+- Contrasts pairwise distance/angle evaluation with analogy evaluation.
+- Uses the analogy idea that "king - queen = man - woman" should hold as a vector relationship.
+- Identifies two model families:
+  - global matrix factorization methods such as LSA
+  - local context-window methods such as skip-gram
+- States the paper's diagnosis:
+  - LSA-like methods use global statistics but do poorly on analogies.
+  - Skip-gram-like methods can do well on analogies but do not operate directly on global co-occurrence counts.
+- States the proposed direction: a weighted least-squares model over global word-word co-occurrence counts.</p>
+<p>Later teaching needs:
+- Start with a concrete word-context example before analogies.
+- Explain that analogies are an evaluation probe, not proof of human-like understanding.</p>
+<h3 id="source_map--2-related-work">2 Related Work</h3>
+<p>Source coverage:
+- Matrix factorization methods:
+  - LSA uses term-document matrices.
+  - HAL and similar methods use term-term matrices.
+  - Frequent function words can dominate raw co-occurrence similarity.
+  - COALS, PPMI, and HPCA are discussed as transformations or normalizations of co-occurrence statistics.
+- Shallow window-based methods:
+  - Neural language model lineage from Bengio et al.
+  - Collobert and Weston decouple word-vector training from downstream tasks.
+  - Skip-gram and CBOW use simple single-layer architectures with inner products.
+  - vLBL and ivLBL are related log-bilinear models.
+  - Skip-gram and ivLBL predict context from word; CBOW and vLBL predict word from context.
+  - The paper argues window-based methods scan local windows and do not directly exploit repeated global co-occurrence counts.</p>
+<p>Later teaching needs:
+- Explain "global" as reusing aggregate counts.
+- Explain "local window" as repeated examples from sliding windows.
+- Avoid implying the paper proves all count-based methods always beat all prediction-based methods.</p>
+<h3 id="source_map--3-the-glove-model">3 The GloVe Model</h3>
+<p>Source coverage:
+- Defines the word-word co-occurrence matrix <code>X</code>.
+- Defines <code>X_ij</code> as the number of times word <code>j</code> occurs in the context of word <code>i</code>.
+- Defines <code>X_i = sum_k X_ik</code>.
+- Defines <code>P_ij = P(j | i) = X_ij / X_i</code>.
+- Uses the ice/steam example to argue that ratios of co-occurrence probabilities isolate meaning-relevant contrasts better than raw probabilities.
+- Proposes a model family where a function <code>F</code> encodes the ratio <code>P_ik / P_jk</code>.
+- Narrows the model using vector differences, a dot product, a homomorphism choice that leads to exponentiation, and symmetry between word and context roles.
+- Arrives at:
+  - <code>w_i^T wtilde_k + b_i + btilde_k = log(X_ik)</code>
+- Notes that log zero is undefined and motivates a weighted least-squares objective over observed counts:
+  - <code>J = sum_{i,j=1}^V f(X_ij) (w_i^T wtilde_j + b_i + btilde_j - log X_ij)^2</code>
+- Defines desirable properties of the weighting function:
+  - zero weight at zero
+  - non-decreasing so rare co-occurrences are not overweighted
+  - capped or relatively small for large counts so frequent pairs are not overweighted
+- Uses:
+  - <code>f(x) = (x / x_max)^alpha</code> if <code>x &lt; x_max</code>
+  - <code>f(x) = 1</code> otherwise
+- Reports <code>x_max = 100</code> and <code>alpha = 3/4</code> for experiments.</p>
+<p>Figures/tables:
+- Table 1: ice/steam co-occurrence probabilities and ratios for <code>solid</code>, <code>gas</code>, <code>water</code>, <code>fashion</code>.
+- Figure 1: weighting function <code>f</code> with <code>alpha = 3/4</code>.</p>
+<p>Later teaching needs:
+- This is the conceptual center of the article.
+- Explain every symbol before formula use.
+- Use a tiny numerical example for a single loss term.
+- Show why biases absorb row/context frequency effects.</p>
+<h3 id="source_map--31-relationship-to-other-models">3.1 Relationship to Other Models</h3>
+<p>Source coverage:
+- Starts from a softmax model <code>Q_ij</code> for the probability that word <code>j</code> appears in context of word <code>i</code>.
+- Groups local-window training terms by co-occurrence pair to express an implied global objective.
+- Discusses cross-entropy as one distance measure between empirical and model distributions.
+- Critiques cross-entropy/softmax normalization for long-tailed distributions and computational cost.
+- Motivates an unnormalized least-squares objective that becomes equivalent to the GloVe-style cost function when generalized with a weighting function.</p>
+<p>Later teaching needs:
+- Treat this as optional deepening unless the section plan needs full paper-section fidelity.
+- Explain that the paper is connecting window-based objectives to count objectives, not simply dismissing window methods.</p>
+<h3 id="source_map--32-complexity-of-the-model">3.2 Complexity of the Model</h3>
+<p>Source coverage:
+- Complexity depends on the number of nonzero entries in <code>X</code>.
+- Worst case is no worse than <code>O(|V|^2)</code>.
+- The paper argues the nonzero count is much smaller in practice.
+- Uses a rank-frequency style assumption and harmonic-number expansion.
+- Reports observed modeling of <code>X_ij</code> with exponent <code>alpha = 1.25</code> for corpora studied.
+- Concludes complexity is much better than the worst case and somewhat better than online window-based methods scaling like <code>O(|C|)</code>.</p>
+<p>Later teaching needs:
+- For beginner readers, this can be simplified to "train only where a pair was observed," with the asymptotic argument as a caveat box.
+- Do not overemphasize the zeta-function derivation unless needed.</p>
+<h3 id="source_map--4-experiments">4 Experiments</h3>
+<p>Source coverage:
+- Evaluates on:
+  - word analogy task from Mikolov et al.
+  - word similarity tasks described in Luong et al.
+  - CoNLL-2003 shared NER benchmark</p>
+<h3 id="source_map--41-evaluation-methods">4.1 Evaluation Methods</h3>
+<p>Source coverage:
+- Word analogies:
+  - Dataset has 19,544 questions.
+  - Split into semantic and syntactic subsets.
+  - Example semantic form: "Athens is to Greece as Berlin is to ?"
+  - Example syntactic form: "dance is to dancing as fly is to ?"
+  - Answer found by nearest vector to <code>w_b - w_a + w_c</code> by cosine similarity.
+- Word similarity:
+  - Evaluates on WordSim-353, MC, RG, SCWS, and RW.
+  - Uses Spearman rank correlation between vector-derived similarity and human judgments.
+- Named entity recognition:
+  - Uses CoNLL-2003 English benchmark and tests on CoNLL-03, ACE, and MUC7.
+  - Adds 50-dimensional vectors for each word in a five-word context as continuous features in a CRF setup.</p>
+<p>Figures/tables:
+- Table 2: word analogy accuracy by model, vector dimension, corpus size, semantic, syntactic, overall.
+- Table 3: Spearman rank correlation on word similarity tasks.
+- Table 4: F1 score on NER tasks.</p>
+<p>Later teaching needs:
+- Explain each benchmark type by what it asks the vector space to do.
+- Keep benchmark caveats visible.</p>
+<h3 id="source_map--42-corpora-and-training-details">4.2 Corpora and Training Details</h3>
+<p>Source coverage:
+- Trains on five corpora:
+  - Wikipedia 2010, 1B tokens
+  - Wikipedia 2014, 1.6B tokens
+  - Gigaword 5, 4.3B tokens
+  - Gigaword 5 + Wikipedia 2014, 6B tokens
+  - Common Crawl, 42B tokens
+- Mentions an additional 840B-token web corpus for scalability but says results are not directly comparable because the vocabulary was not lowercased.
+- Tokenizes and lowercases with Stanford tokenizer.
+- Builds a 400,000-word vocabulary, except Common Crawl uses about 2 million words.
+- Uses distance weighting in the co-occurrence matrix so pairs <code>d</code> words apart contribute <code>1/d</code>.
+- Sets <code>x_max = 100</code>, <code>alpha = 3/4</code>.
+- Trains with AdaGrad, stochastic sampling of nonzero <code>X</code> entries, initial learning rate 0.05.
+- Runs 50 iterations for vectors smaller than 300 dimensions and 100 otherwise.
+- Default context is 10 words left and right.
+- Produces two vector sets, <code>W</code> and <code>Wtilde</code>, and uses <code>W + Wtilde</code> as final word vectors.</p>
+<p>Later teaching needs:
+- Explain what changes during training: word vectors, context vectors, and biases are adjusted to reduce weighted squared error on observed co-occurrence pairs.</p>
+<h3 id="source_map--43-results">4.3 Results</h3>
+<p>Source coverage:
+- Table 2 reports GloVe outperforming listed baselines on word analogies, including 75.0 overall for 300-dimensional vectors trained on 42B tokens.
+- The paper notes its word2vec-tool results are stronger than many previously published results due to choices such as negative sampling, number of negative samples, and corpus.
+- Table 3 reports GloVe outperforming listed models on most word similarity datasets and outperforming CBOW vectors trained on a larger 100B-word news corpus while using a corpus less than half the size.
+- Table 4 reports NER results where GloVe has the highest values in Dev, ACE, and MUC7; HPCA is slightly higher on the CoNLL test set.</p>
+<p>Later teaching needs:
+- Say "in the paper's experimental setup" for result comparisons.
+- Avoid flattening all tasks into one score.</p>
+<h3 id="source_map--44-model-analysis-vector-length-and-context-size">4.4 Model Analysis: Vector Length and Context Size</h3>
+<p>Source coverage:
+- Figure 2 studies analogy accuracy by vector dimension and window size/type.
+- Reports diminishing returns above about 200 dimensions.
+- Reports syntactic performance is better for small and asymmetric context windows.
+- Reports semantic information is more often non-local and better captured with larger windows.</p>
+<p>Later teaching needs:
+- Explain symmetric versus asymmetric context windows.
+- Use a qualitative summary rather than recreating exact plotted curves unless visually verified.</p>
+<h3 id="source_map--45-model-analysis-corpus-size">4.5 Model Analysis: Corpus Size</h3>
+<p>Source coverage:
+- Figure 3 studies analogy accuracy for 300-dimensional vectors across corpora.
+- Syntactic subtask improves monotonically with corpus size.
+- Semantic subtask does not; smaller Wikipedia corpora can beat larger Gigaword corpora.
+- Paper suggests this may be due to city/country analogies and Wikipedia's coverage of locations, plus Wikipedia updates versus fixed news repositories.</p>
+<p>Later teaching needs:
+- Emphasize that more data is not automatically better for every benchmark.</p>
+<h3 id="source_map--46-model-analysis-run-time">4.6 Model Analysis: Run-time</h3>
+<p>Source coverage:
+- Runtime is split between populating <code>X</code> and training.
+- On a dual 2.1GHz Intel Xeon E5-2658 machine:
+  - populating <code>X</code> with 10-word symmetric context, 400,000 vocabulary, and 6B-token corpus takes about 85 minutes on a single thread
+  - one training iteration for 300-dimensional vectors using all 32 cores takes 14 minutes</p>
+<p>Later teaching needs:
+- Separate preprocessing cost from training cost.</p>
+<h3 id="source_map--47-model-analysis-comparison-with-word2vec">4.7 Model Analysis: Comparison with word2vec</h3>
+<p>Source coverage:
+- Notes that rigorous quantitative comparison with word2vec is complicated by many sensitive parameters.
+- Controls vector length, context window, corpus, and vocabulary size.
+- Varies training iterations for GloVe and negative samples for word2vec as a training-time comparison.
+- Figure 4 compares GloVe with CBOW and skip-gram on overall analogy accuracy as a function of training time.
+- Reports GloVe consistently outperforms word2vec under the controlled setup, achieves better results faster, and has the best results irrespective of speed.
+- Notes word2vec performance can decrease beyond about 10 negative samples, with a proposed explanation about negative sampling approximation quality.</p>
+<p>Later teaching needs:
+- Keep the paper's own caveat about comparison difficulty.
+- Do not generalize this 2014 comparison to all later embedding methods.</p>
+<h3 id="source_map--5-conclusion">5 Conclusion</h3>
+<p>Source coverage:
+- Restates the count-based versus prediction-based question.
+- Argues both model classes probe underlying co-occurrence statistics.
+- Claims count-based methods can be efficient at capturing global statistics.
+- Presents GloVe as using count-data benefits while capturing linear substructures seen in prediction-based methods.
+- Concludes GloVe outperforms other models on analogy, similarity, and NER tasks in the paper's setup.</p>
+<p>Later teaching needs:
+- Close with "what the paper gave us" and "what it does not prove."</p>
+<h2 id="source_map--tables-and-figures">Tables and Figures</h2>
+<ul>
+<li>Table 1: co-occurrence probabilities and ratios for <code>ice</code> and <code>steam</code> with context words <code>solid</code>, <code>gas</code>, <code>water</code>, and <code>fashion</code>.</li>
+<li>Figure 1: weighting function <code>f</code> with <code>alpha = 3/4</code>.</li>
+<li>Table 2: word analogy accuracy comparison across models and corpora.</li>
+<li>Figure 2: analogy accuracy as function of vector dimension and window size/type.</li>
+<li>Table 3: word similarity task Spearman correlations.</li>
+<li>Table 4: NER F1 scores.</li>
+<li>Figure 3: analogy accuracy across corpora.</li>
+<li>Figure 4: GloVe versus CBOW/skip-gram analogy accuracy as function of training time.</li>
+</ul>
+<h2 id="source_map--equation-inventory">Equation Inventory</h2>
+<ul>
+<li>Eq. 1: general function of two target word vectors and a context vector equals <code>P_ik / P_jk</code>.</li>
+<li>Eq. 2: restricts dependence to target-vector difference and context vector.</li>
+<li>Eq. 3: uses a dot product so vector arguments produce a scalar relation.</li>
+<li>Eq. 4-6: imposes a homomorphism leading to the exponential/log form.</li>
+<li>Eq. 7: log-count bilinear relation with word and context biases.</li>
+<li>Eq. 8: GloVe weighted least-squares objective.</li>
+<li>Eq. 9: weighting function with cutoff <code>x_max</code> and exponent <code>alpha</code>.</li>
+<li>Eq. 10-16: relationship to softmax/window-based objectives and an unnormalized least-squares form.</li>
+<li>Eq. 17-22: complexity argument based on rank-frequency assumptions and nonzero co-occurrence entries.</li>
+</ul>
+<h2 id="source_map--evaluation-artifacts">Evaluation Artifacts</h2>
+<ul>
+<li>Analogy benchmark: 19,544 questions, semantic and syntactic subsets.</li>
+<li>Similarity benchmarks: WordSim-353, MC, RG, SCWS, RW.</li>
+<li>NER benchmark: CoNLL-2003 English with CoNLL, ACE, and MUC7 test settings.</li>
+<li>Main corpora: Wikipedia 2010, Wikipedia 2014, Gigaword 5, Gigaword 5 + Wikipedia 2014, Common Crawl.</li>
+</ul>
+<h2 id="source_map--extraction-caveats">Extraction Caveats</h2>
+<ul>
+<li><code>pdftotext -layout</code> preserves enough text for source compilation but flattens two-column layout.</li>
+<li>Equations are readable but some superscripts/subscripts and tildes need manual checking against the PDF.</li>
+<li>Figures are not image-extracted by <code>pdfimages -list</code>, likely because they are vector drawings/charts; later visuals should be recreated as teaching diagrams, not copied.</li>
+<li>Exact chart curves in Figures 2-4 should not be reproduced numerically unless manually traced or tabular values are available.</li>
+<li>Table 2 appears partially adjacent to surrounding text in extraction and should be checked visually before using exact rows in publish prose.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="teaching_plan_notes" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">teaching_plan_notes.md</p>
+        <h1>Teaching Plan Notes</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="teaching_plan_notes--teaching-plan-notes">Teaching Plan Notes</h1>
+<h2 id="teaching_plan_notes--reader-prerequisite-ladder">Reader Prerequisite Ladder</h2>
+<p>Before the final article uses the GloVe objective, it should introduce:</p>
+<ol>
+<li>Corpus and token.</li>
+<li>Context window.</li>
+<li>Co-occurrence count.</li>
+<li>Co-occurrence matrix.</li>
+<li>Conditional probability.</li>
+<li>Ratio.</li>
+<li>Vector.</li>
+<li>Dot product.</li>
+<li>Bias term.</li>
+<li>Log count.</li>
+<li>Squared error.</li>
+<li>Weighting function.</li>
+</ol>
+<h2 id="teaching_plan_notes--likely-reader-confusions">Likely Reader Confusions</h2>
+<ul>
+<li>"Global" may sound like the model sees the whole corpus at once. Clarify that the corpus is summarized into co-occurrence counts.</li>
+<li>"Local window" may sound less statistical. Clarify that window methods also accumulate learning signals from many contexts.</li>
+<li><code>X_ij</code> and <code>P_ij</code> can blur together. Keep count and probability examples separate.</li>
+<li>Word vectors and context vectors can look redundant. Explain target role versus context role.</li>
+<li>The weighting function can look arbitrary. Explain the problem it solves before its formula.</li>
+<li>Analogies can be overinterpreted. Keep benchmark meaning modest.</li>
+<li><code>W + Wtilde</code> can seem like a trick. Explain it as combining two trained views of each word.</li>
+</ul>
+<h2 id="teaching_plan_notes--visual-opportunities">Visual Opportunities</h2>
+<ul>
+<li>Corpus to windows to co-occurrence matrix:</li>
+<li>One short sentence with a highlighted target word and neighboring context words.</li>
+<li>A small matrix showing counts.</li>
+<li>Ice/steam ratio table:</li>
+<li>Use the source's <code>solid</code>, <code>gas</code>, <code>water</code>, and <code>fashion</code> contrast.</li>
+<li>Caption: ratios separate discriminative contexts from shared or irrelevant contexts.</li>
+<li>Objective anatomy:</li>
+<li>Show observed count, log target, vector dot product plus biases, error, square, and weight.</li>
+<li>Weighting function:</li>
+<li>Qualitative curve: rare counts low weight, medium counts rising, high counts capped.</li>
+<li>Training workflow:</li>
+<li>Corpus -&gt; co-occurrence matrix -&gt; sampled nonzero pair -&gt; parameter update -&gt; final vectors.</li>
+<li>Evaluation map:</li>
+<li>Analogy, similarity, and NER as three different probes.</li>
+</ul>
+<h2 id="teaching_plan_notes--toy-to-real-bridges">Toy-to-Real Bridges</h2>
+<ul>
+<li>Toy corpus:</li>
+<li>"ice is solid water"</li>
+<li>"steam is hot gas"</li>
+<li>"water can be ice"</li>
+<li>Use it only to show mechanics, not to produce meaningful embeddings.</li>
+<li>Real paper-scale bridge:</li>
+<li>The paper uses billions of tokens and hundreds of thousands to millions of vocabulary entries.</li>
+</ul>
+<h2 id="teaching_plan_notes--section-planning-recommendation">Section Planning Recommendation</h2>
+<p>Use an adapted paper-deep-dive structure. It should preserve every major paper section but teach prerequisites before the densest derivation.</p>
+<p>Recommended future sections:</p>
+<ol>
+<li>Why word-vector arithmetic needed an explanation.</li>
+<li>The older choices: global counts and local windows.</li>
+<li>The ice/steam ratio insight.</li>
+<li>Deriving the GloVe objective.</li>
+<li>What training actually changes.</li>
+<li>How the paper evaluates GloVe.</li>
+<li>Model analysis: dimensions, windows, corpora, runtime, word2vec comparison.</li>
+<li>What the paper proves, what it does not prove, and how GloVe is used.</li>
+</ol>
+<h2 id="teaching_plan_notes--acceptance-criteria-for-later-prose">Acceptance Criteria for Later Prose</h2>
+<ul>
+<li>Every formula has symbols, plain-English reading, and at least one tiny example where useful.</li>
+<li>Every visual has one teaching purpose and one caption.</li>
+<li>Every result claim is tied to "the paper reports" or "in this setup."</li>
+<li>No section says "the model learns" without naming the parameters that change.</li>
+<li>No exact chart values are invented from figures.</li>
+</ul>
+      </div>
+    </article>
+    
+    </main>
+  </div>
+</body>
+</html>
