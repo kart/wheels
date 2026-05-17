@@ -1,11 +1,11 @@
 ---
 name: wheels-section-planner
-description: Convert a bootstrapped Wheels topic wiki into a section-by-section learning plan for user review before any section authoring begins.
+description: Convert a bootstrapped Wheels <TOPIC_DIR>/wiki/** into a section-by-section learning plan for user review before any section authoring begins.
 ---
 
 # wheels-section-planner
 
-Use this skill after `wheels-topic-bootstrap` has completed. This skill converts a topic-level wiki into a section-by-section learning plan that the user can review before any section authoring begins.
+Use this skill after `wheels-topic-bootstrap` has completed. This skill converts `<TOPIC_DIR>/wiki/**` into a section-by-section learning plan that the user can review before any section authoring begins.
 
 This skill plans the learning/content sequence only. It must not author content, generate prose, generate media, generate code, create or modify previews, or create or modify publish artifacts.
 
@@ -32,6 +32,21 @@ All topic-specific files must be referenced through `TOPIC_DIR`:
 Do not use naked topic-specific references like `topic.yaml`, `plan.yaml`, `wiki/**`, `outputs/**`, `reviews/**`, or `.wheels_state.json` unless the text explicitly says "inside TOPIC_DIR".
 
 If `TOPIC_ID` is missing or ambiguous, stop and ask for the topic id. Never mix files from multiple topics in one skill run.
+
+## Preflight Validation
+
+Before planning, verify these required bootstrap inputs exist:
+
+- `<TOPIC_DIR>/topic.yaml`
+- `<TOPIC_DIR>/plan.yaml`
+- `<TOPIC_DIR>/wiki/**`
+
+If any required bootstrap input is missing:
+
+- stop before creating `<TOPIC_DIR>/sections/**`
+- tell the user to run `wheels-topic-bootstrap` first
+- do not create `<TOPIC_DIR>/sections/section_plan.yaml`
+- do not create `<TOPIC_DIR>/sections/<section_id>/section.yaml` files
 
 ## Inputs To Inspect
 
@@ -103,6 +118,8 @@ section_order:
   - section_id:
     title:
     reason_for_position:
+authoring_order_notes:
+section_dependencies:
 global_prerequisite_ladder:
 source_coverage_strategy:
 mechanism_strategy:
@@ -129,6 +146,8 @@ source_anchors:
   - source:
     relevant_claims:
 prerequisite_concepts:
+depends_on_sections:
+authoring_order_notes:
 key_questions_to_answer:
 core_mechanism:
   type: runnable_code | pseudocode | worked_example | visual_trace | architecture_diagram | state_machine | sequence_diagram | table | simulation | none_with_reason
@@ -190,7 +209,7 @@ For `article_shape: paper_deep_dive` or research paper topics:
 - Each section should answer a learning question.
 - Include source anchors to paper sections, equations, figures, or claims when available.
 - Separate motivation/problem, prior work, core idea, mechanism, training/execution workflow, experiments/results, limitations, real-world relevance, and what came next.
-- Use code when it clarifies a mechanism.
+- Plan code when it clarifies a mechanism; do not generate code in this skill.
 - Use worked examples or diagrams when code would be distracting.
 - Include a toy-to-real bridge wherever the paper's real setup is too large to reproduce.
 
@@ -226,7 +245,7 @@ For `article_shape: algorithm_walkthrough`, plan sections in this order:
 - edge cases
 - pattern and similar problems
 
-Code is usually required. The mechanism should usually be a dry run plus runnable code.
+Plan code as usually required; do not generate code in this skill. The mechanism should usually be a dry run plus runnable code.
 
 ### General Concept Deep Dive
 
@@ -248,5 +267,7 @@ After creating:
 stop.
 
 Present a concise section plan summary to the user and stop. Wait for explicit user approval before any section authoring begins.
+
+After creating planning files, the skill may summarize the section plan in the assistant response only. It must not create a new summary file outside `<TOPIC_DIR>/sections/**`.
 
 Do not author the first section. Do not generate section prose. Do not generate images, Manim, diagrams, code, `<TOPIC_DIR>/outputs/preview.html`, or `<TOPIC_DIR>/outputs/publish/blog.md`.
