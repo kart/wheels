@@ -1,3 +1,8 @@
+---
+name: wheels-topic-bootstrap
+description: Bootstrap a Wheels topic from TOPIC_DIR/topic.yaml and raw sources through plan.yaml, wiki compilation, and replan, stopping before section authoring.
+---
+
 # wheels-topic-bootstrap
 
 Use this skill when starting or restarting the first half of a Wheels topic: topic setup, startup planning, source-grounded wiki compilation, and post-wiki replanning. Stop before drafting section prose.
