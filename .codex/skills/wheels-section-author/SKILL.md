@@ -9,6 +9,14 @@ Use this skill after `wheels-section-planner` has created section planning files
 
 This skill authors exactly one planned Wheels section. Never author more than one section in one skill run.
 
+Ownership boundaries:
+
+- `scripts/init_topic.py` owns deterministic `<TOPIC_DIR>/topic.yaml` creation.
+- `wheels-topic-bootstrap` owns `<TOPIC_DIR>/plan.yaml` and `<TOPIC_DIR>/wiki/**`.
+- `wheels-section-planner` owns `<TOPIC_DIR>/sections/section_plan.yaml` and `<SECTION_DIR>/section.yaml`.
+
+The section author may read those files, but must treat them as read-only inputs.
+
 ## Required User Inputs
 
 This skill requires:
@@ -51,6 +59,7 @@ If `TOPIC_ID` or `SECTION_ID` is missing or ambiguous, stop and ask for it. Neve
 Before authoring, verify these exist:
 
 - `<TOPIC_DIR>/topic.yaml`
+- `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
@@ -62,7 +71,28 @@ If any are missing:
 - do not create authoring files
 - do not create prose, media, code, `<SECTION_DIR>/preview.html`, or `<SECTION_DIR>/blog_fragment.md`
 
+Validate that `<TOPIC_DIR>/topic.yaml` includes these deterministic fields created by `scripts/init_topic.py`:
+
+- `id`
+- `title`
+- `audience_profile`
+- `article_shape`
+- `workflow`
+- `publish_target`
+- `raw_resource_policy`
+- `quality_contract`
+- `section_planning_preferences`
+
+If any required `<TOPIC_DIR>/topic.yaml` field is missing:
+
+- stop
+- report the missing fields
+- do not auto-repair `<TOPIC_DIR>/topic.yaml`
+- do not create or update authoring artifacts
+
 During preflight, read `<SECTION_DIR>/section.yaml`. If the `section_id` inside `<SECTION_DIR>/section.yaml` does not match the requested `SECTION_ID`, stop and do not create or modify authoring artifacts.
+
+If `<SECTION_DIR>/section.yaml` is incomplete or wrong, stop and report that section planning should be revised. Do not modify `<SECTION_DIR>/section.yaml` unless the user explicitly asks for a section-plan revision.
 
 During preflight, if `<SECTION_DIR>/state.yaml` exists and says `approved_by_user: true`, stop. Do not revise an approved section unless the user explicitly asks to revise it.
 
@@ -73,9 +103,11 @@ Before authoring, inspect `depends_on_sections` from `<SECTION_DIR>/section.yaml
 When the skill is actually used, read:
 
 - `<TOPIC_DIR>/topic.yaml`
+- `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
+- `<TOPIC_DIR>/.wheels_state.json` if present
 - `AGENTS.md`
 - `templates/article_shapes.md`
 - `prompts/audience_profiles.md`
@@ -103,9 +135,13 @@ Before writing or updating section-local artifacts, inspect existing `<SECTION_D
 
 ## Forbidden Writes
 
+- Do not modify `<TOPIC_DIR>/topic.yaml`.
+- Do not modify `<TOPIC_DIR>/wiki/**`.
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Do not modify `<TOPIC_DIR>/plan.yaml`.
 - Do not modify `<TOPIC_DIR>/.wheels_state.json`.
+- Do not modify `<TOPIC_DIR>/sections/section_plan.yaml`.
+- Do not modify `<SECTION_DIR>/section.yaml` unless the user explicitly asks for a section-plan revision.
 - Do not modify `<TOPIC_DIR>/outputs/**`.
 - Do not modify `<TOPIC_DIR>/reviews/**`.
 - Do not modify other sections under `<TOPIC_DIR>/sections/<other_section_id>/**`.
@@ -114,6 +150,19 @@ Before writing or updating section-local artifacts, inspect existing `<SECTION_D
 - Explicit v1 fixture exception: do not modify `topics/word2vec/outputs/**` or `topics/word2vec/reviews/**` unless the user explicitly asks. This hard-coded fixture guard is intentional and does not replace `TOPIC_DIR` scoping for active topic work.
 - Do not assemble final `<TOPIC_DIR>/outputs/publish/blog.md`.
 - Do not assemble final `<TOPIC_DIR>/outputs/preview.html` for the full topic.
+
+The section author must not enrich, repair, strengthen, or update `<TOPIC_DIR>/topic.yaml`. It must not add source-derived or section-derived fields to `<TOPIC_DIR>/topic.yaml`, including:
+
+- `goal`
+- `available_sources`
+- `source_policy`
+- `must_explain`
+- paper-specific learning goals
+- system-design-specific learning goals
+- algorithm-specific learning goals
+- source-derived claims
+- discovered source inventory
+- section plan metadata
 
 ## Authoring Notes First
 
