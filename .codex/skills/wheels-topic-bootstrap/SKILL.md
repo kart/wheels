@@ -13,8 +13,7 @@ This skill wraps the existing `scripts/wheels_prompt.py` workflow. Do not edit `
 
 This skill owns:
 
-- inspecting an existing `<TOPIC_DIR>/topic.yaml`
-- helping create `<TOPIC_DIR>/topic.yaml` when it is missing
+- validating an existing `<TOPIC_DIR>/topic.yaml` as read-only configuration
 - generating `<TOPIC_DIR>/plan.yaml` through the startup prompt
 - running wiki/source phases from `<TOPIC_DIR>/plan.yaml`
 - marking completed wiki phases in `<TOPIC_DIR>/.wheels_state.json`
@@ -30,6 +29,8 @@ This skill does not own:
 - generating `<TOPIC_DIR>/outputs/preview.html`
 - generating final publish drafts
 - generating `<TOPIC_DIR>/outputs/publish/blog.md`
+- creating, repairing, strengthening, enriching, or updating `<TOPIC_DIR>/topic.yaml`
+- adding source-derived or paper-specific fields to `<TOPIC_DIR>/topic.yaml`
 - editing files under `<TOPIC_DIR>/raw/**`
 - deleting existing files under `<TOPIC_DIR>/outputs/**`
 
@@ -92,7 +93,7 @@ Before editing anything, inspect:
 - `scripts/wheels_prompt.py`
 - `templates/article_shapes.md`
 - `prompts/audience_profiles.md` if present
-- `<TOPIC_DIR>/topic.yaml` if present
+- `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml` if present
 - `<TOPIC_DIR>/wiki/**` if present
 
@@ -102,7 +103,6 @@ For regression awareness, if `TOPIC_ID` is `word2vec`, treat `<TOPIC_DIR>` as th
 
 Bootstrap may update only:
 
-- `<TOPIC_DIR>/topic.yaml`, if creating or strengthening topic intent
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
 - `<TOPIC_DIR>/wiki_preview/**`
@@ -110,6 +110,7 @@ Bootstrap may update only:
 
 Bootstrap must not update:
 
+- `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/raw/**`
 - `<TOPIC_DIR>/sections/**`
 - `<TOPIC_DIR>/outputs/**`
@@ -119,34 +120,47 @@ Bootstrap must not update:
 
 ## Topic YAML Handling
 
-If `<TOPIC_DIR>/topic.yaml` exists:
+`scripts/init_topic.py` owns deterministic `<TOPIC_DIR>/topic.yaml` creation. Bootstrap treats `<TOPIC_DIR>/topic.yaml` as read-only configuration.
 
-1. Read it.
-2. Check that it includes, or has a clear equivalent for:
+Required behavior:
+
+1. Validate that `<TOPIC_DIR>/topic.yaml` exists.
+2. Validate that it includes these deterministic fields created by `scripts/init_topic.py`:
    - `id`
    - `title`
-   - `goal`
-   - `available_sources`
    - `audience_profile`
    - `article_shape`
+   - `workflow`
    - `publish_target`
-   - source ownership rules
-3. Check that `article_shape` is one of:
+   - `raw_resource_policy`
+   - `quality_contract`
+   - `section_planning_preferences`
+3. If any required field is missing:
+   - stop
+   - report the missing field
+   - tell the user to rerun `scripts/init_topic.py` or fix `<TOPIC_DIR>/topic.yaml` manually
+   - do not auto-repair `<TOPIC_DIR>/topic.yaml`
+4. Check that `article_shape` is one of:
    - `paper_deep_dive`
    - `system_design_deep_dive`
    - `algorithm_walkthrough`
-4. Check that every listed source path is under `<TOPIC_DIR>/raw/**`.
-5. Do not modify `<TOPIC_DIR>/raw/**`.
+   - `general_concept_deep_dive`
+5. Do not modify `<TOPIC_DIR>/topic.yaml`.
+6. Do not add source-derived or paper-specific fields to `<TOPIC_DIR>/topic.yaml`, including:
+   - `goal`
+   - `available_sources`
+   - `source_policy`
+   - `must_explain`
+   - paper-specific learning goals
+   - source-derived claims
+   - discovered source inventory
+7. Do not modify `<TOPIC_DIR>/raw/**`.
 
-If `<TOPIC_DIR>/topic.yaml` is missing:
+If source inventory or source grounding is needed, write it under:
 
-1. Create `<TOPIC_DIR>/topic.yaml` only after gathering the minimum topic metadata from the user or existing files.
-2. Use `templates/article_shapes.md` and `prompts/audience_profiles.md` for valid values.
-3. Prefer conservative defaults:
-   - `audience_profile: beginner_technical`
-   - `article_shape: paper_deep_dive` only if the primary source is a paper
-4. Include `source_policy.raw_is_human_owned: true` and `source_policy.do_not_overwrite_raw: true`.
-5. Do not invent source files.
+- `<TOPIC_DIR>/wiki/source_map.md`
+- `<TOPIC_DIR>/wiki/source_summary.md`
+- another appropriate `<TOPIC_DIR>/wiki/**` file
 
 ## Startup Plan Workflow
 
@@ -176,8 +190,9 @@ If `<TOPIC_DIR>/plan.yaml` is missing or the user explicitly asks to restart pla
 
 2. Use the printed prompt as the authoritative startup task.
 3. Create only `<TOPIC_DIR>/plan.yaml`.
-4. Do not generate `<TOPIC_DIR>/wiki/**`, lesson prose, visuals, `<TOPIC_DIR>/outputs/preview.html`, `<TOPIC_DIR>/reviews/**`, or publish files during startup planning.
-5. Do not generate section prose, code, `<TOPIC_DIR>/outputs/preview.html`, or `<TOPIC_DIR>/outputs/publish/blog.md`.
+4. Do not modify `<TOPIC_DIR>/topic.yaml`.
+5. Do not generate `<TOPIC_DIR>/wiki/**`, lesson prose, visuals, `<TOPIC_DIR>/outputs/preview.html`, `<TOPIC_DIR>/reviews/**`, or publish files during startup planning.
+6. Do not generate section prose, code, `<TOPIC_DIR>/outputs/preview.html`, or `<TOPIC_DIR>/outputs/publish/blog.md`.
 
 After creating or finding `<TOPIC_DIR>/plan.yaml`, run:
 
@@ -201,6 +216,8 @@ Loop:
 
 2. Read the emitted phase prompt.
 3. If the next phase is a wiki/source/extraction/compiled-wiki phase, execute exactly that phase.
+   - If raw sources are discovered, use them only to generate `<TOPIC_DIR>/plan.yaml`, `<TOPIC_DIR>/wiki/**`, `<TOPIC_DIR>/wiki_preview/**`, and `<TOPIC_DIR>/.wheels_state.json` as needed.
+   - Write source inventory, source grounding, and source summaries under `<TOPIC_DIR>/wiki/**`, not `<TOPIC_DIR>/topic.yaml`.
 4. If `--next` emits a non-wiki / non-source-extraction / non-compiled-wiki phase, stop immediately.
 5. Do not execute that phase.
 6. Do not run `--mark-done` for that phase.
@@ -237,6 +254,7 @@ Replan rules:
 - Modify only `<TOPIC_DIR>/plan.yaml`.
 - Preserve completed phase ids.
 - Do not rename or delete completed phase ids.
+- Do not modify `<TOPIC_DIR>/topic.yaml`.
 - Do not generate lesson prose.
 - Do not generate visuals.
 - Do not generate code.
@@ -288,6 +306,7 @@ Then stop and ask the reader to approve or revise the section plan before any se
 ## Safety Rules
 
 - Never modify files under `<TOPIC_DIR>/raw/**`.
+- Never modify `<TOPIC_DIR>/topic.yaml`.
 - Never delete existing files under `<TOPIC_DIR>/outputs/**`.
 - Never rewrite an existing final article as part of bootstrap.
 - Do not continue into section prose generation.
