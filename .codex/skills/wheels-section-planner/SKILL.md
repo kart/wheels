@@ -9,6 +9,8 @@ Use this skill after `wheels-topic-bootstrap` has completed. This skill converts
 
 This skill plans the learning/content sequence only. It must not author content, generate prose, generate media, generate code, create or modify previews, or create or modify publish artifacts.
 
+`scripts/init_topic.py` owns deterministic `<TOPIC_DIR>/topic.yaml` creation. This skill may read `<TOPIC_DIR>/topic.yaml`, but must treat it as read-only configuration.
+
 ## Topic Resolution
 
 This skill requires an active topic id.
@@ -48,6 +50,27 @@ If any required bootstrap input is missing:
 - do not create `<TOPIC_DIR>/sections/section_plan.yaml`
 - do not create `<TOPIC_DIR>/sections/<section_id>/section.yaml` files
 
+Validate that `<TOPIC_DIR>/topic.yaml` includes these deterministic fields created by `scripts/init_topic.py`:
+
+- `id`
+- `title`
+- `audience_profile`
+- `article_shape`
+- `workflow`
+- `publish_target`
+- `raw_resource_policy`
+- `quality_contract`
+- `section_planning_preferences`
+
+If any required `<TOPIC_DIR>/topic.yaml` field is missing:
+
+- stop
+- report the missing fields
+- do not auto-repair `<TOPIC_DIR>/topic.yaml`
+- do not create or update `<TOPIC_DIR>/sections/**`
+
+If `<TOPIC_DIR>/wiki/**` is missing or incomplete, stop and tell the user to run `wheels-topic-bootstrap` first. Do not create `<TOPIC_DIR>/sections/**` from raw sources alone.
+
 ## Inputs To Inspect
 
 Before creating section planning files, inspect:
@@ -56,6 +79,7 @@ Before creating section planning files, inspect:
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
 - `<TOPIC_DIR>/wiki/source_map.md` if present
+- `<TOPIC_DIR>/wiki/source_summary.md` if present
 - `<TOPIC_DIR>/wiki/glossary.md` if present
 - `<TOPIC_DIR>/wiki/open_questions.md` if present
 - `AGENTS.md`
@@ -65,9 +89,11 @@ Before creating section planning files, inspect:
 
 ## Write Scope
 
-This skill may create directories and files only under:
+This skill owns only section planning artifacts:
 
-- `<TOPIC_DIR>/sections/**`
+- `<TOPIC_DIR>/sections/README.md`
+- `<TOPIC_DIR>/sections/section_plan.yaml`
+- `<TOPIC_DIR>/sections/<section_id>/section.yaml`
 
 If `<TOPIC_DIR>/sections/**` already exists, inspect it first. Update only planning files intentionally. Do not delete existing section planning unless explicitly asked.
 
@@ -82,11 +108,28 @@ Expected output files:
 This skill must not modify:
 
 - `scripts/wheels_prompt.py`
+- `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/raw/**`
+- `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/plan.yaml`
+- `<TOPIC_DIR>/.wheels_state.json`
 - `<TOPIC_DIR>/outputs/**`
 - `<TOPIC_DIR>/reviews/**`
 - `<TOPIC_DIR>/outputs/preview.html`
 - `<TOPIC_DIR>/outputs/publish/blog.md`
+
+This skill must not enrich, repair, strengthen, or update `<TOPIC_DIR>/topic.yaml`. It must not add source-derived or topic-specific fields to `<TOPIC_DIR>/topic.yaml`, including:
+
+- `goal`
+- `available_sources`
+- `source_policy`
+- `must_explain`
+- paper-specific learning goals
+- system-design-specific learning goals
+- algorithm-specific learning goals
+- source-derived claims
+- discovered source inventory
+- section plan metadata
 
 If `TOPIC_ID` is `word2vec`, treat `<TOPIC_DIR>` as the v1 demo fixture. Do not modify `<TOPIC_DIR>/outputs/**` or `<TOPIC_DIR>/reviews/**` unless explicitly asked.
 
