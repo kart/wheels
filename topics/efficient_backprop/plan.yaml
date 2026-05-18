@@ -1,0 +1,332 @@
+topic_id: efficient_backprop
+plan_version: 2
+status: bootstrapped_replanned
+
+completed_phases:
+  - phase_01_source_extraction_and_source_map
+  - phase_02_compile_wiki
+
+source_reading:
+  pdf_direct_reading_status: readable_with_local_text_extraction_and_rendered_page_evidence
+  extraction_needed: false
+  notes: >
+    The primary source is a 44-page PDF chapter/paper. Bootstrap extracted layout/plain
+    text, rendered all pages under wiki/source_assets/pages/**, and created formula,
+    figure, table, and visual audits. Formula transcription still requires visual
+    verification during section authoring/review.
+
+teaching_strategy:
+  audience_summary: >
+    beginner_technical: smart technical reader with undergraduate-level maturity,
+    potentially weak math background, and novice-to-beginner coding. The article must
+    build training intuition before formulas and paper mechanics.
+  explanation_style: >
+    Deep paper walkthrough with explicit prerequisite/background scaffolding. Use
+    motivation before mechanics, intuition before equations, and tiny examples before
+    Hessian/eigenvalue notation.
+  visual_strategy: >
+    Later authoring should use source_assets/** as evidence and prefer simplified
+    code-generated teaching visuals for gradients, loss landscapes, conditioning,
+    normalization, saturation, initialization, learning-rate stability, and first-order
+    versus second-order optimization.
+  code_strategy: >
+    Code is optional and should be section-local. Use small educational demos only when
+    they clarify scalar gradient descent, 2D quadratic conditioning, normalization, or
+    activation saturation.
+
+wiki_outputs:
+  compiled_wiki_available: true
+  foundation_stack_available: true
+  source_asset_audit_available: true
+  wiki_preview_available: true
+  key_paths:
+    - wiki/index.md
+    - wiki/source_map.md
+    - wiki/source_summary.md
+    - wiki/concepts.md
+    - wiki/formulas_and_notation.md
+    - wiki/historical_vs_current.md
+    - wiki/foundation_stack.md
+    - wiki/glossary.md
+    - wiki/open_questions.md
+    - wiki/source_assets/index.yaml
+    - wiki/source_assets/formulas.md
+    - wiki/source_assets/figures.md
+    - wiki/source_assets/tables.md
+    - wiki/source_assets/visual_audit.md
+    - wiki_preview/index.html
+
+foundation_stack_guidance:
+  must_consume_in_section_planner: true
+  background_sections_likely_needed: true
+  reason: >
+    The source assumes gradients, Jacobians, Hessians, eigenvalues, conditioning, and
+    optimizer families. A beginner article will be shallow or confusing unless it first
+    builds training-loop and loss-geometry intuition.
+  likely_background_sections:
+    - section_01_training_setup_and_gradient_intuition
+    - section_02_backprop_and_stochastic_updates
+    - section_03_loss_geometry_conditioning_and_curvature
+  prerequisites_to_introduce_before_core_paper_walkthrough:
+    - supervised learning setup
+    - loss function and parameters
+    - gradient descent update intuition
+    - backpropagation as gradient computation
+    - stochastic versus batch updates
+    - loss landscapes
+    - learning-rate overshoot and divergence
+    - curvature and Hessian intuition
+    - eigenvalues/eigenvectors as principal curvature directions
+    - conditioning
+  prerequisites_to_inline:
+    - exact Jacobian notation
+    - Taylor expansion details
+    - PCA/Karhunen-Loeve as decorrelation mechanism
+    - conjugate-direction details
+  prerequisites_deferred:
+    - full Hessian derivations
+    - formal proofs of convergence
+    - implementation details for BFGS and Levenberg-Marquardt
+    - modern optimizer comparisons unless additional sources are added
+  notation_strategy: >
+    Introduce symbols only after concrete objects: examples, target, prediction, loss,
+    parameter, gradient, then layer variables. Delay Hessian/eigenvalue notation until
+    after a 1D and 2D loss-landscape example.
+  intuition_strategy: >
+    Use small numeric examples and contour visuals before formulas. Explain every
+    optimization trick as either changing the landscape, changing the step, or keeping
+    gradients in a useful range.
+  checklist_strategy: >
+    Use the final prerequisite checklist from wiki/foundation_stack.md as input to
+    section_plan.yaml acceptance criteria.
+
+source_coverage_strategy:
+  preserve_paper_depth: true
+  adapted_structure_allowed: true
+  adapted_structure_reason: >
+    The paper's order is strong, but beginner readers need a foundation stack before
+    the formula-heavy convergence and second-order sections. The final article should
+    use an adapted structure that still covers every major source section deeply.
+  major_source_sections_to_cover:
+    - "Abstract and Introduction"
+    - "2 Learning and Generalization"
+    - "3 Standard Backpropagation"
+    - "4 A Few Practical Tricks"
+    - "5 Convergence of Gradient Descent"
+    - "6 Classical second order optimization methods"
+    - "7 Tricks to compute the Hessian information in multilayer networks"
+    - "8 Analysis of the Hessian in multi-layer networks"
+    - "9 Applying Second Order Methods to Multilayer Networks"
+    - "10 Discussion and Conclusion"
+  historical_current_policy: >
+    Treat 1998 recommendations as source-era claims. Durable modern relevance can be
+    discussed as interpretation, or should be grounded in additional sources if the user
+    adds them.
+
+source_asset_strategy:
+  source_assets_available: true
+  evidence_paths:
+    - wiki/source_assets/index.yaml
+    - wiki/source_assets/formulas.md
+    - wiki/source_assets/figures.md
+    - wiki/source_assets/tables.md
+    - wiki/source_assets/visual_audit.md
+    - wiki/source_assets/pages/**
+    - wiki/source_assets/extracted/**
+  important_assets:
+    - asset_id: formula_backprop_01_10
+      likely_section: section_02_backprop_and_stochastic_updates
+      visual_verification_needed: true
+    - asset_id: formula_normalization_init_13_16
+      likely_section: section_04_practical_tricks_input_activation_init
+      visual_verification_needed: true
+    - asset_id: formula_curvature_20_39
+      likely_section: section_05_convergence_and_conditioning
+      visual_verification_needed: true
+    - asset_id: formula_second_order_40_47
+      likely_section: section_06_second_order_methods_and_limits
+      visual_verification_needed: true
+    - asset_id: formula_hessian_48_64
+      likely_section: section_07_hessian_tricks_and_practical_approximations
+      visual_verification_needed: true
+    - asset_id: fig_06_learning_rates
+      likely_section: section_03_loss_geometry_conditioning_and_curvature
+      visual_verification_needed: true
+    - asset_id: fig_07_08_hessian_geometry
+      likely_section: section_03_loss_geometry_conditioning_and_curvature
+      visual_verification_needed: true
+    - asset_id: fig_04_sigmoids
+      likely_section: section_04_practical_tricks_input_activation_init
+      visual_verification_needed: true
+    - asset_id: fig_15_newton_whitening
+      likely_section: section_06_second_order_methods_and_limits
+      visual_verification_needed: true
+
+future_section_sequence_for_planner:
+  - section_id: section_01_training_setup_and_gradient_intuition
+    title: "What Training Is Trying To Change"
+    foundation_role: background
+    source_anchors:
+      - wiki/foundation_stack.md
+      - wiki/source_summary.md#2-learning-and-generalization
+    reader_goal: "Understand examples, targets, parameters, loss, gradients, and why training is parameter adjustment."
+  - section_id: section_02_backprop_and_stochastic_updates
+    title: "Backprop Computes Gradients; Optimizers Use Them"
+    foundation_role: background
+    source_anchors:
+      - wiki/source_summary.md#3-standard-backpropagation
+      - wiki/source_summary.md#41-stochastic-versus-batch-learning
+      - wiki/source_assets/formulas.md#formula_backprop_01_10
+    reader_goal: "Separate backpropagation from the update rule and understand stochastic versus batch learning."
+  - section_id: section_03_loss_geometry_conditioning_and_curvature
+    title: "The Geometry Behind Slow Training"
+    foundation_role: background
+    source_anchors:
+      - wiki/foundation_stack.md
+      - wiki/source_summary.md#5-convergence-of-gradient-descent
+      - wiki/source_assets/figures.md
+    reader_goal: "Build intuition for learning rates, loss landscapes, Hessians, eigenvalues, and conditioning."
+  - section_id: section_04_practical_tricks_input_activation_init
+    title: "The Practical Tricks And Why They Work"
+    foundation_role: core_topic
+    source_anchors:
+      - wiki/source_summary.md#4-practical-tricks
+      - wiki/source_assets/formulas.md#formula_input_covariance_13
+      - wiki/source_assets/formulas.md#formula_weight_initialization_14_16
+      - wiki/source_assets/figures.md
+    reader_goal: "Walk through input normalization, target scaling, activation saturation, initialization, and learning-rate heuristics."
+  - section_id: section_05_convergence_and_conditioning
+    title: "Convergence: From Learning Rates To Conditioning"
+    foundation_role: core_topic
+    source_anchors:
+      - wiki/source_summary.md#5-convergence-of-gradient-descent
+      - wiki/source_assets/formulas.md#formula_curvature_20_39
+    reader_goal: "Understand the paper's theoretical explanation for the tricks without losing the beginner reader."
+  - section_id: section_06_second_order_methods_and_limits
+    title: "Classical Second-Order Methods: The Promise And The Wall"
+    foundation_role: core_topic
+    source_anchors:
+      - wiki/source_summary.md#6-classical-second-order-optimization-methods
+      - wiki/source_assets/formulas.md#formula_second_order_40_47
+    reader_goal: "Explain Newton, conjugate gradient, BFGS, Gauss-Newton, and Levenberg-Marquardt at the level needed to understand the paper's practicality claims."
+  - section_id: section_07_hessian_tricks_and_practical_approximations
+    title: "Using Curvature Without Building The Whole Hessian"
+    foundation_role: advanced_extension
+    source_anchors:
+      - wiki/source_summary.md#7-tricks-to-compute-hessian-information-in-multilayer-networks
+      - wiki/source_summary.md#9-applying-second-order-methods-to-multilayer-networks
+      - wiki/source_assets/formulas.md#formula_hessian_48_64
+    reader_goal: "Explain diagonal Hessian, Hessian-vector products, stochastic diagonal Levenberg-Marquardt, and eigenvalue estimation."
+  - section_id: section_08_historical_vs_still_useful
+    title: "What To Take From Efficient BackProp Today"
+    foundation_role: recap
+    source_anchors:
+      - wiki/historical_vs_current.md
+      - wiki/source_summary.md#10-discussion-and-conclusion
+    reader_goal: "Separate source-era recommendations from durable training intuition."
+
+execution_phases:
+  - id: phase_01_source_extraction_and_source_map
+    name: "Source extraction and source map"
+    goal: "Extract readable text and source evidence from the Efficient BackProp PDF without modifying raw files."
+    inputs:
+      - topic.yaml
+      - raw/papers/efficient_backprop.pdf
+    outputs:
+      - wiki/source_map.md
+      - wiki/source_assets/pages/**
+      - wiki/source_assets/extracted/**
+      - wiki/source_assets/visual_audit.md
+    instructions:
+      - Completed during bootstrap.
+      - Preserve generated source evidence under wiki/source_assets/**.
+    completion_check:
+      - wiki/source_map.md exists and identifies the primary PDF source.
+      - wiki/source_assets/visual_audit.md exists and records extraction/rendering limitations.
+      - Candidate evidence pages are rendered or limitations are documented.
+
+  - id: phase_02_compile_wiki
+    name: "Compile wiki and foundation stack"
+    goal: "Create source-grounded wiki notes and a deep prerequisite/background scaffold before section planning."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/papers/efficient_backprop.pdf
+      - wiki/source_map.md
+      - wiki/source_assets/**
+    outputs:
+      - wiki/index.md
+      - wiki/source_summary.md
+      - wiki/concepts.md
+      - wiki/formulas_and_notation.md
+      - wiki/historical_vs_current.md
+      - wiki/foundation_stack.md
+      - wiki/glossary.md
+      - wiki/open_questions.md
+      - wiki/source_assets/index.yaml
+      - wiki/source_assets/formulas.md
+      - wiki/source_assets/figures.md
+      - wiki/source_assets/tables.md
+      - wiki_preview/index.html
+    instructions:
+      - Completed during bootstrap.
+      - Preserve foundation_stack.md as planning/source-grounding support, not article prose.
+    completion_check:
+      - All listed wiki files exist.
+      - foundation_stack.md includes required foundation-stack structure and open uncertainties.
+      - source asset audit files exist or explain empty categories.
+      - wiki_preview/index.html exists.
+
+  - id: phase_03_refine_plan_after_wiki
+    name: "Refine plan after wiki"
+    goal: "Refine plan.yaml into section-planning guidance after the wiki and foundation stack exist."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/**
+      - wiki/source_assets/**
+      - wiki_preview/index.html
+    outputs:
+      - plan.yaml
+    instructions:
+      - Preserve completed phase ids.
+      - Preserve source fidelity, source asset, and foundation-stack guidance.
+      - Do not generate sections/**, section prose, visuals, code, outputs/**, reviews/**, or publish artifacts.
+    completion_check:
+      - plan.yaml preserves completed bootstrap phases.
+      - plan.yaml identifies that foundation_stack.md must be consumed by wheels-section-planner.
+      - future section/content work is split into small, reviewable, user-approved sections.
+
+  - id: phase_04_section_planning_after_user_approval
+    name: "Section planning after user approval"
+    goal: "Future phase only: use wheels-section-planner to convert wiki and foundation stack into section contracts."
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/**
+      - wiki/foundation_stack.md
+      - wiki/source_assets/**
+    outputs:
+      - sections/README.md
+      - sections/section_plan.yaml
+      - sections/<section_id>/section.yaml
+    instructions:
+      - Not run by bootstrap.
+      - Must wait for explicit user instruction.
+      - Use foundation_stack.md to decide background sections and prerequisite ramps.
+    completion_check:
+      - Not applicable during bootstrap.
+
+bootstrap_stop_condition:
+  completed:
+    - source extraction/source map
+    - compiled wiki
+    - wiki/foundation_stack.md
+    - post-wiki replan
+  stop_before:
+    - sections/**
+    - section prose
+    - section visuals/code
+    - outputs/**
+    - reviews/**
+    - publish artifacts

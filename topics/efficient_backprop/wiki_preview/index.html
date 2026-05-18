@@ -1,0 +1,2358 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheels Wiki: efficient_backprop</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --panel: #ffffff;
+      --ink: #202122;
+      --muted: #54595d;
+      --line: #a2a9b1;
+      --line-soft: #eaecf0;
+      --link: #0645ad;
+      --link-visited: #0b0080;
+      --code-bg: #f5f5f5;
+      --sidebar-width: 19rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:visited {
+      color: var(--link-visited);
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      background: #ffffff;
+      padding: 1.1rem 1rem 2rem;
+    }
+
+    .brand {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .brand-title {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.45rem;
+      line-height: 1.2;
+    }
+
+    .brand-subtitle {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .nav-list,
+    .page-toc {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-page {
+      margin: 0 0 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .nav-title {
+      display: block;
+      font-weight: 650;
+      line-height: 1.25;
+    }
+
+    .nav-path {
+      margin-top: 0.18rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      overflow-wrap: anywhere;
+    }
+
+    .page-toc {
+      margin-top: 0.5rem;
+      font-size: 0.84rem;
+    }
+
+    .page-toc li {
+      margin: 0.18rem 0;
+    }
+
+    .toc-h2 {
+      padding-left: 0.65rem;
+    }
+
+    .toc-h3 {
+      padding-left: 1.25rem;
+    }
+
+    .content {
+      max-width: 72rem;
+      padding: 2rem clamp(1rem, 4vw, 4rem) 4rem;
+    }
+
+    .wiki-article {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      margin: 0 0 2rem;
+      padding: clamp(1.1rem, 3vw, 2.25rem);
+    }
+
+    .article-header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.8rem;
+    }
+
+    .article-path {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      margin: 0 0 0.35rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      line-height: 1.28;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.55rem);
+    }
+
+    .article-body h1 {
+      margin-top: 0;
+      font-size: 1.9rem;
+    }
+
+    .article-body h2 {
+      border-bottom: 1px solid var(--line-soft);
+      margin-top: 2rem;
+      padding-bottom: 0.25rem;
+      font-size: 1.55rem;
+    }
+
+    .article-body h3 {
+      margin-top: 1.55rem;
+      font-size: 1.25rem;
+    }
+
+    p,
+    ul,
+    ol,
+    table,
+    pre,
+    blockquote {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul,
+    ol {
+      padding-left: 1.45rem;
+    }
+
+    li + li {
+      margin-top: 0.25rem;
+    }
+
+    code {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      border-radius: 3px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.92em;
+      padding: 0.1rem 0.22rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line-soft);
+      overflow: auto;
+      padding: 0.9rem 1rem;
+    }
+
+    pre code {
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      display: block;
+      max-width: 100%;
+      overflow-x: auto;
+      width: max-content;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 0.45rem 0.62rem;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eaecf0;
+      font-weight: 650;
+    }
+
+    blockquote {
+      border-left: 4px solid var(--line);
+      color: var(--muted);
+      padding-left: 1rem;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 2rem 0;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .wiki-article {
+        border-left: 0;
+        border-right: 0;
+        margin-left: -1rem;
+        margin-right: -1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1 class="brand-title">Wheels Wiki</h1>
+        <p class="brand-subtitle">efficient_backprop</p>
+      </div>
+      <ol class="nav-list">
+            <li class="nav-page">
+              <a class="nav-title" href="#concepts">Concepts And Mechanisms</a>
+              <div class="nav-path">concepts.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#concepts--concepts-and-mechanisms">Concepts And Mechanisms</a></li><li class="toc-h2"><a href="#concepts--problem-the-paper-is-solving">Problem The Paper Is Solving</a></li><li class="toc-h2"><a href="#concepts--learning-machine">Learning Machine</a></li><li class="toc-h2"><a href="#concepts--backpropagation">Backpropagation</a></li><li class="toc-h2"><a href="#concepts--stochastic-versus-batch-updates">Stochastic Versus Batch Updates</a></li><li class="toc-h2"><a href="#concepts--normalization-and-conditioning">Normalization And Conditioning</a></li><li class="toc-h2"><a href="#concepts--activation-saturation">Activation Saturation</a></li><li class="toc-h2"><a href="#concepts--target-scaling">Target Scaling</a></li><li class="toc-h2"><a href="#concepts--weight-initialization">Weight Initialization</a></li><li class="toc-h2"><a href="#concepts--learning-rate">Learning Rate</a></li><li class="toc-h2"><a href="#concepts--hessian-and-curvature">Hessian And Curvature</a></li><li class="toc-h2"><a href="#concepts--first-order-versus-second-order-methods">First-Order Versus Second-Order Methods</a></li><li class="toc-h2"><a href="#concepts--historical-versus-durable-ideas">Historical Versus Durable Ideas</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#formulas_and_notation">Formulas And Notation</a>
+              <div class="nav-path">formulas_and_notation.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#formulas_and_notation--formulas-and-notation">Formulas And Notation</a></li><li class="toc-h2"><a href="#formulas_and_notation--core-symbols">Core Symbols</a></li><li class="toc-h2"><a href="#formulas_and_notation--mean-squared-error">Mean Squared Error</a></li><li class="toc-h2"><a href="#formulas_and_notation--modular-backpropagation">Modular Backpropagation</a></li><li class="toc-h2"><a href="#formulas_and_notation--classical-layer-equations">Classical Layer Equations</a></li><li class="toc-h2"><a href="#formulas_and_notation--gradient-descent-update">Gradient Descent Update</a></li><li class="toc-h2"><a href="#formulas_and_notation--stochastic-update">Stochastic Update</a></li><li class="toc-h2"><a href="#formulas_and_notation--input-covariance">Input Covariance</a></li><li class="toc-h2"><a href="#formulas_and_notation--recommended-sigmoid">Recommended Sigmoid</a></li><li class="toc-h2"><a href="#formulas_and_notation--weight-initialization-scale">Weight Initialization Scale</a></li><li class="toc-h2"><a href="#formulas_and_notation--one-dimensional-curvature-and-optimal-learning-rate">One-Dimensional Curvature And Optimal Learning Rate</a></li><li class="toc-h2"><a href="#formulas_and_notation--hessian">Hessian</a></li><li class="toc-h2"><a href="#formulas_and_notation--multi-dimensional-learning-rate-stability">Multi-Dimensional Learning-Rate Stability</a></li><li class="toc-h2"><a href="#formulas_and_notation--linear-network-hessian-and-input-covariance">Linear Network Hessian And Input Covariance</a></li><li class="toc-h2"><a href="#formulas_and_notation--newton-step">Newton Step</a></li><li class="toc-h2"><a href="#formulas_and_notation--diagonal-levenberg-marquardt-learning-rate">Diagonal Levenberg-Marquardt Learning Rate</a></li><li class="toc-h2"><a href="#formulas_and_notation--principal-eigenvalue-learning-rate-estimate">Principal Eigenvalue Learning-Rate Estimate</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#foundation_stack">Foundation Stack: Efficient BackProp</a>
+              <div class="nav-path">foundation_stack.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#foundation_stack--foundation-stack-efficient-backprop">Foundation Stack: Efficient BackProp</a></li><li class="toc-h2"><a href="#foundation_stack--1-topic-and-target-audience">1. Topic And Target Audience</a></li><li class="toc-h2"><a href="#foundation_stack--2-goal-of-the-foundation-stack">2. Goal Of The Foundation Stack</a></li><li class="toc-h2"><a href="#foundation_stack--3-big-picture-of-the-topic">3. Big Picture Of The Topic</a></li><li class="toc-h2"><a href="#foundation_stack--4-prerequisite-stack">4. Prerequisite Stack</a></li><li class="toc-h2"><a href="#foundation_stack--5-detailed-prerequisite-sections">5. Detailed Prerequisite Sections</a></li><li class="toc-h3"><a href="#foundation_stack--51-supervised-learning-setup">5.1 Supervised Learning Setup</a></li><li class="toc-h3"><a href="#foundation_stack--52-loss-function">5.2 Loss Function</a></li><li class="toc-h3"><a href="#foundation_stack--53-parameters-and-training-as-knob-adjustment">5.3 Parameters And Training As Knob Adjustment</a></li><li class="toc-h3"><a href="#foundation_stack--54-gradient">5.4 Gradient</a></li><li class="toc-h3"><a href="#foundation_stack--55-backpropagation">5.5 Backpropagation</a></li><li class="toc-h3"><a href="#foundation_stack--56-batch-stochastic-and-mini-batch-updates">5.6 Batch, Stochastic, And Mini-Batch Updates</a></li><li class="toc-h3"><a href="#foundation_stack--57-loss-landscape">5.7 Loss Landscape</a></li><li class="toc-h3"><a href="#foundation_stack--58-learning-rate">5.8 Learning Rate</a></li><li class="toc-h3"><a href="#foundation_stack--59-curvature-and-hessian">5.9 Curvature And Hessian</a></li><li class="toc-h3"><a href="#foundation_stack--510-eigenvalues-eigenvectors-and-conditioning">5.10 Eigenvalues, Eigenvectors, And Conditioning</a></li><li class="toc-h3"><a href="#foundation_stack--511-input-centering">5.11 Input Centering</a></li><li class="toc-h3"><a href="#foundation_stack--512-input-scaling">5.12 Input Scaling</a></li><li class="toc-h3"><a href="#foundation_stack--513-decorrelation-and-whitening">5.13 Decorrelation And Whitening</a></li><li class="toc-h3"><a href="#foundation_stack--514-activation-saturation">5.14 Activation Saturation</a></li><li class="toc-h3"><a href="#foundation_stack--515-target-scaling">5.15 Target Scaling</a></li><li class="toc-h3"><a href="#foundation_stack--516-weight-initialization">5.16 Weight Initialization</a></li><li class="toc-h3"><a href="#foundation_stack--517-first-order-optimization">5.17 First-Order Optimization</a></li><li class="toc-h3"><a href="#foundation_stack--518-second-order-optimization">5.18 Second-Order Optimization</a></li><li class="toc-h3"><a href="#foundation_stack--519-historical-versus-still-useful">5.19 Historical Versus Still Useful</a></li><li class="toc-h2"><a href="#foundation_stack--6-best-learning-order">6. Best Learning Order</a></li><li class="toc-h2"><a href="#foundation_stack--7-final-prerequisite-checklist">7. Final Prerequisite Checklist</a></li><li class="toc-h2"><a href="#foundation_stack--8-core-mental-model-in-one-paragraph">8. Core Mental Model In One Paragraph</a></li><li class="toc-h2"><a href="#foundation_stack--9-open-foundation-gaps-or-uncertainties">9. Open Foundation Gaps Or Uncertainties</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#glossary">Glossary</a>
+              <div class="nav-path">glossary.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#glossary--glossary">Glossary</a></li><li class="toc-h2"><a href="#glossary--activation-saturation">Activation Saturation</a></li><li class="toc-h2"><a href="#glossary--backpropagation">Backpropagation</a></li><li class="toc-h2"><a href="#glossary--batch-learning">Batch Learning</a></li><li class="toc-h2"><a href="#glossary--condition-number">Condition Number</a></li><li class="toc-h2"><a href="#glossary--curvature">Curvature</a></li><li class="toc-h2"><a href="#glossary--decorrelation">Decorrelation</a></li><li class="toc-h2"><a href="#glossary--eigenvalue">Eigenvalue</a></li><li class="toc-h2"><a href="#glossary--eigenvector">Eigenvector</a></li><li class="toc-h2"><a href="#glossary--fan-in">Fan-In</a></li><li class="toc-h2"><a href="#glossary--gradient">Gradient</a></li><li class="toc-h2"><a href="#glossary--hessian">Hessian</a></li><li class="toc-h2"><a href="#glossary--learning-rate">Learning Rate</a></li><li class="toc-h2"><a href="#glossary--levenberg-marquardt">Levenberg-Marquardt</a></li><li class="toc-h2"><a href="#glossary--mean-squared-error">Mean Squared Error</a></li><li class="toc-h2"><a href="#glossary--momentum">Momentum</a></li><li class="toc-h2"><a href="#glossary--newton-method">Newton Method</a></li><li class="toc-h2"><a href="#glossary--stochastic-learning">Stochastic Learning</a></li><li class="toc-h2"><a href="#glossary--target-scaling">Target Scaling</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#historical_vs_current">Historical Versus Still-Useful Recommendations</a>
+              <div class="nav-path">historical_vs_current.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#historical_vs_current--historical-versus-still-useful-recommendations">Historical Versus Still-Useful Recommendations</a></li><li class="toc-h2"><a href="#historical_vs_current--source-era-context">Source-Era Context</a></li><li class="toc-h2"><a href="#historical_vs_current--recommendations-that-are-source-claims">Recommendations That Are Source Claims</a></li><li class="toc-h2"><a href="#historical_vs_current--durable-principles">Durable Principles</a></li><li class="toc-h2"><a href="#historical_vs_current--historically-specific-details">Historically Specific Details</a></li><li class="toc-h2"><a href="#historical_vs_current--modern-interpretation-to-handle-carefully">Modern Interpretation To Handle Carefully</a></li><li class="toc-h2"><a href="#historical_vs_current--planning-guidance">Planning Guidance</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#index">Efficient BackProp Wiki</a>
+              <div class="nav-path">index.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#index--efficient-backprop-wiki">Efficient BackProp Wiki</a></li><li class="toc-h2"><a href="#index--bootstrap-status">Bootstrap Status</a></li><li class="toc-h2"><a href="#index--source">Source</a></li><li class="toc-h2"><a href="#index--reader-and-article-shape">Reader And Article Shape</a></li><li class="toc-h2"><a href="#index--core-source-thesis">Core Source Thesis</a></li><li class="toc-h2"><a href="#index--planning-implications">Planning Implications</a></li><li class="toc-h2"><a href="#index--source-asset-evidence">Source Asset Evidence</a></li><li class="toc-h2"><a href="#index--critical-caveat">Critical Caveat</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#open_questions">Open Questions And Bootstrap Caveats</a>
+              <div class="nav-path">open_questions.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#open_questions--open-questions-and-bootstrap-caveats">Open Questions And Bootstrap Caveats</a></li><li class="toc-h2"><a href="#open_questions--source-extraction-caveats">Source Extraction Caveats</a></li><li class="toc-h2"><a href="#open_questions--paper-interpretation-caveats">Paper Interpretation Caveats</a></li><li class="toc-h2"><a href="#open_questions--items-later-section-authors-must-verify">Items Later Section Authors Must Verify</a></li><li class="toc-h2"><a href="#open_questions--foundation-gaps">Foundation Gaps</a></li><li class="toc-h2"><a href="#open_questions--stop-boundary-reminder">Stop-Boundary Reminder</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_assetsfigures">Figure Audit: Efficient BackProp</a>
+              <div class="nav-path">source_assets/figures.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_assetsfigures--figure-audit-efficient-backprop">Figure Audit: Efficient BackProp</a></li><li class="toc-h2"><a href="#source_assetsfigures--figure-inventory">Figure Inventory</a></li><li class="toc-h2"><a href="#source_assetsfigures--high-priority-teaching-visuals-for-later-sections">High-Priority Teaching Visuals For Later Sections</a></li><li class="toc-h2"><a href="#source_assetsfigures--verification-notes">Verification Notes</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_assetsformulas">Formula Audit: Efficient BackProp</a>
+              <div class="nav-path">source_assets/formulas.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_assetsformulas--formula-audit-efficient-backprop">Formula Audit: Efficient BackProp</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_learning_machine_mse">formula_learning_machine_mse</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_backprop_01_10">formula_backprop_01_10</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_input_covariance_13">formula_input_covariance_13</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_recommended_sigmoid">formula_recommended_sigmoid</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_weight_initialization_14_16">formula_weight_initialization_14_16</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_learning_rate_adaptation_17_19">formula_learning_rate_adaptation_17_19</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_curvature_20_39">formula_curvature_20_39</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_second_order_40_47">formula_second_order_40_47</a></li><li class="toc-h2"><a href="#source_assetsformulas--formula_hessian_48_64">formula_hessian_48_64</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_assetstables">Table Audit: Efficient BackProp</a>
+              <div class="nav-path">source_assets/tables.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_assetstables--table-audit-efficient-backprop">Table Audit: Efficient BackProp</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_assetsvisual_audit">Visual Audit: Efficient BackProp</a>
+              <div class="nav-path">source_assets/visual_audit.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_assetsvisual_audit--visual-audit-efficient-backprop">Visual Audit: Efficient BackProp</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--scope">Scope</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--extraction-quality">Extraction Quality</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--important-visual-evidence">Important Visual Evidence</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--recommended-treatment">Recommended Treatment</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--manual-spot-check-needed-later">Manual Spot-Check Needed Later</a></li><li class="toc-h2"><a href="#source_assetsvisual_audit--caveats">Caveats</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_map">Source Map: Efficient BackProp</a>
+              <div class="nav-path">source_map.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_map--source-map-efficient-backprop">Source Map: Efficient BackProp</a></li><li class="toc-h2"><a href="#source_map--topic">Topic</a></li><li class="toc-h2"><a href="#source_map--primary-source">Primary Source</a></li><li class="toc-h2"><a href="#source_map--generated-extraction-artifacts">Generated Extraction Artifacts</a></li><li class="toc-h2"><a href="#source_map--source-structure">Source Structure</a></li><li class="toc-h2"><a href="#source_map--required-deep-dive-coverage">Required Deep-Dive Coverage</a></li><li class="toc-h2"><a href="#source_map--source-fidelity-notes">Source Fidelity Notes</a></li></ol>
+            </li>
+            
+            <li class="nav-page">
+              <a class="nav-title" href="#source_summary">Source Summary: Efficient BackProp</a>
+              <div class="nav-path">source_summary.md</div>
+              <ol class="page-toc"><li class="toc-h1"><a href="#source_summary--source-summary-efficient-backprop">Source Summary: Efficient BackProp</a></li><li class="toc-h2"><a href="#source_summary--citation-and-source-type">Citation And Source Type</a></li><li class="toc-h2"><a href="#source_summary--abstract-and-main-claim">Abstract And Main Claim</a></li><li class="toc-h2"><a href="#source_summary--1-introduction">1. Introduction</a></li><li class="toc-h2"><a href="#source_summary--2-learning-and-generalization">2. Learning And Generalization</a></li><li class="toc-h2"><a href="#source_summary--3-standard-backpropagation">3. Standard Backpropagation</a></li><li class="toc-h2"><a href="#source_summary--4-practical-tricks">4. Practical Tricks</a></li><li class="toc-h3"><a href="#source_summary--41-stochastic-versus-batch-learning">4.1 Stochastic Versus Batch Learning</a></li><li class="toc-h3"><a href="#source_summary--42-shuffling-the-examples">4.2 Shuffling The Examples</a></li><li class="toc-h3"><a href="#source_summary--43-normalizing-the-inputs">4.3 Normalizing The Inputs</a></li><li class="toc-h3"><a href="#source_summary--44-the-sigmoid">4.4 The Sigmoid</a></li><li class="toc-h3"><a href="#source_summary--45-choosing-target-values">4.5 Choosing Target Values</a></li><li class="toc-h3"><a href="#source_summary--46-initializing-the-weights">4.6 Initializing The Weights</a></li><li class="toc-h3"><a href="#source_summary--47-choosing-learning-rates">4.7 Choosing Learning Rates</a></li><li class="toc-h3"><a href="#source_summary--48-radial-basis-functions-versus-sigmoid-units">4.8 Radial Basis Functions Versus Sigmoid Units</a></li><li class="toc-h2"><a href="#source_summary--5-convergence-of-gradient-descent">5. Convergence Of Gradient Descent</a></li><li class="toc-h3"><a href="#source_summary--examples">Examples</a></li><li class="toc-h3"><a href="#source_summary--input-transformations-revisited">Input Transformations Revisited</a></li><li class="toc-h2"><a href="#source_summary--6-classical-second-order-optimization-methods">6. Classical Second-Order Optimization Methods</a></li><li class="toc-h3"><a href="#source_summary--newton">Newton</a></li><li class="toc-h3"><a href="#source_summary--conjugate-gradient">Conjugate Gradient</a></li><li class="toc-h3"><a href="#source_summary--quasi-newton-bfgs">Quasi-Newton / BFGS</a></li><li class="toc-h3"><a href="#source_summary--gauss-newton-and-levenberg-marquardt">Gauss-Newton And Levenberg-Marquardt</a></li><li class="toc-h2"><a href="#source_summary--7-tricks-to-compute-hessian-information-in-multilayer-networks">7. Tricks To Compute Hessian Information In Multilayer Networks</a></li><li class="toc-h2"><a href="#source_summary--8-analysis-of-the-hessian-in-multilayer-networks">8. Analysis Of The Hessian In Multilayer Networks</a></li><li class="toc-h2"><a href="#source_summary--9-applying-second-order-methods-to-multilayer-networks">9. Applying Second-Order Methods To Multilayer Networks</a></li><li class="toc-h3"><a href="#source_summary--91-stochastic-diagonal-levenberg-marquardt">9.1 Stochastic Diagonal Levenberg-Marquardt</a></li><li class="toc-h3"><a href="#source_summary--92-principal-eigenvaluevector-of-the-hessian">9.2 Principal Eigenvalue/Vector Of The Hessian</a></li><li class="toc-h2"><a href="#source_summary--10-discussion-and-conclusion">10. Discussion And Conclusion</a></li><li class="toc-h2"><a href="#source_summary--final-planning-note">Final Planning Note</a></li></ol>
+            </li>
+            </ol>
+    </aside>
+    <main class="content">
+      
+    <article id="concepts" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">concepts.md</p>
+        <h1>Concepts And Mechanisms</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="concepts--concepts-and-mechanisms">Concepts And Mechanisms</h1>
+<h2 id="concepts--problem-the-paper-is-solving">Problem The Paper Is Solving</h2>
+<p>The paper addresses a practical training problem: backpropagation gives an efficient way to compute gradients, but gradient-based training can be slow, unstable, or sensitive to choices that appear arbitrary to practitioners.</p>
+<p>The source focuses on minimization speed and quality for a given cost function. It explicitly does not solve all generalization problems.</p>
+<h2 id="concepts--learning-machine">Learning Machine</h2>
+<p>Source-grounded elements:</p>
+<ul>
+<li>input pattern: <code>Z_p</code></li>
+<li>desired output: <code>D_p</code></li>
+<li>model: <code>M(Z_p; W)</code></li>
+<li>parameters: <code>W</code></li>
+<li>per-example cost: <code>E_p</code></li>
+<li>training cost: average cost over examples</li>
+</ul>
+<p>Teaching interpretation:</p>
+<p>Training changes <code>W</code>. It does not change the training examples or the desired outputs. Backpropagation computes how each part of <code>W</code> should be nudged to reduce cost.</p>
+<h2 id="concepts--backpropagation">Backpropagation</h2>
+<p>The source's modular definition is important:</p>
+<ol>
+<li>A network is a stack of modules.</li>
+<li>Each module has inputs, outputs, and parameters.</li>
+<li>If we know how cost changes with a module's output, Jacobians let us compute how cost changes with that module's parameters and inputs.</li>
+<li>Applying this backward from the last module to the first computes all parameter gradients.</li>
+</ol>
+<p>Key teaching distinction:</p>
+<ul>
+<li>Backpropagation computes gradients.</li>
+<li>Gradient descent, stochastic gradient, Newton, conjugate gradient, and other methods decide how to use those gradients to update parameters.</li>
+</ul>
+<h2 id="concepts--stochastic-versus-batch-updates">Stochastic Versus Batch Updates</h2>
+<p>Batch update:</p>
+<ul>
+<li>compute the average gradient over the whole training set</li>
+<li>update once</li>
+</ul>
+<p>Stochastic update:</p>
+<ul>
+<li>sample one example</li>
+<li>compute a noisy gradient estimate</li>
+<li>update immediately</li>
+</ul>
+<p>Source claims:</p>
+<ul>
+<li>stochastic learning is usually faster on large redundant datasets</li>
+<li>stochastic update noise can sometimes help move between basins</li>
+<li>batch learning has better-understood convergence and supports methods such as conjugate gradient</li>
+<li>stochastic noise can prevent exact convergence unless the learning rate is annealed or batch size changes</li>
+</ul>
+<h2 id="concepts--normalization-and-conditioning">Normalization And Conditioning</h2>
+<p>The source ties preprocessing directly to optimization geometry.</p>
+<p>Input centering:</p>
+<ul>
+<li>nonzero means bias weight updates</li>
+<li>all-positive inputs can force all weights into same-sign updates for a sample</li>
+<li>this creates zigzagging when a weight vector needs to change direction</li>
+</ul>
+<p>Input scaling:</p>
+<ul>
+<li>unequal input variances make some weights learn faster than others</li>
+<li>equalizing variances helps balance learning speeds</li>
+</ul>
+<p>Input decorrelation:</p>
+<ul>
+<li>correlated inputs couple parameters</li>
+<li>decorrelation makes the optimization problem closer to diagonal</li>
+<li>diagonal systems allow independent per-weight learning rates to be more effective</li>
+</ul>
+<h2 id="concepts--activation-saturation">Activation Saturation</h2>
+<p>The paper's sigmoid discussion is about keeping units in a region where gradients can pass.</p>
+<p>Too-large weights:</p>
+<ul>
+<li>push activations into saturated tails</li>
+<li>derivatives become small</li>
+<li>learning slows or stalls</li>
+</ul>
+<p>Too-small weights:</p>
+<ul>
+<li>can also produce small gradients in some regimes</li>
+<li>may prevent strong enough signal</li>
+</ul>
+<p>Symmetric activations:</p>
+<ul>
+<li>help keep layer outputs centered near zero</li>
+<li>prevent each next layer from receiving always-positive inputs</li>
+</ul>
+<h2 id="concepts--target-scaling">Target Scaling</h2>
+<p>For classification, the paper warns against setting targets at exact sigmoid asymptotes. If the target is unreachable except at infinite preactivation, training keeps trying to push weights larger, saturating units and hiding uncertainty.</p>
+<p>The paper recommends choosing targets inside the activation range, ideally near maximum second derivative for the recommended sigmoid.</p>
+<h2 id="concepts--weight-initialization">Weight Initialization</h2>
+<p>The source recommends random zero-mean weights with standard deviation about <code>1 / sqrt(m)</code>, assuming:</p>
+<ul>
+<li>normalized training inputs</li>
+<li>the paper's recommended symmetric sigmoid</li>
+</ul>
+<p>Here <code>m</code> is fan-in, the number of inputs feeding a unit.</p>
+<p>Teaching interpretation:</p>
+<p>Initialization is not just "break symmetry." It sets the initial scale of activations and gradients. Good scale keeps units away from both dead-flat small-gradient regimes and saturated tails.</p>
+<h2 id="concepts--learning-rate">Learning Rate</h2>
+<p>A learning rate is a step-size multiplier for parameter updates. The paper treats learning-rate selection as curvature-dependent.</p>
+<p>One-dimensional intuition:</p>
+<ul>
+<li>if the learning rate is too small, training crawls</li>
+<li>if it is near optimal for a local quadratic, training moves quickly</li>
+<li>if it is too large, training oscillates or diverges</li>
+</ul>
+<p>Multi-dimensional intuition:</p>
+<ul>
+<li>one scalar learning rate must be safe for steep directions</li>
+<li>that same safe rate may be too small for flat directions</li>
+<li>this mismatch causes slow training in ill-conditioned landscapes</li>
+</ul>
+<h2 id="concepts--hessian-and-curvature">Hessian And Curvature</h2>
+<p>The Hessian is the matrix of second derivatives of the cost with respect to parameters. In the paper, it is used as a local curvature object:</p>
+<ul>
+<li>eigenvectors: principal directions of curvature</li>
+<li>eigenvalues: steepness along those directions</li>
+<li>condition number: ratio between largest and smallest eigenvalues</li>
+</ul>
+<p>The paper uses Hessian/eigenvalue intuition to explain learning-rate limits, input transformations, and why second-order methods are attractive but expensive.</p>
+<h2 id="concepts--first-order-versus-second-order-methods">First-Order Versus Second-Order Methods</h2>
+<p>First-order methods:</p>
+<ul>
+<li>use gradients</li>
+<li>examples: gradient descent, stochastic gradient</li>
+<li>cheaper per step, but sensitive to conditioning</li>
+</ul>
+<p>Second-order methods:</p>
+<ul>
+<li>use curvature information</li>
+<li>examples: Newton, Gauss-Newton, Levenberg-Marquardt, quasi-Newton/BFGS</li>
+<li>can choose better-shaped steps, but full versions require large matrices, line search, or batch-mode assumptions</li>
+</ul>
+<p>The paper's practical message is not "second order is bad." It is: full classical second-order methods are often impractical for large neural networks, but diagonal or implicit curvature information can still help.</p>
+<h2 id="concepts--historical-versus-durable-ideas">Historical Versus Durable Ideas</h2>
+<p>Source-era practices:</p>
+<ul>
+<li>scaled tanh/sigmoid networks</li>
+<li>mean squared error for many settings</li>
+<li>stochastic gradient versus conjugate gradient framing</li>
+<li>diagonal Levenberg-Marquardt variants</li>
+</ul>
+<p>Durable principles:</p>
+<ul>
+<li>input centering and scaling matter</li>
+<li>activation saturation damages gradient flow</li>
+<li>initialization scale matters</li>
+<li>learning rates are constrained by curvature</li>
+<li>full Hessians are too expensive for large models</li>
+<li>optimization geometry explains many practical tricks</li>
+</ul>
+<p>This distinction is interpretation built from the source and modern context. If final prose makes strong modern claims, it should either cite additional sources or mark the claim as interpretation.</p>
+      </div>
+    </article>
+    
+
+    <article id="formulas_and_notation" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">formulas_and_notation.md</p>
+        <h1>Formulas And Notation</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="formulas_and_notation--formulas-and-notation">Formulas And Notation</h1>
+<p>This file records important notation and formulas for planning. Formula transcription from PDF text extraction is approximate; final article prose should verify against rendered page evidence in <code>wiki/source_assets/pages/**</code>.</p>
+<h2 id="formulas_and_notation--core-symbols">Core Symbols</h2>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+<th>Source context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Z_p</code></td>
+<td>p-th input pattern</td>
+<td>Learning machine, section 2</td>
+</tr>
+<tr>
+<td><code>D_p</code></td>
+<td>desired output for pattern <code>p</code></td>
+<td>Learning machine, section 2</td>
+</tr>
+<tr>
+<td><code>W</code></td>
+<td>all adjustable parameters</td>
+<td>Learning machine and optimization sections</td>
+</tr>
+<tr>
+<td><code>M(Z_p; W)</code></td>
+<td>model output for input <code>Z_p</code> and parameters <code>W</code></td>
+<td>Learning machine, section 2</td>
+</tr>
+<tr>
+<td><code>E_p</code></td>
+<td>cost/error for pattern <code>p</code></td>
+<td>Learning machine, section 2</td>
+</tr>
+<tr>
+<td><code>E_train(W)</code></td>
+<td>average training cost over examples</td>
+<td>Learning machine, section 2</td>
+</tr>
+<tr>
+<td><code>X_n</code></td>
+<td>output vector of module/layer <code>n</code></td>
+<td>Backprop, section 3</td>
+</tr>
+<tr>
+<td><code>W_n</code></td>
+<td>parameters of module/layer <code>n</code></td>
+<td>Backprop, section 3</td>
+</tr>
+<tr>
+<td><code>Y_n</code></td>
+<td>weighted input/preactivation vector at layer <code>n</code></td>
+<td>Classical multilayer network, section 3</td>
+</tr>
+<tr>
+<td><code>F</code> or <code>f</code></td>
+<td>activation function</td>
+<td>Classical multilayer network, section 3</td>
+</tr>
+<tr>
+<td><code>eta</code></td>
+<td>learning rate</td>
+<td>Gradient descent and later optimizer sections</td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>Hessian matrix of second derivatives</td>
+<td>Convergence and second-order sections</td>
+</tr>
+<tr>
+<td><code>lambda_i</code></td>
+<td>Hessian eigenvalue</td>
+<td>Curvature/conditioning sections</td>
+</tr>
+<tr>
+<td><code>lambda_max</code></td>
+<td>largest Hessian eigenvalue</td>
+<td>Learning-rate stability</td>
+</tr>
+<tr>
+<td><code>kappa</code></td>
+<td>condition number, approximately <code>lambda_max / lambda_min</code></td>
+<td>Conditioning</td>
+</tr>
+</tbody>
+</table>
+<h2 id="formulas_and_notation--mean-squared-error">Mean Squared Error</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">E_p = 1/2 (D_p - M(Z_p; W))^2
+E_train = average of E_p over training examples
+</code></pre>
+<p>Plain-English reading:</p>
+<p>For each training example, compare the desired output with the model's output, square the difference, and average across examples.</p>
+<p>Why it matters:</p>
+<p>The paper's later Gauss-Newton and Levenberg-Marquardt discussion depends on mean-squared-error structure.</p>
+<h2 id="formulas_and_notation--modular-backpropagation">Modular Backpropagation</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">X_n = F_n(W_n, X_{n-1})
+</code></pre>
+<p>If the derivative of the cost with respect to <code>X_n</code> is known, the chain rule gives derivatives with respect to <code>W_n</code> and <code>X_{n-1}</code> using Jacobians of <code>F_n</code>.</p>
+<p>Plain-English reading:</p>
+<p>A layer transforms its input into an output. Backprop asks: if changing this layer's output changes the loss, how much did this layer's weights and inputs contribute?</p>
+<p>Why it matters:</p>
+<p>This explains backprop as systematic chain-rule bookkeeping, not magic.</p>
+<h2 id="formulas_and_notation--classical-layer-equations">Classical Layer Equations</h2>
+<p>Source formulas:</p>
+<pre><code class="language-text">Y_n = W_n X_{n-1}
+X_n = F(Y_n)
+</code></pre>
+<p>Plain-English reading:</p>
+<p>A layer first computes weighted sums, then applies a nonlinear activation to each weighted sum.</p>
+<p>Why it matters:</p>
+<p>Most later training tricks affect either the scale of <code>X</code>, the scale of <code>Y</code>, the derivative of <code>F</code>, or the scale of <code>W</code>.</p>
+<h2 id="formulas_and_notation--gradient-descent-update">Gradient Descent Update</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">W(t+1) = W(t) - eta * dE/dW
+</code></pre>
+<p>The extracted PDF has sign/spacing artifacts, but the intended gradient-descent form is a move opposite the gradient.</p>
+<p>Plain-English reading:</p>
+<p>At each step, move parameters in the direction that most quickly lowers the cost locally, with step size controlled by <code>eta</code>.</p>
+<p>Why it matters:</p>
+<p>Nearly every paper trick changes either the gradient direction, the step size, or the shape of the surface that the gradient sees.</p>
+<h2 id="formulas_and_notation--stochastic-update">Stochastic Update</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">W(t+1) = W(t) - eta * dE_t/dW
+</code></pre>
+<p>Plain-English reading:</p>
+<p>Instead of averaging every example before moving, use one example's gradient estimate and update immediately.</p>
+<p>Why it matters:</p>
+<p>This is central to the paper's distinction between large redundant classification datasets and smaller batch-friendly problems.</p>
+<h2 id="formulas_and_notation--input-covariance">Input Covariance</h2>
+<p>Source formula:</p>
+<pre><code class="language-text">C_i = (1/P) * sum_p (z_i^p)^2
+</code></pre>
+<p>assuming inputs have been centered.</p>
+<p>Plain-English reading:</p>
+<p>For input coordinate <code>i</code>, measure the average squared size of that coordinate across training examples.</p>
+<p>Why it matters:</p>
+<p>The paper recommends scaling input variables so covariances are about the same, often around 1 for the recommended sigmoid setup.</p>
+<h2 id="formulas_and_notation--recommended-sigmoid">Recommended Sigmoid</h2>
+<p>Source formula:</p>
+<pre><code class="language-text">f(x) = 1.7159 * tanh((2/3) * x)
+</code></pre>
+<p>Plain-English reading:</p>
+<p>Use a symmetric squashing function scaled so its useful operating region works well with normalized inputs.</p>
+<p>Why it matters:</p>
+<p>The paper coordinates activation choice with input normalization, target values, and initialization.</p>
+<h2 id="formulas_and_notation--weight-initialization-scale">Weight Initialization Scale</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">sigma_w = m^{-1/2}
+</code></pre>
+<p>where <code>m</code> is fan-in.</p>
+<p>Plain-English reading:</p>
+<p>If a unit receives more inputs, make each incoming random weight smaller so the total weighted sum stays at a useful scale.</p>
+<p>Why it matters:</p>
+<p>This prevents units from starting heavily saturated or too weakly activated, assuming normalized inputs and the paper's recommended sigmoid.</p>
+<h2 id="formulas_and_notation--one-dimensional-curvature-and-optimal-learning-rate">One-Dimensional Curvature And Optimal Learning Rate</h2>
+<p>Source idea:</p>
+<p>For a local quadratic in one dimension:</p>
+<pre><code class="language-text">eta_opt = 1 / curvature
+eta_max = 2 * eta_opt
+</code></pre>
+<p>Plain-English reading:</p>
+<p>If the valley is steep, use a smaller step. If it is shallow, a larger step is safe. More than twice the one-step rate overshoots and diverges in the quadratic idealization.</p>
+<p>Why it matters:</p>
+<p>This is the simplest bridge from learning rate to curvature.</p>
+<h2 id="formulas_and_notation--hessian">Hessian</h2>
+<p>Source formula:</p>
+<pre><code class="language-text">H_ij = d^2 E / (dW_i dW_j)
+</code></pre>
+<p>Plain-English reading:</p>
+<p>The Hessian records how the gradient itself changes when parameters move.</p>
+<p>Why it matters:</p>
+<p>Its eigenvalues and eigenvectors describe the local shape of the loss surface.</p>
+<h2 id="formulas_and_notation--multi-dimensional-learning-rate-stability">Multi-Dimensional Learning-Rate Stability</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">eta &lt; 2 / lambda_max
+eta_opt approximately 1 / lambda_max for scalar-rate gradient descent
+condition number kappa = lambda_max / lambda_min
+</code></pre>
+<p>Plain-English reading:</p>
+<p>The largest curvature direction sets the maximum safe scalar learning rate. If other directions are much flatter, that safe rate can be painfully slow there.</p>
+<p>Why it matters:</p>
+<p>This explains zigzagging, slow convergence, normalization, decorrelation, and per-weight learning rates.</p>
+<h2 id="formulas_and_notation--linear-network-hessian-and-input-covariance">Linear Network Hessian And Input Covariance</h2>
+<p>Source idea:</p>
+<p>For least mean squares with a linear network:</p>
+<pre><code class="language-text">H = (1/P) * sum_p x_p x_p^T
+</code></pre>
+<p>Plain-English reading:</p>
+<p>In this simple case, the loss curvature is the same object as the input covariance matrix.</p>
+<p>Why it matters:</p>
+<p>This is the paper's clearest mathematical reason why preprocessing inputs changes optimization geometry.</p>
+<h2 id="formulas_and_notation--newton-step">Newton Step</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">Delta w = - eta * H^{-1} * gradient
+</code></pre>
+<p>Plain-English reading:</p>
+<p>Instead of stepping directly downhill, rescale and rotate the step by inverse curvature so the local valley becomes more spherical.</p>
+<p>Why it matters:</p>
+<p>This explains both the attraction and impracticality of second-order methods.</p>
+<h2 id="formulas_and_notation--diagonal-levenberg-marquardt-learning-rate">Diagonal Levenberg-Marquardt Learning Rate</h2>
+<p>Source idea:</p>
+<pre><code class="language-text">eta_ki = epsilon / (running_diagonal_second_derivative_ki + mu)
+</code></pre>
+<p>Plain-English reading:</p>
+<p>Give each parameter a learning rate inversely related to its estimated local curvature, with damping <code>mu</code> to avoid huge rates in flat regions.</p>
+<p>Why it matters:</p>
+<p>This is the paper's practical compromise: use some curvature information without storing or inverting the full Hessian.</p>
+<h2 id="formulas_and_notation--principal-eigenvalue-learning-rate-estimate">Principal Eigenvalue Learning-Rate Estimate</h2>
+<p>Source idea:</p>
+<p>Estimate the largest Hessian eigenvalue using Hessian-vector products or gradient perturbations, then set:</p>
+<pre><code class="language-text">eta_opt approximately 1 / largest_eigenvalue_estimate
+</code></pre>
+<p>Plain-English reading:</p>
+<p>Find the steepest local direction and choose a learning rate that is safe at that scale.</p>
+<p>Why it matters:</p>
+<p>The paper uses this to motivate automatic learning-rate prediction in Figures 24-26.</p>
+      </div>
+    </article>
+    
+
+    <article id="foundation_stack" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">foundation_stack.md</p>
+        <h1>Foundation Stack: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="foundation_stack--foundation-stack-efficient-backprop">Foundation Stack: Efficient BackProp</h1>
+<h2 id="foundation_stack--1-topic-and-target-audience">1. Topic And Target Audience</h2>
+<p>Topic: <code>Efficient BackProp</code></p>
+<p>Target audience: <code>beginner_technical</code></p>
+<p>Reader assumptions:</p>
+<ul>
+<li>smart technical reader</li>
+<li>may know basic algebra and programming</li>
+<li>may have weak calculus or linear algebra</li>
+<li>may have seen neural networks at a high level</li>
+<li>should not be expected to already understand gradients, Hessians, conditioning, activation saturation, or second-order optimization</li>
+</ul>
+<p>Article shape: <code>paper_deep_dive</code></p>
+<p>This foundation stack is not final article prose. It is planning support so later section planning can decide which background concepts need their own sections before the paper walkthrough.</p>
+<h2 id="foundation_stack--2-goal-of-the-foundation-stack">2. Goal Of The Foundation Stack</h2>
+<p>The paper assumes a lot of training intuition. It talks about gradients, Jacobians, Hessians, eigenvalues, learning rates, stochastic noise, conditioning, input transformations, and saturation. A beginner can easily miss the central point: most of the "tricks" are ways to make the optimization landscape easier for gradient-based training.</p>
+<p>The goal of this foundation stack is to make the reader ready to understand:</p>
+<ul>
+<li>what backpropagation computes</li>
+<li>what gradient descent changes</li>
+<li>why the same learning rate can be too small in one direction and too large in another</li>
+<li>why input normalization and decorrelation affect optimization</li>
+<li>why activation and target scaling can create or avoid saturation</li>
+<li>why initialization scale matters</li>
+<li>why full second-order methods are attractive but expensive</li>
+<li>why the paper's recommendations are partly historical and partly durable</li>
+</ul>
+<p>Enough preparation does not mean the reader can derive every equation from scratch. It means the reader can read the paper walkthrough without feeling that the article assumes the very concepts it is supposed to teach.</p>
+<h2 id="foundation_stack--3-big-picture-of-the-topic">3. Big Picture Of The Topic</h2>
+<p>Backpropagation has two separate jobs in common speech, but the paper separates them implicitly:</p>
+<ol>
+<li>Backpropagation computes gradients efficiently.</li>
+<li>An optimizer uses those gradients to change weights.</li>
+</ol>
+<p>The paper is mostly about making the second job go well.</p>
+<p>The cost function is like a landscape over all possible weight settings. A model starts somewhere on that landscape. Training tries to move the weights toward lower cost. The gradient tells the local downhill direction. But the landscape may be stretched, tilted, curved, flat in some regions, and steep in others. If the data or architecture makes this landscape badly shaped, gradient descent zigzags, stalls, or diverges.</p>
+<p>The paper's tricks are mostly ways to improve that landscape or choose better steps through it:</p>
+<ul>
+<li>Centering inputs removes directional bias in updates.</li>
+<li>Scaling inputs makes different weights learn at comparable speeds.</li>
+<li>Decorrelation reduces coupling between parameters.</li>
+<li>Symmetric activations keep layer outputs centered.</li>
+<li>Target values inside the sigmoid range avoid forcing outputs into unreachable extremes.</li>
+<li>Initialization keeps units in a useful derivative regime.</li>
+<li>Learning-rate rules respond to curvature.</li>
+<li>Second-order approximations try to use curvature without paying the full Hessian cost.</li>
+</ul>
+<h2 id="foundation_stack--4-prerequisite-stack">4. Prerequisite Stack</h2>
+<p>Recommended prerequisite order:</p>
+<ol>
+<li>Supervised learning setup: examples, targets, model outputs, parameters.</li>
+<li>Loss as a score for "how wrong" the model is.</li>
+<li>Parameters as knobs and training as repeated knob adjustment.</li>
+<li>Gradient as local sensitivity of loss to each knob.</li>
+<li>Backpropagation as efficient gradient bookkeeping.</li>
+<li>Batch versus stochastic updates.</li>
+<li>Loss landscapes and learning-rate behavior.</li>
+<li>Curvature, Hessian, eigenvalues, and conditioning.</li>
+<li>Input centering, scaling, and decorrelation as landscape shaping.</li>
+<li>Activation saturation and target scaling.</li>
+<li>Weight initialization as early signal-scale control.</li>
+<li>First-order versus second-order methods.</li>
+<li>Historical versus modern interpretation.</li>
+</ol>
+<h2 id="foundation_stack--5-detailed-prerequisite-sections">5. Detailed Prerequisite Sections</h2>
+<h3 id="foundation_stack--51-supervised-learning-setup">5.1 Supervised Learning Setup</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>A supervised training example has an input and a desired output.</li>
+<li>The model turns the input into a prediction.</li>
+<li>The parameters are the adjustable numbers inside the model.</li>
+<li>Training changes parameters, not the data.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Think of a model as a machine with many knobs. Each input goes through the machine and produces an output. The training set says what output we wanted. If the output is wrong, training asks which knobs should move and by how much.</p>
+<p>Tiny example:</p>
+<p>Suppose input <code>x = 2</code>, target <code>D = 5</code>, and a model predicts <code>M(x; w) = w * x</code>. If <code>w = 1</code>, the prediction is <code>2</code>, so the model is too low. Training should increase <code>w</code>.</p>
+<p>Why it matters for this topic:</p>
+<p>The paper's notation starts with <code>Z_p</code>, <code>D_p</code>, <code>W</code>, and <code>M(Z_p; W)</code>. Without this setup, formulas look abstract.</p>
+<p>Enough understanding:</p>
+<p>The reader can say: "For each example, the model predicts something; the loss measures how wrong it is; training adjusts parameters to reduce average loss."</p>
+<p>Learn-more links:</p>
+<ul>
+<li>None from provided sources.</li>
+</ul>
+<h3 id="foundation_stack--52-loss-function">5.2 Loss Function</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>A loss/cost function converts prediction error into a number.</li>
+<li>Lower loss means better fit to the training target for the chosen cost.</li>
+<li>The paper often uses mean squared error.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>The loss is a scorecard. It lets the optimizer compare two weight settings: if one setting gives lower loss on the training examples, it is better for the training objective.</p>
+<p>Tiny worked case:</p>
+<p>Prediction <code>2</code>, target <code>5</code>.</p>
+<p>Difference: <code>5 - 2 = 3</code>.</p>
+<p>Squared error with the paper's <code>1/2</code> factor: <code>0.5 * 3^2 = 4.5</code>.</p>
+<p>If a later update gives prediction <code>4</code>, the squared error becomes <code>0.5 * 1^2 = 0.5</code>, so the training objective improved.</p>
+<p>Why it matters:</p>
+<p>Gradient descent follows the slope of the loss. Hessians describe curvature of the loss. Input normalization and activation saturation matter because they change how the loss responds to parameter changes.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain that "lower loss" means better according to the chosen objective, not necessarily better real-world generalization.</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need a full taxonomy of modern loss functions before reading this paper. Mean squared error and the idea of a differentiable cost are enough for the source walkthrough.</p>
+<h3 id="foundation_stack--53-parameters-and-training-as-knob-adjustment">5.3 Parameters And Training As Knob Adjustment</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Parameters are numbers such as weights and biases.</li>
+<li>Training repeatedly updates them.</li>
+<li>A parameter update has a direction and a size.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Imagine a sound mixer with many sliders. If the output is wrong, you need to know which sliders affect the error and how much to move each. Training is repeated small slider adjustment.</p>
+<p>Tiny example:</p>
+<p>For <code>M(x; w) = w * x</code>, if <code>x = 2</code> and target is <code>5</code>, increasing <code>w</code> increases prediction. If the prediction is too low, moving <code>w</code> upward helps.</p>
+<p>Why it matters:</p>
+<p>The paper's update rules all change <code>W</code>. A beginner must see that formulas like <code>W(t+1) = W(t) - eta * gradient</code> are just knob updates.</p>
+<p>Enough understanding:</p>
+<p>The reader can identify what changes during training: the parameter values.</p>
+<h3 id="foundation_stack--54-gradient">5.4 Gradient</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>A derivative tells how one output changes when one input changes.</li>
+<li>A gradient is the vector of derivatives with respect to many parameters.</li>
+<li>The gradient points toward steepest local increase in loss; gradient descent moves the opposite way.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If each parameter is a knob, the gradient says how sensitive the loss is to each knob. A large positive derivative means "turning this knob up increases loss a lot." To reduce loss, turn it down. A large negative derivative means "turning this knob up decreases loss," so turn it up.</p>
+<p>Tiny worked case:</p>
+<p>Use loss <code>E(w) = (w - 3)^2</code>.</p>
+<p>The derivative is <code>dE/dw = 2(w - 3)</code>.</p>
+<p>If <code>w = 1</code>, derivative is <code>-4</code>. Increasing <code>w</code> reduces the loss, so gradient descent moves <code>w</code> upward:</p>
+<pre><code class="language-text">w_new = w - eta * (-4)
+</code></pre>
+<p>Why it matters:</p>
+<p>The paper's standard backpropagation section is about computing gradients. Its practical tricks are about making those gradients useful.</p>
+<p>Enough understanding:</p>
+<p>The reader can say: "The gradient is local advice. It is not a map of the whole landscape."</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need multivariable calculus rigor before the first paper walkthrough, but does need the sensitivity idea.</p>
+<h3 id="foundation_stack--55-backpropagation">5.5 Backpropagation</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Backpropagation is the efficient chain-rule method for computing gradients in layered models.</li>
+<li>It starts from the loss at the output and moves backward through layers.</li>
+<li>It computes how much each parameter contributed to the loss.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>In a layered network, an early weight affects a later activation, which affects another activation, which affects the final loss. Backpropagation keeps track of that chain of responsibility backward.</p>
+<p>Tiny analogy:</p>
+<p>If a factory product fails inspection, you trace backward through each station to see which adjustable machine settings contributed to the defect.</p>
+<p>Tiny worked case:</p>
+<p>If:</p>
+<pre><code class="language-text">y = w * x
+E = 1/2 * (D - y)^2
+</code></pre>
+<p>then changing <code>w</code> changes <code>y</code>, and changing <code>y</code> changes <code>E</code>. The chain rule combines:</p>
+<pre><code class="language-text">dE/dw = dE/dy * dy/dw
+</code></pre>
+<p>Why it matters:</p>
+<p>The paper's equations 1-9 are chain-rule equations. Later optimization methods still need gradients, and backprop is how neural nets get them efficiently.</p>
+<p>Enough understanding:</p>
+<p>The reader can distinguish:</p>
+<ul>
+<li>backpropagation: computes gradients</li>
+<li>optimizer: decides parameter updates</li>
+</ul>
+<h3 id="foundation_stack--56-batch-stochastic-and-mini-batch-updates">5.6 Batch, Stochastic, And Mini-Batch Updates</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Batch learning uses the whole dataset before updating.</li>
+<li>Stochastic learning updates from one example at a time.</li>
+<li>Mini-batches are an intermediate idea.</li>
+<li>Stochastic gradients are noisy estimates of the full gradient.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Batch learning asks every student in the class before changing the lesson plan. Stochastic learning asks one student and adjusts immediately. The one-student signal is noisy, but you get feedback much more often.</p>
+<p>Tiny example:</p>
+<p>If a dataset contains many near-duplicates, computing all their gradients before one update wastes time. Stochastic learning can react after each example and may make several useful moves while batch learning is still averaging.</p>
+<p>Why it matters:</p>
+<p>The paper strongly contrasts stochastic and batch learning. It argues stochastic learning is often preferred for large redundant classification data, while batch methods enable some acceleration methods.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why stochastic learning can be faster but noisier.</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need formal stochastic approximation theory before this article.</p>
+<h3 id="foundation_stack--57-loss-landscape">5.7 Loss Landscape</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>A loss landscape is the loss value over parameter space.</li>
+<li>Low regions are better training objective values.</li>
+<li>The shape can be flat, steep, stretched, curved, or contain multiple basins.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Imagine hiking in fog. The gradient tells the slope under your feet. If the valley is narrow and steep on one side but flat along its length, a careless step size may bounce side to side while making slow forward progress.</p>
+<p>Tiny example:</p>
+<p>Compare:</p>
+<pre><code class="language-text">E(w1, w2) = w1^2 + w2^2
+</code></pre>
+<p>to:</p>
+<pre><code class="language-text">E(w1, w2) = 100*w1^2 + w2^2
+</code></pre>
+<p>The second surface is much steeper along <code>w1</code>. A learning rate safe for <code>w1</code> may be slow for <code>w2</code>.</p>
+<p>Why it matters:</p>
+<p>The paper's convergence analysis, conditioning discussion, and second-order methods are all about the shape of this landscape.</p>
+<p>Enough understanding:</p>
+<p>The reader can interpret learning-rate failure as a geometry problem, not just a bad constant.</p>
+<h3 id="foundation_stack--58-learning-rate">5.8 Learning Rate</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>The learning rate controls update size.</li>
+<li>Too small means slow progress.</li>
+<li>Too large can oscillate or diverge.</li>
+<li>The best size depends on curvature.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Walking downhill with tiny steps is safe but slow. Jumping too far can cross the valley and land higher than before. The right step size depends on how steep and narrow the terrain is.</p>
+<p>Tiny worked case:</p>
+<p>For <code>E(w) = (w - 3)^2</code>, the derivative at <code>w = 1</code> is <code>-4</code>.</p>
+<p>With <code>eta = 0.1</code>:</p>
+<pre><code class="language-text">w_new = 1 - 0.1*(-4) = 1.4
+</code></pre>
+<p>With <code>eta = 1.0</code>:</p>
+<pre><code class="language-text">w_new = 1 - 1.0*(-4) = 5
+</code></pre>
+<p>The large step overshoots the minimum at <code>3</code>.</p>
+<p>Why it matters:</p>
+<p>The paper derives optimal and maximum rates for local quadratic landscapes and later proposes ways to estimate useful rates from curvature.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why one global learning rate can be problematic in many dimensions.</p>
+<h3 id="foundation_stack--59-curvature-and-hessian">5.9 Curvature And Hessian</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Curvature is how quickly slope changes.</li>
+<li>In one dimension, curvature is a second derivative.</li>
+<li>In many dimensions, the Hessian stores second derivatives for all parameter pairs.</li>
+<li>The Hessian tells local landscape shape.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Slope says which way is downhill right now. Curvature says whether the slope is changing quickly. A steep, sharply curved wall requires careful steps; a broad flat direction can tolerate larger steps.</p>
+<p>Tiny example:</p>
+<p><code>E(w) = w^2</code> has derivative <code>2w</code> and curvature <code>2</code>.</p>
+<p><code>E(w) = 100w^2</code> has derivative <code>200w</code> and curvature <code>200</code>.</p>
+<p>At the same distance from zero, the second loss changes much faster and needs a smaller learning rate.</p>
+<p>Why it matters:</p>
+<p>The paper's second-order methods, learning-rate bounds, and conditioning analysis all depend on Hessian intuition.</p>
+<p>Enough understanding:</p>
+<p>The reader can say: "The Hessian is local curvature information. Full Hessians are expensive because there are many parameter pairs."</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need to compute full Hessian matrices by hand.</p>
+<h3 id="foundation_stack--510-eigenvalues-eigenvectors-and-conditioning">5.10 Eigenvalues, Eigenvectors, And Conditioning</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Eigenvectors of the Hessian are principal curvature directions.</li>
+<li>Eigenvalues are curvatures along those directions.</li>
+<li>A large spread between largest and smallest eigenvalues means poor conditioning.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>A round bowl is well-conditioned: every direction has similar steepness. A long narrow ravine is ill-conditioned: one direction is steep, another is flat. Gradient descent with one step size struggles in ravines.</p>
+<p>Tiny worked case:</p>
+<p>For:</p>
+<pre><code class="language-text">E(w1, w2) = 100*w1^2 + w2^2
+</code></pre>
+<p>the <code>w1</code> direction is 100 times sharper than the <code>w2</code> direction. A step size safe for <code>w1</code> crawls along <code>w2</code>.</p>
+<p>Why it matters:</p>
+<p>The paper explains input normalization and decorrelation as ways to reduce bad conditioning, especially in simple linear cases where the Hessian relates to input covariance.</p>
+<p>Enough understanding:</p>
+<p>The reader can connect "large condition number" to "training zigzags or moves slowly."</p>
+<h3 id="foundation_stack--511-input-centering">5.11 Input Centering</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Centering subtracts the mean from each input variable.</li>
+<li>Centered inputs have average near zero.</li>
+<li>Nonzero means bias gradient updates.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If every input feature is positive, then for a given error sign, all incoming weights to a unit tend to move in the same direction. That makes it hard to rotate a weight vector; it has to zigzag through many same-sign moves.</p>
+<p>Tiny example:</p>
+<p>If a unit sees inputs <code>[10, 11, 12]</code>, every example pushes in a positive-feature direction. If centered to <code>[-1, 0, 1]</code>, updates can push more flexibly in different directions.</p>
+<p>Why it matters:</p>
+<p>The paper makes input centering one of the first practical tricks and later explains it as reducing large Hessian eigenvalues.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why centering is an optimization trick, not merely a data-cleaning convention.</p>
+<h3 id="foundation_stack--512-input-scaling">5.12 Input Scaling</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Scaling makes input variables have comparable spread.</li>
+<li>The paper recommends covariance/std scale roughly matched to the activation setup.</li>
+<li>Inputs with larger scale create larger gradients for connected weights.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If one input is measured in dollars and another in millions of dollars, the second coordinate can dominate updates just because of units. Scaling makes the optimizer's job less distorted by arbitrary measurement scale.</p>
+<p>Tiny example:</p>
+<p>Feature A ranges from <code>0</code> to <code>1</code>. Feature B ranges from <code>0</code> to <code>1000</code>. A weight connected to B may see gradients about 1000 times larger, forcing the learning rate to be safe for B and slow for A.</p>
+<p>Why it matters:</p>
+<p>The paper connects scaling to Hessian eigenvalue spread and learning speed.</p>
+<p>Enough understanding:</p>
+<p>The reader can say that scaling helps weights learn at comparable speeds.</p>
+<h3 id="foundation_stack--513-decorrelation-and-whitening">5.13 Decorrelation And Whitening</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Correlated inputs carry overlapping information.</li>
+<li>Correlation couples parameter updates.</li>
+<li>Decorrelation rotates/rescales coordinates so directions become more independent.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If two knobs always affect the output together, it is hard to tune them independently. Decorrelation tries to create knobs that control different things.</p>
+<p>Tiny example:</p>
+<p>If <code>z2 = 2*z1</code> always, the model has redundant input directions. Many combinations of two weights produce the same effect. Training wastes motion in directions that do not change the output.</p>
+<p>Why it matters:</p>
+<p>The paper's Figures 2-3 and section 5.3 explain input transformation as error-surface transformation.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why correlated inputs can rotate the ravine and make coordinate-wise learning rates less effective.</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need a full PCA derivation. It is enough to know PCA/Karhunen-Loeve can remove linear correlations.</p>
+<h3 id="foundation_stack--514-activation-saturation">5.14 Activation Saturation</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Sigmoid-like activations flatten at extremes.</li>
+<li>In flat regions, derivatives are small.</li>
+<li>Small derivatives shrink backpropagated gradients.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>A saturated activation is like a volume knob already turned almost all the way up. Pushing it more barely changes the output, so the training signal says the earlier weights have little effect.</p>
+<p>Tiny example:</p>
+<p>For a tanh-like function:</p>
+<ul>
+<li>near <code>0</code>, a small input change noticeably changes output</li>
+<li>near a large positive value, output is already near its maximum, so a small input change barely matters</li>
+</ul>
+<p>Why it matters:</p>
+<p>The paper's activation, target, and initialization recommendations all try to keep units in useful non-saturated regimes.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why "large weights" can paradoxically make learning slow.</p>
+<h3 id="foundation_stack--515-target-scaling">5.15 Target Scaling</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Classification targets are numerical values assigned to classes.</li>
+<li>With sigmoid outputs, target values near unreachable asymptotes can drive weights larger and larger.</li>
+<li>Targets inside the activation range can avoid forcing saturation.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If the model can only approach <code>1.0</code> asymptotically, asking it to hit exactly <code>1.0</code> encourages it to push harder forever. Asking for a reachable value inside the curve gives it a practical stopping region.</p>
+<p>Tiny example:</p>
+<p>If a sigmoid output is already <code>0.999</code>, the derivative is tiny. Trying to push it closer to <code>1.0</code> may require very large weights for very little useful improvement.</p>
+<p>Why it matters:</p>
+<p>The paper's target-value section explains a subtle way the loss/activation setup can create stalled learning and poor confidence behavior.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why target values are part of optimization design, not just labels.</p>
+<p>Historical note:</p>
+<p>This recommendation is tied to sigmoid-era output units. Do not generalize it blindly to modern losses and activations.</p>
+<h3 id="foundation_stack--516-weight-initialization">5.16 Weight Initialization</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Initialization sets starting parameter values.</li>
+<li>Randomness breaks symmetry.</li>
+<li>Scale controls whether activations and gradients start in useful ranges.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Before training starts, weights decide where each unit lives on its activation curve. Too large: saturated tails. Too small: weak signals. A good scale starts the network where gradients can flow.</p>
+<p>Tiny worked case:</p>
+<p>If a unit sums <code>m</code> inputs with variance about 1, then using weights with standard deviation about <code>1/sqrt(m)</code> keeps the weighted sum from growing just because there are many inputs.</p>
+<p>Why it matters:</p>
+<p>The paper's initialization rule coordinates normalized inputs, the scaled tanh activation, and fan-in.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain initialization as signal-scale control.</p>
+<p>Historical note:</p>
+<p>The exact rule is source-era and activation-dependent. The durable idea is variance control.</p>
+<h3 id="foundation_stack--517-first-order-optimization">5.17 First-Order Optimization</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>First-order methods use gradients but not full curvature matrices.</li>
+<li>Gradient descent and stochastic gradient are first-order methods.</li>
+<li>They are cheap per update but sensitive to conditioning.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>First-order training only knows which way is downhill locally. It does not directly know whether the valley is narrow, curved, or stretched.</p>
+<p>Tiny example:</p>
+<p>On a long ravine, the gradient may point mostly toward the steep wall rather than along the valley floor. Repeated gradient steps bounce side to side.</p>
+<p>Why it matters:</p>
+<p>The paper explains many tricks as ways to make first-order methods behave better.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why stochastic gradient is attractive despite noisy updates.</p>
+<h3 id="foundation_stack--518-second-order-optimization">5.18 Second-Order Optimization</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>Second-order methods use curvature information.</li>
+<li>Newton uses the inverse Hessian to reshape the step.</li>
+<li>Full Hessian methods are expensive for many parameters.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>If first-order training says "go downhill," second-order training also asks "what is the shape of the hill?" With shape information, it can avoid bouncing across a narrow valley.</p>
+<p>Tiny example:</p>
+<p>In <code>E(w1,w2)=100*w1^2+w2^2</code>, a second-order method can automatically take smaller steps in <code>w1</code> and larger steps in <code>w2</code>, because it knows <code>w1</code> is sharper.</p>
+<p>Why it matters:</p>
+<p>The paper's core second-order message is practical: curvature is useful, but full classical methods are often not scalable.</p>
+<p>Enough understanding:</p>
+<p>The reader can explain why the paper looks for diagonal or implicit Hessian tricks.</p>
+<p>What not to learn yet:</p>
+<p>The reader does not need to implement Newton, BFGS, or Levenberg-Marquardt before reading the article.</p>
+<h3 id="foundation_stack--519-historical-versus-still-useful">5.19 Historical Versus Still Useful</h3>
+<p>What the reader needs to know:</p>
+<ul>
+<li>The source is from 1998.</li>
+<li>Some specific recommendations are tied to sigmoid networks and source-era optimizers.</li>
+<li>Many underlying principles remain useful training intuition.</li>
+</ul>
+<p>Intuition-first explanation:</p>
+<p>Treat the paper like a mechanics lesson, not a list of commands to paste into a modern training script. The exact tool choices changed, but the reasons scale, saturation, curvature, and conditioning matter did not disappear.</p>
+<p>Tiny example:</p>
+<p>The paper's specific scaled tanh recommendation is historical. But the idea "activation choice affects gradient flow and output centering" remains useful.</p>
+<p>Why it matters:</p>
+<p>The user specifically asked to distinguish historical from still useful. Later sections should make this distinction explicit.</p>
+<p>Enough understanding:</p>
+<p>The reader can say which parts are source-era recommendations and which parts are general optimization principles.</p>
+<h2 id="foundation_stack--6-best-learning-order">6. Best Learning Order</h2>
+<p>Recommended article planning order:</p>
+<ol>
+<li>Motivation: why backprop training can feel like art.</li>
+<li>Training setup: examples, targets, parameters, loss.</li>
+<li>Gradient descent: what changes and why.</li>
+<li>Backpropagation: how gradients are computed efficiently.</li>
+<li>Stochastic versus batch: why noisy updates can be useful.</li>
+<li>Loss geometry: learning rates, curvature, overshoot, and divergence.</li>
+<li>Conditioning: eigenvalue spread and ravines.</li>
+<li>Input preprocessing: centering, scaling, decorrelation.</li>
+<li>Activation/target/init: saturation and signal scale.</li>
+<li>Paper walkthrough: practical tricks and convergence analysis.</li>
+<li>Second-order methods: Newton intuition, practical limits, approximations.</li>
+<li>Historical/current interpretation.</li>
+</ol>
+<h2 id="foundation_stack--7-final-prerequisite-checklist">7. Final Prerequisite Checklist</h2>
+<p>Before the core paper walkthrough, the reader should be able to answer:</p>
+<ul>
+<li>What are inputs, targets, outputs, parameters, and loss?</li>
+<li>What changes during training?</li>
+<li>What is a gradient?</li>
+<li>Why does gradient descent move opposite the gradient?</li>
+<li>What does backpropagation compute?</li>
+<li>What is the difference between backpropagation and an optimizer?</li>
+<li>Why is stochastic gradient noisy?</li>
+<li>Why can noisy stochastic updates still be useful?</li>
+<li>What is a loss landscape?</li>
+<li>What happens if the learning rate is too small or too large?</li>
+<li>What is curvature?</li>
+<li>What is the Hessian, at an intuition level?</li>
+<li>What do Hessian eigenvalues and eigenvectors mean?</li>
+<li>What is conditioning?</li>
+<li>Why do centered and scaled inputs help optimization?</li>
+<li>Why do correlated inputs couple weights?</li>
+<li>What is activation saturation?</li>
+<li>Why can target values near activation asymptotes cause trouble?</li>
+<li>Why does initialization scale matter?</li>
+<li>What is the difference between first-order and second-order methods?</li>
+<li>Which paper recommendations are historical details versus durable principles?</li>
+</ul>
+<h2 id="foundation_stack--8-core-mental-model-in-one-paragraph">8. Core Mental Model In One Paragraph</h2>
+<p>Efficient backpropagation is about making gradient-based training move through the loss landscape in useful steps. Backprop computes the local sensitivity of loss to every weight. The optimizer uses those sensitivities to change weights. Training becomes slow or unstable when the landscape is badly shaped: inputs are shifted or unevenly scaled, parameters are coupled, activations saturate, weights start at poor scales, or one learning rate must serve both steep and flat directions. The paper's practical tricks are ways to center, scale, decouple, and curvature-adjust the problem so backprop's gradients lead to faster, more reliable parameter updates.</p>
+<h2 id="foundation_stack--9-open-foundation-gaps-or-uncertainties">9. Open Foundation Gaps Or Uncertainties</h2>
+<ul>
+<li>The foundation stack explains Hessian/eigenvalue intuition but does not derive linear algebra rigorously. Later sections should avoid relying on formal eigen decomposition unless they teach it locally.</li>
+<li>The exact formula transcription in the PDF has extraction artifacts. Formula-heavy sections should verify against rendered pages.</li>
+<li>The RBF discussion may need a small bridge if included; otherwise it can be summarized as supporting context for second-derivative behavior.</li>
+<li>Modern-practice claims need careful framing because the provided source is historical.</li>
+<li>Section planning should decide whether "loss geometry and conditioning" gets one section or two; the paper is dense enough that two background sections may be better for a beginner.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="glossary" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">glossary.md</p>
+        <h1>Glossary</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="glossary--glossary">Glossary</h1>
+<p>This glossary is a short reference. It is not a substitute for <code>foundation_stack.md</code>.</p>
+<h2 id="glossary--activation-saturation">Activation Saturation</h2>
+<p>A unit is saturated when its activation is in a flat tail where changing the input barely changes the output. Saturation makes derivatives small and slows gradient-based learning.</p>
+<h2 id="glossary--backpropagation">Backpropagation</h2>
+<p>An efficient chain-rule procedure for computing derivatives of the cost with respect to every parameter in a layered model.</p>
+<h2 id="glossary--batch-learning">Batch Learning</h2>
+<p>Training mode where a full training-set gradient is computed before each parameter update.</p>
+<h2 id="glossary--condition-number">Condition Number</h2>
+<p>In this paper's optimization discussion, roughly the ratio between largest and smallest Hessian eigenvalues. Large condition numbers mean some directions are much steeper than others, making scalar learning-rate gradient descent slow.</p>
+<h2 id="glossary--curvature">Curvature</h2>
+<p>How quickly the gradient changes as parameters move. In one dimension it is a second derivative; in many dimensions it is represented locally by the Hessian.</p>
+<h2 id="glossary--decorrelation">Decorrelation</h2>
+<p>Transforming inputs so different input coordinates are less statistically coupled. The paper connects decorrelation to making the Hessian closer to diagonal in simple cases.</p>
+<h2 id="glossary--eigenvalue">Eigenvalue</h2>
+<p>For the Hessian, an eigenvalue measures curvature along a corresponding eigenvector direction.</p>
+<h2 id="glossary--eigenvector">Eigenvector</h2>
+<p>For the Hessian, a principal direction of the local loss surface.</p>
+<h2 id="glossary--fan-in">Fan-In</h2>
+<p>The number of inputs feeding into a unit. The paper's initialization rule scales random weight standard deviation as <code>1 / sqrt(fan-in)</code> under its assumptions.</p>
+<h2 id="glossary--gradient">Gradient</h2>
+<p>The vector of first derivatives of the cost with respect to parameters. It points in the direction of steepest local increase; gradient descent moves against it.</p>
+<h2 id="glossary--hessian">Hessian</h2>
+<p>The matrix of second derivatives of the cost with respect to parameters. It describes local curvature.</p>
+<h2 id="glossary--learning-rate">Learning Rate</h2>
+<p>The step-size multiplier used to convert a gradient or search direction into a parameter update.</p>
+<h2 id="glossary--levenberg-marquardt">Levenberg-Marquardt</h2>
+<p>A curvature-aware method related to Gauss-Newton that adds damping to avoid unstable steps when curvature estimates are small or ill-conditioned.</p>
+<h2 id="glossary--mean-squared-error">Mean Squared Error</h2>
+<p>A cost function based on the squared difference between desired and predicted output.</p>
+<h2 id="glossary--momentum">Momentum</h2>
+<p>A training heuristic that adds a fraction of the previous update to the current update, often damping high-curvature oscillations and helping movement along flatter directions.</p>
+<h2 id="glossary--newton-method">Newton Method</h2>
+<p>A second-order method that uses the inverse Hessian to rescale/rotate the gradient. Attractive for local quadratics, but full Hessian storage/inversion is usually impractical for large networks.</p>
+<h2 id="glossary--stochastic-learning">Stochastic Learning</h2>
+<p>Training mode where each update uses one example or a small noisy sample instead of the full training set.</p>
+<h2 id="glossary--target-scaling">Target Scaling</h2>
+<p>Choosing numerical target values for supervised outputs. In this paper, target scaling is tied to avoiding sigmoid saturation.</p>
+      </div>
+    </article>
+    
+
+    <article id="historical_vs_current" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">historical_vs_current.md</p>
+        <h1>Historical Versus Still-Useful Recommendations</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="historical_vs_current--historical-versus-still-useful-recommendations">Historical Versus Still-Useful Recommendations</h1>
+<p>This file separates source claims from bootstrap interpretation. The source is from 1998. It does not itself prove what is current practice in 2026. Treat modern relevance notes as planning interpretation unless later supported with additional sources.</p>
+<h2 id="historical_vs_current--source-era-context">Source-Era Context</h2>
+<p>The paper discusses classical feed-forward neural networks, sigmoid/tanh activations, mean squared error, stochastic gradient, conjugate gradient, BFGS, Gauss-Newton, Levenberg-Marquardt, and Hessian approximations. It predates many later defaults such as ReLU-family activations, batch normalization, Adam-style adaptive optimizers becoming common defaults, and deep-learning-scale GPU training practice.</p>
+<h2 id="historical_vs_current--recommendations-that-are-source-claims">Recommendations That Are Source Claims</h2>
+<p>The paper explicitly recommends or argues:</p>
+<ul>
+<li>shuffle examples</li>
+<li>center input variables by subtracting the mean</li>
+<li>normalize input variables to standard deviation around 1</li>
+<li>decorrelate input variables if possible</li>
+<li>prefer symmetric sigmoids over standard logistic sigmoid</li>
+<li>choose target values within the sigmoid range rather than at asymptotes</li>
+<li>initialize weights with mean zero and standard deviation about <code>1 / sqrt(fan-in)</code> under the paper's assumptions</li>
+<li>use larger learning rates in lower layers than higher layers in many architectures</li>
+<li>use stochastic gradient with careful tuning for large redundant classification datasets</li>
+<li>use conjugate gradient for smaller datasets or regression-like tasks where accurate real-valued outputs matter</li>
+<li>regard classical full second-order methods as impractical in almost all useful large-network cases</li>
+</ul>
+<h2 id="historical_vs_current--durable-principles">Durable Principles</h2>
+<p>These ideas remain broadly useful as training intuition:</p>
+<ul>
+<li>preprocessing changes optimization geometry</li>
+<li>centering reduces biased update directions</li>
+<li>scaling inputs changes effective curvature</li>
+<li>decorrelation can reduce parameter coupling</li>
+<li>activation saturation blocks gradients</li>
+<li>target scale can induce or avoid output saturation</li>
+<li>initialization scale controls early activation and gradient regimes</li>
+<li>learning-rate stability depends on curvature</li>
+<li>a single scalar learning rate is limited by the steepest direction</li>
+<li>full Hessians are expensive, but curvature approximations can be useful</li>
+</ul>
+<h2 id="historical_vs_current--historically-specific-details">Historically Specific Details</h2>
+<p>These should be explained as historical/source-era recommendations, not universal modern rules:</p>
+<ul>
+<li>the specific scaled tanh activation as the recommended default</li>
+<li>the target-value recommendation tied to the scaled sigmoid's maximum second derivative</li>
+<li>mean squared error as the common classification cost in the source's framing</li>
+<li>the exact stochastic diagonal Levenberg-Marquardt recommendation and the paper's three-times-faster rule of thumb</li>
+<li>conjugate gradient as a preferred option for some smaller/regression problems in the source-era optimizer landscape</li>
+<li>layerwise learning-rate heuristics tied to sigmoid-era multilayer architectures</li>
+</ul>
+<h2 id="historical_vs_current--modern-interpretation-to-handle-carefully">Modern Interpretation To Handle Carefully</h2>
+<p>If later article sections discuss modern deep learning, phrase cautiously:</p>
+<ul>
+<li>Modern neural networks often use activation functions and normalization layers that change the saturation and centering story, but the underlying gradient-flow intuition remains useful.</li>
+<li>Modern initialization schemes can be viewed as descendants of the same variance-control idea, but exact formulas differ by activation and architecture.</li>
+<li>Adaptive optimizers and normalization layers do not remove the need to understand scale, curvature, and conditioning.</li>
+<li>Full Hessian methods remain expensive at large scale, but modern second-order, quasi-second-order, and preconditioning ideas continue to appear in specialized forms.</li>
+</ul>
+<p>Do not claim these modern points as source claims unless additional sources are added.</p>
+<h2 id="historical_vs_current--planning-guidance">Planning Guidance</h2>
+<p>The final article should include a "historical versus still useful" section after the paper walkthrough or near the recap. It should:</p>
+<ul>
+<li>respect the paper's 1998 context</li>
+<li>avoid ridiculing old recommendations</li>
+<li>explain which ideas were tied to sigmoid networks and which are general optimization principles</li>
+<li>avoid pretending the paper anticipated every modern method</li>
+<li>use "the source argues" for source claims and "a modern reader can reinterpret this as" for interpretation</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="index" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">index.md</p>
+        <h1>Efficient BackProp Wiki</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="index--efficient-backprop-wiki">Efficient BackProp Wiki</h1>
+<h2 id="index--bootstrap-status">Bootstrap Status</h2>
+<p>This wiki compiles source-grounded understanding for <code>efficient_backprop</code> before any section planning or reader-facing prose is created.</p>
+<p>Generated bootstrap artifacts:</p>
+<ul>
+<li><code>wiki/source_map.md</code></li>
+<li><code>wiki/source_summary.md</code></li>
+<li><code>wiki/concepts.md</code></li>
+<li><code>wiki/formulas_and_notation.md</code></li>
+<li><code>wiki/historical_vs_current.md</code></li>
+<li><code>wiki/foundation_stack.md</code></li>
+<li><code>wiki/glossary.md</code></li>
+<li><code>wiki/open_questions.md</code></li>
+<li><code>wiki/source_assets/**</code></li>
+<li><code>wiki_preview/index.html</code></li>
+</ul>
+<h2 id="index--source">Source</h2>
+<p>Primary source:</p>
+<ul>
+<li>Yann LeCun, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Muller, "Efficient BackProp", originally published in Orr and Muller, <em>Neural Networks: Tricks of the Trade</em>, Springer, 1998.</li>
+<li>Local file: <code>topics/efficient_backprop/raw/papers/efficient_backprop.pdf</code></li>
+</ul>
+<h2 id="index--reader-and-article-shape">Reader And Article Shape</h2>
+<ul>
+<li>Audience: <code>beginner_technical</code></li>
+<li>Article shape: <code>paper_deep_dive</code></li>
+</ul>
+<p>The final article must be a deep paper/chapter walkthrough, not a short summary. The source is long and foundational, so later section planning should include explicit background sections before formula-heavy mechanics.</p>
+<h2 id="index--core-source-thesis">Core Source Thesis</h2>
+<p>The paper says backpropagation is simple and efficient in principle, but often hard to make work well in practice. It then explains practical "tricks" through optimization geometry:</p>
+<ul>
+<li>preprocess inputs so gradients are less biased and the error surface is better conditioned</li>
+<li>choose activation functions and target values that avoid saturation</li>
+<li>initialize weights so units operate in useful regimes</li>
+<li>choose learning rates with curvature in mind</li>
+<li>prefer stochastic learning for many large redundant classification datasets</li>
+<li>understand why full second-order methods are usually impractical for large networks</li>
+<li>use partial or implicit curvature information when it gives practical benefit</li>
+</ul>
+<h2 id="index--planning-implications">Planning Implications</h2>
+<p>Later section planning should consume <code>wiki/foundation_stack.md</code> first. Recommended early background sections:</p>
+<ol>
+<li>What changes during training: parameters, loss, gradients, and backpropagation.</li>
+<li>Loss geometry: learning rates, curvature, conditioning, Hessian/eigenvalue intuition.</li>
+<li>Practical training hygiene: normalization, scaling, saturation, initialization.</li>
+</ol>
+<p>Only after that should the article walk through the paper's sections in detail.</p>
+<h2 id="index--source-asset-evidence">Source Asset Evidence</h2>
+<p>Rendered source pages:</p>
+<ul>
+<li><code>wiki/source_assets/pages/efficient_backprop_page_001.png</code> through <code>efficient_backprop_page_044.png</code></li>
+</ul>
+<p>Text extraction:</p>
+<ul>
+<li><code>wiki/source_assets/extracted/efficient_backprop_layout.txt</code></li>
+<li><code>wiki/source_assets/extracted/efficient_backprop_plain.txt</code></li>
+</ul>
+<p>Important audit files:</p>
+<ul>
+<li><code>wiki/source_assets/formulas.md</code></li>
+<li><code>wiki/source_assets/figures.md</code></li>
+<li><code>wiki/source_assets/tables.md</code></li>
+<li><code>wiki/source_assets/visual_audit.md</code></li>
+</ul>
+<h2 id="index--critical-caveat">Critical Caveat</h2>
+<p>Historical/current relevance is not directly established by the 1998 source. <code>wiki/historical_vs_current.md</code> includes bootstrap interpretation for later planning, but final article claims about modern practice should either be clearly framed as interpretation or grounded in additional sources if the user adds them.</p>
+      </div>
+    </article>
+    
+
+    <article id="open_questions" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">open_questions.md</p>
+        <h1>Open Questions And Bootstrap Caveats</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="open_questions--open-questions-and-bootstrap-caveats">Open Questions And Bootstrap Caveats</h1>
+<h2 id="open_questions--source-extraction-caveats">Source Extraction Caveats</h2>
+<ul>
+<li>PDF text extraction is readable but contains encoding artifacts.</li>
+<li>Formula transcription should be visually checked against rendered pages before final prose.</li>
+<li>Figure captions are mostly available, but axes/labels need rendered-page inspection.</li>
+<li>No OCR was run.</li>
+</ul>
+<h2 id="open_questions--paper-interpretation-caveats">Paper Interpretation Caveats</h2>
+<ul>
+<li>The source is a 1998 paper/chapter. Modern relevance notes in <code>historical_vs_current.md</code> are bootstrap interpretation, not source claims.</li>
+<li>If the final article makes concrete claims about current best practices, additional current sources should be added or the claims should be clearly marked as interpretation.</li>
+<li>The paper's recommendation of a specific scaled tanh activation should be framed in sigmoid-era context.</li>
+<li>The paper's target-scaling advice is tied to sigmoid outputs and should not be generalized blindly to modern architectures/losses.</li>
+</ul>
+<h2 id="open_questions--items-later-section-authors-must-verify">Items Later Section Authors Must Verify</h2>
+<ul>
+<li>Exact formulas in sections 3, 5, 6, 7, and 9.</li>
+<li>Captions and visual meaning for Figures 6-8, 15-18, and 19-26.</li>
+<li>Whether section planning should include RBF material as a dedicated aside or fold it into the second-derivative discussion.</li>
+<li>How much modern interpretation the user wants in the final article.</li>
+</ul>
+<h2 id="open_questions--foundation-gaps">Foundation Gaps</h2>
+<ul>
+<li>The source assumes comfort with derivatives, Jacobians, matrix multiplication, eigenvalues, and Taylor expansion.</li>
+<li><code>foundation_stack.md</code> supplies the prerequisite scaffold, but later section planning must decide which background concepts deserve full sections and which can be introduced inline.</li>
+</ul>
+<h2 id="open_questions--stop-boundary-reminder">Stop-Boundary Reminder</h2>
+<p>Bootstrap must stop before creating:</p>
+<ul>
+<li><code>topics/efficient_backprop/sections/**</code></li>
+<li><code>topics/efficient_backprop/outputs/**</code></li>
+<li><code>topics/efficient_backprop/reviews/**</code></li>
+<li>section prose</li>
+<li>section visuals</li>
+<li>section code</li>
+<li>publish artifacts</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_assetsfigures" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_assets/figures.md</p>
+        <h1>Figure Audit: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_assetsfigures--figure-audit-efficient-backprop">Figure Audit: Efficient BackProp</h1>
+<p>Rendered page images are source evidence. Later reader-facing visuals should usually be simplified teaching redraws, not raw page screenshots.</p>
+<h2 id="source_assetsfigures--figure-inventory">Figure Inventory</h2>
+<table>
+<thead>
+<tr>
+<th>Figure</th>
+<th style="text-align: right;">Page</th>
+<th>What it shows</th>
+<th>Recommended treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fig. 1</td>
+<td style="text-align: right;">2</td>
+<td>Gradient-based learning machine: input, parameters, model, output, desired output, error/cost.</td>
+<td>Redraw simplified as teaching diagram.</td>
+</tr>
+<tr>
+<td>Fig. 2</td>
+<td style="text-align: right;">9</td>
+<td>Linearly dependent inputs and lines of constant error.</td>
+<td>Redraw simplified when explaining redundant/correlated inputs.</td>
+</tr>
+<tr>
+<td>Fig. 3</td>
+<td style="text-align: right;">10</td>
+<td>Input transformation sequence: mean cancellation, KL expansion, covariance equalization.</td>
+<td>Redraw simplified flow.</td>
+</tr>
+<tr>
+<td>Fig. 4</td>
+<td style="text-align: right;">11</td>
+<td>Standard logistic versus recommended symmetric scaled tanh.</td>
+<td>Code-generate activation curves.</td>
+</tr>
+<tr>
+<td>Fig. 5</td>
+<td style="text-align: right;">16</td>
+<td>Convergence flow and average flow near final stage of learning.</td>
+<td>Explain in text or redraw only if section uses learning-rate adaptation.</td>
+</tr>
+<tr>
+<td>Fig. 6</td>
+<td style="text-align: right;">17</td>
+<td>Gradient descent behavior for different learning rates.</td>
+<td>Redraw as a central teaching visual.</td>
+</tr>
+<tr>
+<td>Fig. 7</td>
+<td style="text-align: right;">19</td>
+<td>Lines of constant error and Hessian eigenvectors.</td>
+<td>Redraw with contours and axes.</td>
+</tr>
+<tr>
+<td>Fig. 8</td>
+<td style="text-align: right;">19</td>
+<td>Input spread and Hessian eigenvalue/eigenvector intuition for LMS.</td>
+<td>Redraw or combine with Fig. 7 teaching visual.</td>
+</tr>
+<tr>
+<td>Fig. 9</td>
+<td style="text-align: right;">21</td>
+<td>Simple linear network.</td>
+<td>Redraw only if using the linear toy example.</td>
+</tr>
+<tr>
+<td>Fig. 10</td>
+<td style="text-align: right;">21</td>
+<td>Two Gaussian classes.</td>
+<td>Redraw if using the paper's toy data example.</td>
+</tr>
+<tr>
+<td>Fig. 11</td>
+<td style="text-align: right;">22</td>
+<td>Batch learning trajectories and error curves for different learning rates.</td>
+<td>Redraw simplified or cite qualitatively.</td>
+</tr>
+<tr>
+<td>Fig. 12</td>
+<td style="text-align: right;">23</td>
+<td>Stochastic learning trajectory and error curve.</td>
+<td>Redraw simplified to contrast batch/stochastic.</td>
+</tr>
+<tr>
+<td>Fig. 13</td>
+<td style="text-align: right;">23</td>
+<td>Multilayer stochastic trajectory/errors.</td>
+<td>Cite qualitatively unless needed for detailed walkthrough.</td>
+</tr>
+<tr>
+<td>Fig. 14</td>
+<td style="text-align: right;">24</td>
+<td>Minimal multilayer network.</td>
+<td>Redraw if using this example.</td>
+</tr>
+<tr>
+<td>Fig. 15</td>
+<td style="text-align: right;">26</td>
+<td>Newton algorithm as whitening/local coordinate transform.</td>
+<td>Redraw simplified for second-order section.</td>
+</tr>
+<tr>
+<td>Fig. 16</td>
+<td style="text-align: right;">27</td>
+<td>Conjugate-gradient direction idea.</td>
+<td>Redraw if explaining conjugate gradient geometry.</td>
+</tr>
+<tr>
+<td>Fig. 17</td>
+<td style="text-align: right;">27</td>
+<td>Conjugate directions in 2D error surface.</td>
+<td>Redraw if explaining conjugacy.</td>
+</tr>
+<tr>
+<td>Fig. 18</td>
+<td style="text-align: right;">31</td>
+<td>Backpropagating diagonal Hessian for sigmoids and RBFs.</td>
+<td>Use as source evidence; redraw only if covering Hessian backprop deeply.</td>
+</tr>
+<tr>
+<td>Fig. 19</td>
+<td style="text-align: right;">33</td>
+<td>Eigenvalue spectrum in a 4-layer shared-weight network.</td>
+<td>Use qualitative chart or cite; exact values require spot-check.</td>
+</tr>
+<tr>
+<td>Fig. 20</td>
+<td style="text-align: right;">34</td>
+<td>Histogram-like eigenvalue spectrum with "big killers".</td>
+<td>Use qualitative chart; exact values require spot-check.</td>
+</tr>
+<tr>
+<td>Fig. 21</td>
+<td style="text-align: right;">34</td>
+<td>Layer-wise second derivative scale sketch.</td>
+<td>Redraw simplified if explaining layer learning-rate differences.</td>
+</tr>
+<tr>
+<td>Fig. 22</td>
+<td style="text-align: right;">36</td>
+<td>Stochastic diagonal LM with smaller learning rates.</td>
+<td>Cite qualitatively or redraw if comparing algorithms.</td>
+</tr>
+<tr>
+<td>Fig. 23</td>
+<td style="text-align: right;">37</td>
+<td>Stochastic diagonal LM with larger learning rates and more fluctuations.</td>
+<td>Cite qualitatively or redraw if comparing algorithms.</td>
+</tr>
+<tr>
+<td>Fig. 24</td>
+<td style="text-align: right;">39</td>
+<td>Online principal eigenvalue estimate over pattern presentations.</td>
+<td>Cite qualitatively; exact values require spot-check.</td>
+</tr>
+<tr>
+<td>Fig. 25</td>
+<td style="text-align: right;">40</td>
+<td>MSE versus ratio of learning rate to predicted optimal rate for fully connected network.</td>
+<td>Cite qualitatively; exact values require spot-check.</td>
+</tr>
+<tr>
+<td>Fig. 26</td>
+<td style="text-align: right;">41</td>
+<td>MSE versus ratio of learning rate to predicted optimal rate for shared-weight network.</td>
+<td>Cite qualitatively; exact values require spot-check.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source_assetsfigures--high-priority-teaching-visuals-for-later-sections">High-Priority Teaching Visuals For Later Sections</h2>
+<ol>
+<li>Gradient descent learning-rate outcomes, based on Fig. 6.</li>
+<li>Well-conditioned versus ill-conditioned loss contours, based on Figs. 7-8.</li>
+<li>Input transformation pipeline, based on Figs. 2-3.</li>
+<li>Logistic versus symmetric tanh saturation, based on Fig. 4.</li>
+<li>Newton as whitening/local preconditioning, based on Fig. 15.</li>
+<li>Full Hessian versus diagonal/implicit curvature information, based on sections 7-9.</li>
+</ol>
+<h2 id="source_assetsfigures--verification-notes">Verification Notes</h2>
+<ul>
+<li>Figure captions are extracted well enough for planning but should be checked visually.</li>
+<li>Axes and numeric values in Figures 19-26 should not be quoted exactly without rendered-page inspection.</li>
+<li>Conceptual redraws should be labeled as conceptual or source-inspired, not exact reproductions, unless values are visually verified.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_assetsformulas" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_assets/formulas.md</p>
+        <h1>Formula Audit: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_assetsformulas--formula-audit-efficient-backprop">Formula Audit: Efficient BackProp</h1>
+<p>Formula extraction from the PDF is approximate. Use rendered evidence pages for final verification.</p>
+<h2 id="source_assetsformulas--formula_learning_machine_mse"><code>formula_learning_machine_mse</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Page: 2</li>
+<li>Related paper section: 2, Learning and Generalization</li>
+<li>Formula: mean squared error per example and average training cost.</li>
+<li>Symbols:</li>
+<li><code>D_p</code>: desired output</li>
+<li><code>M(Z_p; W)</code>: model output</li>
+<li><code>E_p</code>: per-example error</li>
+<li><code>E_train</code>: average training error</li>
+<li>Intuition: measure the squared gap between desired and predicted output, then average across examples.</li>
+<li>Why it matters: sets the cost function that later optimization tries to minimize.</li>
+<li>Likely sections: motivation, training setup.</li>
+<li>Evidence image: <code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_002.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_backprop_01_10"><code>formula_backprop_01_10</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Pages: 3-4</li>
+<li>Related paper section: 3, Standard Backpropagation</li>
+<li>Formula group: modular backprop recurrence, matrix/sigmoid layer equations, scalar/matrix backprop equations, gradient descent update.</li>
+<li>Symbols:</li>
+<li><code>X_n</code>: layer/module output</li>
+<li><code>W_n</code>: layer/module parameters</li>
+<li><code>Y_n</code>: weighted sums/preactivations</li>
+<li><code>F</code> or <code>f</code>: activation function</li>
+<li><code>E_p</code>: per-example cost</li>
+<li><code>eta</code>: learning rate</li>
+<li>Intuition: derivatives flow backward through modules using the chain rule; gradients with respect to weights are then used by an optimizer.</li>
+<li>Why it matters: this is the paper's formal backprop foundation.</li>
+<li>Likely sections: foundation training loop, standard backprop walkthrough.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_003.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_004.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_input_covariance_13"><code>formula_input_covariance_13</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Page: 8</li>
+<li>Related paper section: 4.3, Normalizing the Inputs</li>
+<li>Formula: input covariance/average squared component after centering.</li>
+<li>Symbols:</li>
+<li><code>P</code>: number of training examples</li>
+<li><code>z_i^p</code>: component <code>i</code> of training example <code>p</code></li>
+<li><code>C_i</code>: covariance/spread of input variable <code>i</code></li>
+<li>Intuition: measure how large each input coordinate tends to be.</li>
+<li>Why it matters: the paper recommends scaling inputs so covariances are comparable.</li>
+<li>Evidence image: <code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_008.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_recommended_sigmoid"><code>formula_recommended_sigmoid</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Page: 10-11</li>
+<li>Related paper section: 4.4, The Sigmoid</li>
+<li>Formula: <code>f(x) = 1.7159 tanh((2/3)x)</code>.</li>
+<li>Intuition: a symmetric activation scaled to work well with normalized inputs.</li>
+<li>Why it matters: coordinates activation output scale with input preprocessing and target values.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_010.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_011.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_weight_initialization_14_16"><code>formula_weight_initialization_14_16</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Page: 13</li>
+<li>Related paper section: 4.6, Initializing the weights</li>
+<li>Formula group: weighted-sum standard deviation and random-weight scale <code>sigma_w = m^{-1/2}</code>.</li>
+<li>Symbols:</li>
+<li><code>m</code>: fan-in, number of inputs to a unit</li>
+<li><code>sigma_w</code>: standard deviation of random weights</li>
+<li><code>sigma_y</code>: standard deviation of weighted input to sigmoid</li>
+<li>Intuition: shrink individual weights when a unit has many inputs so the sum remains in a useful activation range.</li>
+<li>Why it matters: initialization controls early activation saturation and gradient scale.</li>
+<li>Evidence image: <code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_013.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_learning_rate_adaptation_17_19"><code>formula_learning_rate_adaptation_17_19</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Pages: 13-15</li>
+<li>Related paper section: 4.7, Choosing Learning Rates</li>
+<li>Formula group: adaptive learning-rate rules using a leaky average of gradients.</li>
+<li>Intuition: use an averaged gradient signal to estimate distance to minimum and anneal the learning rate near the minimum.</li>
+<li>Why it matters: bridges stochastic learning-rate adaptation to Hessian/eigenvector intuition.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_013.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_014.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_015.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_curvature_20_39"><code>formula_curvature_20_39</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Pages: 16-20</li>
+<li>Related paper section: 5.1, A Little Theory</li>
+<li>Formula group: one-dimensional gradient descent, Taylor expansion, optimal learning rate, Hessian definition, quadratic approximation, eigendecomposition, convergence condition.</li>
+<li>Key meanings:</li>
+<li><code>eta_opt</code>: one-step optimal learning rate for local quadratic in one dimension</li>
+<li><code>eta_max</code>: maximum non-divergent learning rate in one-dimensional quadratic case</li>
+<li><code>H</code>: Hessian curvature matrix</li>
+<li><code>lambda_max</code>: largest Hessian eigenvalue</li>
+<li>condition number: eigenvalue spread controlling convergence speed</li>
+<li>Intuition: learning rate is safe only relative to curvature; in many dimensions, the steepest direction limits the global rate.</li>
+<li>Why it matters: this is the mathematical backbone for normalization, conditioning, and second-order methods.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_016.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_017.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_018.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_019.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_020.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_second_order_40_47"><code>formula_second_order_40_47</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Pages: 25-29</li>
+<li>Related paper section: 6, Classical second order optimization methods</li>
+<li>Formula group: Newton update, conjugate-gradient direction rules, BFGS inverse-Hessian estimate update, Gauss-Newton and Levenberg-Marquardt updates.</li>
+<li>Intuition: use curvature or curvature approximations to choose better-shaped steps than raw gradient descent.</li>
+<li>Why it matters: shows why second-order methods are attractive and why full versions are expensive or limited.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_025.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_026.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_027.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_028.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_029.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+<h2 id="source_assetsformulas--formula_hessian_48_64"><code>formula_hessian_48_64</code></h2>
+<ul>
+<li>Source: <code>paper_01</code></li>
+<li>Pages: 30-38</li>
+<li>Related paper sections: 7 and 9</li>
+<li>Formula group: square-Jacobian approximation, backpropagating diagonal Hessian terms, Hessian-vector products, stochastic diagonal Levenberg-Marquardt rates, principal eigenvalue/vector estimates.</li>
+<li>Intuition: compute useful curvature approximations without explicitly storing or inverting the full Hessian.</li>
+<li>Why it matters: this is the paper's practical route from second-order theory to scalable training tricks.</li>
+<li>Evidence images:</li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_030.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_031.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_032.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_035.png</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_038.png</code></li>
+<li><code>visual_verification_needed</code>: true</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_assetstables" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_assets/tables.md</p>
+        <h1>Table Audit: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_assetstables--table-audit-efficient-backprop">Table Audit: Efficient BackProp</h1>
+<p>No formal source tables were detected during bootstrap text extraction.</p>
+<p>The PDF contains boxed recommendation lists and multi-panel figures, but no table assets that need a separate table audit.</p>
+<p>Planning note:</p>
+<ul>
+<li>Later authors may create reader-facing teaching tables from approved section content, such as "paper recommendation versus modern interpretation" or "first-order versus second-order methods."</li>
+<li>Those future tables would be teaching artifacts, not source tables.</li>
+<li>Do not treat any exact numeric chart values from figures as table data unless visually verified from rendered page evidence.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_assetsvisual_audit" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_assets/visual_audit.md</p>
+        <h1>Visual Audit: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_assetsvisual_audit--visual-audit-efficient-backprop">Visual Audit: Efficient BackProp</h1>
+<h2 id="source_assetsvisual_audit--scope">Scope</h2>
+<p>Audited source:</p>
+<ul>
+<li><code>paper_01</code>: <code>topics/efficient_backprop/raw/papers/efficient_backprop.pdf</code></li>
+</ul>
+<p>The PDF has 44 pages. All pages were rendered as source-evidence images under:</p>
+<pre><code class="language-text">topics/efficient_backprop/wiki/source_assets/pages/
+</code></pre>
+<p>Rendered file pattern:</p>
+<pre><code class="language-text">efficient_backprop_page_001.png
+...
+efficient_backprop_page_044.png
+</code></pre>
+<p>Text extraction artifacts:</p>
+<ul>
+<li><code>topics/efficient_backprop/wiki/source_assets/extracted/efficient_backprop_layout.txt</code></li>
+<li><code>topics/efficient_backprop/wiki/source_assets/extracted/efficient_backprop_plain.txt</code></li>
+</ul>
+<h2 id="source_assetsvisual_audit--extraction-quality">Extraction Quality</h2>
+<ul>
+<li>Text extraction is broadly usable for section headings, prose, captions, and many equations.</li>
+<li>The source uses older PDF encoding; extracted text has artifacts such as broken ligatures, missing minus signs in some places, malformed accents, and spacing issues inside formulas.</li>
+<li>Formula text must be treated as uncertain until checked against the rendered page image.</li>
+<li>Figure captions are mostly recoverable from text extraction, but rendered pages should be inspected before final prose or visual redraws.</li>
+</ul>
+<h2 id="source_assetsvisual_audit--important-visual-evidence">Important Visual Evidence</h2>
+<p>The source contains a large number of figures that are central to teaching:</p>
+<ul>
+<li>Figure 1: gradient-based learning machine.</li>
+<li>Figures 2-3: linearly dependent inputs and input transformation.</li>
+<li>Figure 4: recommended versus not-recommended sigmoid shapes.</li>
+<li>Figure 5: convergence flow and learning-rate adaptation intuition.</li>
+<li>Figures 6-8: gradient descent, constant-error lines, Hessian eigenvectors/eigenvalues, and conditioning.</li>
+<li>Figures 9-14: toy linear/multilayer network examples and learning trajectories.</li>
+<li>Figures 15-17: Newton and conjugate-gradient geometry.</li>
+<li>Figure 18: backpropagating diagonal Hessian for sigmoids and RBFs.</li>
+<li>Figures 19-21: Hessian spectra and layer-wise second derivative intuition.</li>
+<li>Figures 22-26: stochastic diagonal Levenberg-Marquardt and principal eigenvalue/learning-rate prediction experiments.</li>
+</ul>
+<h2 id="source_assetsvisual_audit--recommended-treatment">Recommended Treatment</h2>
+<ul>
+<li>Do not use raw page screenshots as reader-facing visuals by default.</li>
+<li>Use rendered pages as evidence for source fidelity.</li>
+<li>Later section authors should create simplified code-generated teaching visuals for:</li>
+<li>one-parameter and two-parameter loss landscapes</li>
+<li>stable versus unstable learning rates</li>
+<li>well-conditioned versus ill-conditioned contours</li>
+<li>input centering/scaling/decorrelation</li>
+<li>activation saturation</li>
+<li>first-order versus second-order step geometry</li>
+<li>diagonal versus full Hessian intuition</li>
+<li>If a later section refers to exact numeric values from Figures 19-26, the values should be visually checked from the rendered page image and marked as source-derived.</li>
+</ul>
+<h2 id="source_assetsvisual_audit--manual-spot-check-needed-later">Manual Spot-Check Needed Later</h2>
+<p>Before final article prose, manually inspect rendered page evidence for:</p>
+<ul>
+<li>Equations 1-16 for backpropagation, input normalization, target scaling, and weight initialization.</li>
+<li>Equations 20-39 for gradient descent, Taylor/quadratic approximation, Hessian/eigenvalue conditions, and optimal learning rates.</li>
+<li>Equations 40-47 for Newton, conjugate gradient, BFGS, Gauss-Newton, and Levenberg-Marquardt.</li>
+<li>Equations 48-64 for Hessian approximations and eigenvalue/vector estimation.</li>
+<li>Captions and axes in Figures 6-8, 11-13, 19-26, because these visuals carry training-geometry and convergence claims.</li>
+</ul>
+<h2 id="source_assetsvisual_audit--caveats">Caveats</h2>
+<ul>
+<li>No OCR was run. Text extraction plus rendered page images were sufficient for bootstrap-level source mapping.</li>
+<li>The extracted formulas in <code>efficient_backprop_layout.txt</code> should be considered approximate, not authoritative.</li>
+<li>Rendered pages are source evidence only. They are not section visuals and should not be copied into final outputs without an explicit teaching reason.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_map" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_map.md</p>
+        <h1>Source Map: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_map--source-map-efficient-backprop">Source Map: Efficient BackProp</h1>
+<h2 id="source_map--topic">Topic</h2>
+<ul>
+<li>Topic id: <code>efficient_backprop</code></li>
+<li>Title: <code>Efficient BackProp</code></li>
+<li>Article shape: <code>paper_deep_dive</code></li>
+<li>Audience profile: <code>beginner_technical</code></li>
+</ul>
+<h2 id="source_map--primary-source">Primary Source</h2>
+<table>
+<thead>
+<tr>
+<th>Source id</th>
+<th>Path</th>
+<th>Type</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>paper_01</code></td>
+<td><code>topics/efficient_backprop/raw/papers/efficient_backprop.pdf</code></td>
+<td>PDF chapter/paper</td>
+<td>readable with local extraction</td>
+<td>44-page PDF, originally published in Orr and Muller, <em>Neural Networks: Tricks of the Trade</em>, Springer, 1998.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source_map--generated-extraction-artifacts">Generated Extraction Artifacts</h2>
+<p>These are generated source-evidence artifacts under <code>wiki/source_assets/**</code>, not section media.</p>
+<table>
+<thead>
+<tr>
+<th>Artifact</th>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Layout-preserving text</td>
+<td><code>topics/efficient_backprop/wiki/source_assets/extracted/efficient_backprop_layout.txt</code></td>
+<td>Main text extraction with page breaks and approximate formula/figure placement.</td>
+</tr>
+<tr>
+<td>Plain text</td>
+<td><code>topics/efficient_backprop/wiki/source_assets/extracted/efficient_backprop_plain.txt</code></td>
+<td>Search-friendly text extraction.</td>
+</tr>
+<tr>
+<td>Rendered pages</td>
+<td><code>topics/efficient_backprop/wiki/source_assets/pages/efficient_backprop_page_001.png</code> through <code>efficient_backprop_page_044.png</code></td>
+<td>Visual evidence for formulas, figures, captions, and extraction verification.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source_map--source-structure">Source Structure</h2>
+<p>The PDF text extraction identifies these main sections:</p>
+<table>
+<thead>
+<tr>
+<th>Paper section</th>
+<th>Topic</th>
+<th>Source coverage notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Abstract</td>
+<td>Purpose and claims</td>
+<td>The chapter analyzes backprop convergence, practical tricks, and the practical limits of classical second-order methods.</td>
+</tr>
+<tr>
+<td>1 Introduction</td>
+<td>Why backprop can feel like art</td>
+<td>Frames training as a set of critical but problem-dependent choices, with heuristics and theory as guidance rather than a foolproof recipe.</td>
+</tr>
+<tr>
+<td>2 Learning and Generalization</td>
+<td>Learning machine, training cost, test error, bias/variance</td>
+<td>Introduces the learning-machine diagram, mean squared error, empirical risk minimization, and the distinction between minimization and generalization.</td>
+</tr>
+<tr>
+<td>3 Standard Backpropagation</td>
+<td>Modular backprop and classical multilayer equations</td>
+<td>Defines modules, Jacobians, chain-rule backward recurrence, matrix/sigmoid layers, and gradient descent.</td>
+</tr>
+<tr>
+<td>4 A Few Practical Tricks</td>
+<td>Stochastic learning, shuffling, input normalization, sigmoid choice, target values, learning rates, RBFs</td>
+<td>This is a core practical section and must be covered deeply.</td>
+</tr>
+<tr>
+<td>5 Convergence of Gradient Descent</td>
+<td>Quadratic intuition, eigenvalues, conditioning, examples, transformations</td>
+<td>Explains why learning rates and input transformations matter through curvature and Hessian geometry.</td>
+</tr>
+<tr>
+<td>6 Classical second order optimization methods</td>
+<td>Newton, conjugate gradient, quasi-Newton, Gauss-Newton, Levenberg-Marquardt</td>
+<td>Explains benefits and limits of classical second-order optimization for neural nets.</td>
+</tr>
+<tr>
+<td>7 Tricks to compute the Hessian information</td>
+<td>Finite differences, diagonal estimates, backpropagating second derivatives</td>
+<td>Covers ways to approximate useful Hessian information without explicitly forming the full Hessian.</td>
+</tr>
+<tr>
+<td>8 Analysis of the Hessian in multi-layer networks</td>
+<td>Hessian spectra and layered curvature</td>
+<td>Uses eigenvalue spectrum figures to explain curvature spread and why conditioning is hard in multilayer networks.</td>
+</tr>
+<tr>
+<td>9 Applying Second Order Methods to Multilayer Networks</td>
+<td>Stochastic diagonal Levenberg-Marquardt and principal eigenvalue/vector estimation</td>
+<td>Presents practical approximate second-order methods and learning-rate prediction.</td>
+</tr>
+<tr>
+<td>10 Discussion and Conclusion</td>
+<td>Recommended training workflow and caveats</td>
+<td>Summarizes recommended practices and states that classical second-order methods are impractical in almost all useful cases.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="source_map--required-deep-dive-coverage">Required Deep-Dive Coverage</h2>
+<p>Later planning and authoring should not collapse this source into a short summary. The paper/chapter is long and foundational. The final article should preserve a deep walkthrough of:</p>
+<ul>
+<li>training/generalization distinction</li>
+<li>standard backpropagation and what changes during training</li>
+<li>stochastic versus batch learning</li>
+<li>input centering, scaling, and decorrelation</li>
+<li>target scaling</li>
+<li>sigmoid saturation and activation choice</li>
+<li>weight initialization</li>
+<li>learning-rate selection and adaptation</li>
+<li>curvature, Hessian, eigenvalues, and conditioning</li>
+<li>first-order versus second-order optimization</li>
+<li>why classical second-order methods are often impractical for large neural networks</li>
+<li>diagonal/implicit Hessian approximations</li>
+<li>which recommendations are historical versus still useful today</li>
+</ul>
+<h2 id="source_map--source-fidelity-notes">Source Fidelity Notes</h2>
+<ul>
+<li>The PDF text extraction is mostly readable but has OCR/encoding artifacts such as broken ligatures and malformed characters.</li>
+<li>Equations are partially readable in text, but formula fidelity must be checked against rendered page images before final prose.</li>
+<li>Figures are visible in rendered pages. Later reader-facing visuals should generally be simplified teaching redraws rather than raw screenshots.</li>
+<li>Historical/current interpretation must be clearly labeled as interpretation. The source itself is a 1998 chapter/paper; later modern ML practice is outside the provided source unless separately sourced or marked as contextual interpretation.</li>
+</ul>
+      </div>
+    </article>
+    
+
+    <article id="source_summary" class="wiki-article">
+      <header class="article-header">
+        <p class="article-path">source_summary.md</p>
+        <h1>Source Summary: Efficient BackProp</h1>
+      </header>
+      <div class="article-body">
+        <h1 id="source_summary--source-summary-efficient-backprop">Source Summary: Efficient BackProp</h1>
+<h2 id="source_summary--citation-and-source-type">Citation And Source Type</h2>
+<p><code>Efficient BackProp</code> is a long paper/chapter by Yann LeCun, Leon Bottou, Genevieve B. Orr, and Klaus-Robert Muller. The PDF says it was originally published in Orr and Muller, <em>Neural Networks: Tricks of the Trade</em>, Springer, 1998.</p>
+<p>This source is not just a short research paper. It is part tutorial, part practitioner guide, and part optimization analysis. A final article should preserve both:</p>
+<ul>
+<li>the practical recommendations, and</li>
+<li>the geometric explanations for why those recommendations help.</li>
+</ul>
+<h2 id="source_summary--abstract-and-main-claim">Abstract And Main Claim</h2>
+<p>The abstract frames the paper around explaining common practitioner-observed backpropagation behavior. It says many undesirable behaviors can be avoided with tricks that are rarely exposed in technical publications, and it argues that many classical second-order methods are impractical for large neural networks even though second-order information is attractive.</p>
+<h2 id="source_summary--1-introduction">1. Introduction</h2>
+<p>The paper starts from a practical tension:</p>
+<ul>
+<li>Backpropagation is conceptually simple, computationally efficient, and often works.</li>
+<li>But getting it to work well can feel like art because practitioners must choose architecture, number of units/layers, learning rates, training/test sets, and other details.</li>
+</ul>
+<p>The paper does not promise a universal recipe. It says these choices are problem-dependent, but heuristics and theory can guide better decisions.</p>
+<p>Planned paper flow from the introduction:</p>
+<ol>
+<li>Introduce standard backpropagation.</li>
+<li>Discuss practical tricks.</li>
+<li>Analyze convergence.</li>
+<li>Describe classical second-order nonlinear optimization methods.</li>
+<li>Explain why many are limited for neural-network training.</li>
+<li>Present second-order methods that avoid some limitations.</li>
+</ol>
+<h2 id="source_summary--2-learning-and-generalization">2. Learning And Generalization</h2>
+<p>The paper introduces a generic gradient-based learning machine:</p>
+<ul>
+<li>Input pattern: <code>Z_p</code></li>
+<li>Parameters: <code>W</code></li>
+<li>Model output: <code>M(Z_p; W)</code></li>
+<li>Desired output: <code>D_p</code></li>
+<li>Per-pattern cost: <code>E_p = C(D_p, M(Z_p; W))</code></li>
+<li>Training cost: average over training examples</li>
+</ul>
+<p>The learning problem, in the simplest setting, is to find parameters <code>W</code> that minimize training cost. The paper immediately warns that training-set performance is not the real goal. The relevant practical measure is performance on field/test examples not used for training.</p>
+<p>The paper distinguishes:</p>
+<ul>
+<li>minimization: finding a low-cost parameter setting for the given training set</li>
+<li>generalization: doing well on unseen examples</li>
+</ul>
+<p>It discusses bias and variance qualitatively:</p>
+<ul>
+<li>early in training, bias is high because outputs are far from the desired function</li>
+<li>late in training, bias may be low but variance may rise if the network learns dataset-specific noise</li>
+<li>overtraining can occur when optimization keeps fitting training-set noise</li>
+</ul>
+<p>Important teaching implication: the final article should not present "optimize harder" as always better. The paper itself says model choice, architecture, cost function, and generalization controls matter.</p>
+<h2 id="source_summary--3-standard-backpropagation">3. Standard Backpropagation</h2>
+<p>The paper presents a modular view of multilayer learning machines:</p>
+<ul>
+<li>each module computes <code>X_n = F_n(W_n, X_{n-1})</code></li>
+<li><code>X_0</code> is the input pattern</li>
+<li><code>W_n</code> is the parameter subset for module <code>n</code></li>
+</ul>
+<p>Backpropagation is described as repeated application of the chain rule from the output module backward. If the derivative of the cost with respect to a module output is known, the derivative with respect to that module's parameters and inputs can be computed using Jacobians.</p>
+<p>For traditional multilayer neural networks, the paper specializes the module to:</p>
+<ul>
+<li>matrix multiplication: <code>Y_n = W_n X_{n-1}</code></li>
+<li>component-wise sigmoid: <code>X_n = F(Y_n)</code></li>
+</ul>
+<p>Then it gives classical scalar and matrix backpropagation equations and the gradient descent update. The source treats learning-rate choice as central; the basic update uses a scalar <code>eta</code>, while later methods use variable, diagonal, or inverse-Hessian-like learning rates.</p>
+<p>Planning implication: a beginner section must explain what backprop computes before showing equations. Backprop is not the learning rule itself; it is the efficient way to compute gradients used by a learning rule.</p>
+<h2 id="source_summary--4-practical-tricks">4. Practical Tricks</h2>
+<p>The paper says backpropagation can be slow because multilayer network cost surfaces are high-dimensional, non-quadratic, non-convex, and can contain local minima and flat regions. It does not give a guarantee of fast or good convergence. Instead, it lists practical tricks and later explains them geometrically.</p>
+<h3 id="source_summary--41-stochastic-versus-batch-learning">4.1 Stochastic Versus Batch Learning</h3>
+<p>Batch learning computes the average gradient over the whole dataset before each update. Stochastic/online learning computes a gradient estimate from one example and updates immediately.</p>
+<p>The paper's stated advantages of stochastic learning:</p>
+<ul>
+<li>often faster than batch learning, especially on large redundant datasets</li>
+<li>can find better solutions because update noise can move weights between basins</li>
+<li>can track changing data distributions</li>
+</ul>
+<p>The paper's stated advantages of batch learning:</p>
+<ul>
+<li>convergence conditions are better understood</li>
+<li>many acceleration techniques such as conjugate gradient require batch mode</li>
+<li>theoretical dynamics are simpler</li>
+</ul>
+<p>Important nuance: the same noise that helps stochastic learning can prevent exact convergence. The paper mentions learning-rate annealing and mini-batches as ways to reduce fluctuations.</p>
+<h3 id="source_summary--42-shuffling-the-examples">4.2 Shuffling The Examples</h3>
+<p>The paper argues that networks learn fastest from unexpected or information-rich examples. Since "unexpected" is hard to know directly, shuffling and avoiding long runs of similar examples can help. It also notes a possible heuristic of presenting high-error examples more often, but warns this can be bad with outliers because large errors may reflect bad data rather than useful information.</p>
+<h3 id="source_summary--43-normalizing-the-inputs">4.3 Normalizing The Inputs</h3>
+<p>The paper gives three input-transformation recommendations:</p>
+<ol>
+<li>make each input variable's average close to zero</li>
+<li>scale input variables so their covariances are about the same</li>
+<li>decorrelate input variables if possible</li>
+</ol>
+<p>The intuitive reason is update geometry. If all inputs are positive, the weights feeding a unit tend to update in the same sign for a given example. A weight vector that needs to change direction must zigzag, slowing learning. Nonzero mean biases updates in a direction.</p>
+<p>Scaling matters because weights connected to high-variance inputs learn at different effective speeds than weights connected to low-variance inputs.</p>
+<p>Decorrelation matters because correlated inputs couple parameters. If inputs are independent, parameters can be solved or adjusted more independently; if they are correlated, the optimizer has to solve for them together. The paper connects this to diagonal systems and PCA/Karhunen-Loeve transformation.</p>
+<h3 id="source_summary--44-the-sigmoid">4.4 The Sigmoid</h3>
+<p>The paper recommends symmetric sigmoids, especially a scaled tanh-like function, over the standard logistic sigmoid. The reason parallels input centering: a symmetric activation is more likely to produce outputs with mean near zero, which matters because each layer's outputs become the next layer's inputs.</p>
+<p>The paper recommends:</p>
+<ul>
+<li>symmetric sigmoids such as hyperbolic tangent often converge faster</li>
+<li>a scaled <code>tanh</code> variant from LeCun's earlier work</li>
+<li>sometimes adding a small linear term to avoid flat spots</li>
+</ul>
+<p>The paper also discusses saturation. Very small weights can place learning in flat regions near the origin for some symmetric sigmoids; very large weights can saturate units far from the origin, making derivatives small.</p>
+<h3 id="source_summary--45-choosing-target-values">4.5 Choosing Target Values</h3>
+<p>The paper warns against setting classification targets at the exact asymptotes of the sigmoid. If targets are at unreachable asymptotes, training pushes weights toward very large values, sigmoid derivatives become tiny, and updates can stall. Saturated outputs also hide uncertainty: examples near decision boundaries can be forced into extreme outputs.</p>
+<p>The recommendation is to choose target values inside the sigmoid range, at points of maximum second derivative. For the recommended sigmoid, the paper says typical binary targets <code>+1</code> and <code>-1</code> correspond to this idea.</p>
+<h3 id="source_summary--46-initializing-the-weights">4.6 Initializing The Weights</h3>
+<p>The paper says starting weights strongly affect training. Weights should be random, but chosen so sigmoids mostly operate in their useful linear range.</p>
+<p>Problems:</p>
+<ul>
+<li>too-large weights saturate sigmoid units and make gradients small</li>
+<li>too-small weights can also make gradients small</li>
+<li>intermediate weights let the network first learn the linear part of the mapping before the harder nonlinear part</li>
+</ul>
+<p>The paper coordinates this with normalized inputs and recommended sigmoid choice. Under those assumptions, it recommends random weights with mean zero and standard deviation approximately <code>m^{-1/2}</code>, where <code>m</code> is the fan-in.</p>
+<h3 id="source_summary--47-choosing-learning-rates">4.7 Choosing Learning Rates</h3>
+<p>The paper says different weights may need different learning rates because curvature differs by parameter and layer.</p>
+<p>Key ideas:</p>
+<ul>
+<li>some weights need small rates to avoid divergence</li>
+<li>some need large rates to move at a reasonable speed</li>
+<li>lower-layer weights often need larger learning rates because second derivatives in lower layers are often smaller</li>
+<li>shared weights should use learning rates proportional to the square root of the number of connections sharing the weight</li>
+<li>momentum can help on highly nonspherical cost surfaces by damping high-curvature directions and increasing effective movement along low-curvature directions</li>
+<li>adaptive learning-rate rules are discussed, but the paper says many oscillation-based rules are not appropriate for stochastic learning because stochastic weights fluctuate all the time</li>
+</ul>
+<h3 id="source_summary--48-radial-basis-functions-versus-sigmoid-units">4.8 Radial Basis Functions Versus Sigmoid Units</h3>
+<p>The paper contrasts RBF-style local units with sigmoid units in the context of convergence and Hessian structure. Later planning should check this section if the article wants to explain why the paper briefly discusses RBFs; it may be a supporting section rather than a central final-article topic.</p>
+<h2 id="source_summary--5-convergence-of-gradient-descent">5. Convergence Of Gradient Descent</h2>
+<p>This section supplies the geometric explanation for earlier tricks.</p>
+<p>In one dimension, the paper analyzes learning-rate size near a local minimum:</p>
+<ul>
+<li>too small: convergence takes many steps</li>
+<li>optimal for a quadratic: reaches the minimum in one step</li>
+<li>between optimal and twice optimal: oscillates but converges</li>
+<li>more than twice optimal: diverges</li>
+</ul>
+<p>The paper derives this with a Taylor expansion and identifies the one-dimensional optimal learning rate as the reciprocal of curvature.</p>
+<p>In multiple dimensions, the scalar curvature becomes the Hessian matrix:</p>
+<ul>
+<li>Hessian eigenvectors are principal curvature directions</li>
+<li>Hessian eigenvalues are steepness along those directions</li>
+<li>a single scalar learning rate must be small enough for the steepest direction</li>
+<li>if some directions are much flatter, progress there becomes slow</li>
+<li>convergence time is tied to the condition number, the ratio between largest and smallest eigenvalues</li>
+</ul>
+<p>This is the central bridge between practical tricks and training geometry.</p>
+<h3 id="source_summary--examples">Examples</h3>
+<p>The paper uses a simple linear network and Gaussian-class data to show batch and stochastic trajectories. It also uses a small 1-1-1 multilayer network example. These examples are useful because they make high-dimensional training geometry visible in two dimensions.</p>
+<h3 id="source_summary--input-transformations-revisited">Input Transformations Revisited</h3>
+<p>The paper returns to input transformations and explains them through Hessian geometry:</p>
+<ul>
+<li>nonzero input means create large eigenvalues</li>
+<li>unequal input variances create eccentric error surfaces</li>
+<li>correlated inputs rotate Hessian eigenvectors away from coordinate axes</li>
+<li>decorrelation and per-weight learning rates help decouple weights</li>
+</ul>
+<h2 id="source_summary--6-classical-second-order-optimization-methods">6. Classical Second-Order Optimization Methods</h2>
+<p>The paper introduces several second-order or curvature-aware methods.</p>
+<h3 id="source_summary--newton">Newton</h3>
+<p>Newton uses inverse Hessian information. On a quadratic error surface, it can converge in one step. Geometrically, it is like whitening the local error surface so gradient descent sees a sphere instead of an ellipsoid.</p>
+<p>Limits:</p>
+<ul>
+<li>must store and invert an <code>N x N</code> Hessian</li>
+<li>inversion is <code>O(N^3)</code></li>
+<li>impractical beyond small numbers of variables</li>
+<li>no convergence guarantee if the function is not quadratic</li>
+<li>can diverge if the Hessian is not positive definite</li>
+<li>multilayer network Hessians are generally not positive definite everywhere</li>
+</ul>
+<h3 id="source_summary--conjugate-gradient">Conjugate Gradient</h3>
+<p>Conjugate gradient avoids explicit Hessian storage and tries to pick directions that do not spoil previous progress. It uses line search and works only in batch mode. The paper says it can work well for moderate-sized, low-redundancy problems and real-valued function approximation/control problems, but stochastic backprop is faster on large redundant classification problems.</p>
+<h3 id="source_summary--quasi-newton-bfgs">Quasi-Newton / BFGS</h3>
+<p>BFGS estimates the inverse Hessian from gradients. It avoids explicit Hessian inversion but still stores an <code>N x N</code> matrix, so it is practical only for small networks with non-redundant training sets.</p>
+<h3 id="source_summary--gauss-newton-and-levenberg-marquardt">Gauss-Newton And Levenberg-Marquardt</h3>
+<p>These use a squared-Jacobian approximation to the Hessian and are mainly designed for batch learning. The paper notes <code>O(N^3)</code> complexity and mean-squared-error limitations. Levenberg-Marquardt adds a regularization parameter to prevent blow-ups when eigenvalues are small.</p>
+<h2 id="source_summary--7-tricks-to-compute-hessian-information-in-multilayer-networks">7. Tricks To Compute Hessian Information In Multilayer Networks</h2>
+<p>The paper discusses ways to get curvature information without forming the full Hessian:</p>
+<ul>
+<li>finite differences of gradients</li>
+<li>square-Jacobian approximations</li>
+<li>backpropagating second derivatives</li>
+<li>diagonal Hessian approximations</li>
+<li>Hessian-vector products</li>
+</ul>
+<p>The key teaching point is that second-order information is useful, but the full Hessian is usually too expensive. Practical methods often keep only diagonal, implicit, or vector-product information.</p>
+<h2 id="source_summary--8-analysis-of-the-hessian-in-multilayer-networks">8. Analysis Of The Hessian In Multilayer Networks</h2>
+<p>The paper examines how architecture and implementation influence the Hessian.</p>
+<p>It states that Hessian eigenvalue distributions often contain:</p>
+<ul>
+<li>a few small eigenvalues</li>
+<li>many medium eigenvalues</li>
+<li>a few very large eigenvalues</li>
+</ul>
+<p>The large eigenvalues cause trouble because the largest-to-smallest eigenvalue ratio controls conditioning. The paper identifies three causes:</p>
+<ul>
+<li>nonzero mean inputs or neuron states</li>
+<li>wide variations of second derivatives from layer to layer</li>
+<li>correlation between state variables</li>
+</ul>
+<p>It also notes that lower layers can have much smaller second derivatives than upper layers, which helps explain slow lower-layer learning and sometimes fast/oscillating upper-layer learning.</p>
+<h2 id="source_summary--9-applying-second-order-methods-to-multilayer-networks">9. Applying Second-Order Methods To Multilayer Networks</h2>
+<p>The paper repeats a pessimistic practical point:</p>
+<ul>
+<li>full-Hessian methods apply only to very small batch-mode networks</li>
+<li>those are not the networks that most need speedups</li>
+<li>line-search methods do not fit stochastic mode well</li>
+<li>carefully tuned stochastic gradient is hard to beat on large classification problems</li>
+<li>conjugate gradient may work well for smaller, less redundant, accuracy-sensitive regression/control-like problems</li>
+</ul>
+<h3 id="source_summary--91-stochastic-diagonal-levenberg-marquardt">9.1 Stochastic Diagonal Levenberg-Marquardt</h3>
+<p>The paper proposes using a running estimate of the diagonal Hessian to compute one learning rate per parameter. The denominator includes a damping parameter to prevent learning rates from exploding in flat regions.</p>
+<p>The paper claims the additional cost over regular backpropagation is negligible and gives a rule-of-thumb convergence improvement of about three times over carefully tuned stochastic gradient. This claim should be preserved as a source claim and not generalized without context.</p>
+<h3 id="source_summary--92-principal-eigenvaluevector-of-the-hessian">9.2 Principal Eigenvalue/Vector Of The Hessian</h3>
+<p>The paper gives methods for estimating the principal Hessian eigenvalue/vector without computing the full Hessian:</p>
+<ul>
+<li>power method</li>
+<li>Taylor expansion using gradient perturbations</li>
+<li>online running-average computation</li>
+</ul>
+<p>The practical goal is to estimate a useful learning-rate scale. Figures 24-26 show that the predicted optimal learning rate is close to the best observed rate in the paper's examples.</p>
+<h2 id="source_summary--10-discussion-and-conclusion">10. Discussion And Conclusion</h2>
+<p>The paper's practitioner workflow:</p>
+<ul>
+<li>shuffle examples</li>
+<li>center input variables</li>
+<li>normalize input variables to standard deviation 1</li>
+<li>decorrelate inputs if possible</li>
+<li>use the recommended symmetric sigmoid</li>
+<li>set target values within the sigmoid range, typically <code>+1</code> and <code>-1</code></li>
+<li>initialize weights according to the paper's fan-in prescription</li>
+<li>for large redundant classification datasets, use carefully tuned stochastic gradient or stochastic diagonal Levenberg-Marquardt</li>
+<li>for smaller or regression tasks, use conjugate gradient</li>
+</ul>
+<p>The paper concludes that classical second-order methods are impractical in almost all useful cases, and that stochastic gradient dynamics in multilayer networks remain incompletely understood, especially around generalization.</p>
+<h2 id="source_summary--final-planning-note">Final Planning Note</h2>
+<p>The later article should preserve the paper's adapted structure:</p>
+<ol>
+<li>motivation and generalization distinction</li>
+<li>standard backprop mechanics</li>
+<li>practical tricks</li>
+<li>convergence geometry that explains the tricks</li>
+<li>second-order methods and limits</li>
+<li>practical/modern interpretation</li>
+</ol>
+<p>But for a beginner reader, the foundation stack should come before or alongside the early paper walkthrough so the article does not assume gradients, curvature, conditioning, or Hessians before teaching them.</p>
+      </div>
+    </article>
+    
+    </main>
+  </div>
+</body>
+</html>
