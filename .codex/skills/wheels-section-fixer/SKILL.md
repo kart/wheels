@@ -28,6 +28,7 @@ Use scoped paths like:
 
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
 - `<SECTION_DIR>/authoring_notes.md`
@@ -114,6 +115,8 @@ If `<SECTION_DIR>/state.yaml` has `needs_fix: false` and there are no user comme
 
 ## Forbidden Writes
 
+- Do not modify `<TOPIC_DIR>/wiki/**`.
+- Do not modify `<TOPIC_DIR>/wiki/source_assets/**`.
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Do not modify `<TOPIC_DIR>/outputs/**`.
 - Do not modify `<TOPIC_DIR>/reviews/**`.
@@ -152,8 +155,23 @@ Do not blindly apply reviewer suggestions. For each finding:
 
 - verify against `<SECTION_DIR>/section.yaml`
 - verify against `<TOPIC_DIR>/wiki/**` and source anchors
+- verify against `<TOPIC_DIR>/wiki/source_assets/**` when the finding or section contract involves formulas, figures, tables, charts, diagrams, page evidence, `source_assets`, or `visual_verification_required`
 - verify against the actual section artifacts
 - decide whether the finding is valid
+
+When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`, or when `<SECTION_DIR>/review.md` mentions source asset, formula, figure, or table issues, inspect:
+
+- `<TOPIC_DIR>/wiki/source_assets/index.yaml`
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md`
+- `<TOPIC_DIR>/wiki/source_assets/figures.md`
+- `<TOPIC_DIR>/wiki/source_assets/tables.md`
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
+- evidence image paths referenced in `<SECTION_DIR>/section.yaml`
+- `<SECTION_DIR>/authoring_notes.md`
+- `<SECTION_DIR>/source_notes.md` if present
+- `<SECTION_DIR>/review.md`
+
+Treat `<TOPIC_DIR>/wiki/source_assets/**`, `<TOPIC_DIR>/wiki/**`, `<SECTION_DIR>/section.yaml`, and `<SECTION_DIR>/review.md` as read-only inputs.
 
 4. Apply only accepted fixes.
 
@@ -168,6 +186,53 @@ Possible fixes may include:
 - improving code comments or shape clarity
 - correcting small code/media issues
 - updating `<SECTION_DIR>/source_notes.md` with caveats or source anchors
+- correcting source-asset-related formula, figure, table, chart, or visual-verification issues in section-local artifacts
+
+If accepted reviewer findings or user comments identify source-asset-related issues, update only section-local artifacts allowed by this skill:
+
+- `<SECTION_DIR>/draft.md`
+- `<SECTION_DIR>/blog_fragment.md`
+- `<SECTION_DIR>/preview.html`
+- `<SECTION_DIR>/media_plan.md`
+- `<SECTION_DIR>/visuals/**`
+- `<SECTION_DIR>/code/**`
+- `<SECTION_DIR>/manim/**`
+- `<SECTION_DIR>/manim_media/**`
+- `<SECTION_DIR>/source_notes.md`
+- `<SECTION_DIR>/fix_log.md`
+- `<SECTION_DIR>/state.yaml`
+
+### Formula Fixes
+
+If a formula issue is accepted:
+
+- correct the formula explanation in section prose
+- define missing symbols
+- add or improve intuition before the equation
+- add or improve a worked example when useful
+- add caveats if `visual_verification_needed` is `true`
+- do not pretend uncertainty is resolved unless evidence was visually checked
+- record the fix decision in `<SECTION_DIR>/fix_log.md`
+
+### Figure And Table Fixes
+
+If a figure/table issue is accepted:
+
+- correct qualitative interpretation
+- remove or soften exact values if not reliable or visually verified
+- improve captions
+- replace misleading simplified visuals
+- create or update section-local teaching visuals if useful
+- do not copy raw evidence screenshots into preview by default
+- record the fix decision in `<SECTION_DIR>/fix_log.md`
+
+### Visual Verification Handling
+
+If a reviewer says manual visual verification is required:
+
+- do not silently mark it resolved unless the evidence image was actually inspected
+- either fix based on inspection, or record the issue as deferred in `<SECTION_DIR>/fix_log.md`
+- if deferred, keep `needs_fix: true` unless the issue is non-blocking
 
 5. Code/media rule:
 
@@ -259,6 +324,8 @@ You must not:
 - approve the section on behalf of the user
 
 Any new claim must be grounded in `<TOPIC_DIR>/wiki/**`, section source notes, or clearly marked as interpretation.
+
+Any new source-asset-related claim must be grounded in `<TOPIC_DIR>/wiki/source_assets/**`, section source notes, or clearly marked as interpretation.
 
 Prefer fixes that improve understanding, not merely polish wording.
 
