@@ -127,6 +127,7 @@ Review exactly this section's artifacts:
 - `<SECTION_DIR>/manim/**` if present
 - `<SECTION_DIR>/source_notes.md` if present
 - relevant `<TOPIC_DIR>/wiki/**` source anchors
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
 - relevant `<TOPIC_DIR>/wiki/source_assets/**` files if `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`
 
 Do not review unrelated sections in this skill run. Use a separate run with a different `SECTION_ID` for another section.
@@ -143,6 +144,8 @@ When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verificati
 - `<SECTION_DIR>/source_notes.md` if present
 
 Treat all source asset files and section authoring artifacts as read-only while reviewing.
+
+If `<TOPIC_DIR>/wiki/foundation_stack.md` exists, inspect it when reviewing the section's `foundation_role`, `foundation_stack_refs`, prerequisite ramp, or background depth. Treat it as read-only planning/source-grounding support, not as required final prose.
 
 ## Review Checks
 
@@ -233,6 +236,26 @@ If a system design section is generic, component-list-only, or lacks design reas
 - For beginner-oriented audiences, does the section avoid assuming domain-specific machinery unless explicitly listed as prerequisite?
 - If the section starts too abstractly for the audience, set `needs_fix: true`.
 - Do not treat a missing intuition ramp as optional polish when it blocks beginner comprehension.
+
+### Foundation / Background Review
+
+- Did the section use `<TOPIC_DIR>/wiki/foundation_stack.md` appropriately when present?
+- Does `<SECTION_DIR>/authoring_notes.md` include `Foundation / Background Use`?
+- Was the section's `foundation_role` satisfied?
+- If this is a background section, is it deep and intuitive rather than a glossary?
+- If this is a core section, does it rely on prior approved foundation sections correctly?
+- Does the section introduce prerequisites before using them?
+- Does it avoid assuming the concepts it is supposed to teach?
+- Does it avoid dumping too much background that distracts from the section goal?
+- Does it preserve the intended audience level?
+- Are enough-understanding checks or equivalent reader outcomes present when useful?
+- Are deferred concepts clearly deferred rather than silently ignored?
+- For paper topics, are math/notation prerequisites introduced before formulas?
+- For system-design topics, are requirements, capacity, API, and data-model primitives introduced before major architecture decisions?
+- For algorithm topics, are data structures and complexity ideas introduced before optimized mechanics?
+- If the section starts too abstractly for the audience, set `needs_fix: true`.
+- If a background section is shallow, glossary-like, or fails to build intuition, set `needs_fix: true`.
+- If a core section duplicates too much foundation material unnecessarily, set `needs_fix: true` when it blocks flow, otherwise list it as a non-blocking improvement.
 
 ### Mechanism Clarity
 
@@ -351,6 +374,15 @@ State:
 - visual verification caveats
 - whether source evidence was transformed faithfully into teaching artifacts
 - whether any manual spot-check is required
+
+## Foundation / Background Notes
+State:
+- foundation_stack.md consulted or not present
+- whether the section's foundation_role was satisfied
+- missing prerequisite intuition
+- over-explained or duplicated background
+- deferred concepts
+- whether the section is ready for the target audience
 
 ## Learning Goal Coverage
 State whether the section meets its learning goal and key questions.

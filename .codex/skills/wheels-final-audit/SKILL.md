@@ -30,6 +30,7 @@ Use scoped paths like:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
 - `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<TOPIC_DIR>/sections/<section_id>/section.yaml`
@@ -137,6 +138,8 @@ If `<TOPIC_DIR>/wiki/source_assets/**` exists, inspect:
 
 Treat all source asset files as read-only. Use them to audit whether source evidence was mapped, used, reviewed, fixed, deferred, or documented appropriately across sections.
 
+If `<TOPIC_DIR>/wiki/foundation_stack.md` exists, inspect it as read-only planning/source-grounding support. Use it to audit whether approved sections covered, deferred, or intentionally omitted the required background for the declared audience and article shape.
+
 ## Audit Checks
 
 ### Section Approval And Completeness
@@ -159,6 +162,22 @@ Treat all source asset files as read-only. Use them to audit whether source evid
 - Are terms consistent across sections?
 - Are any important foundations missing?
 - Are there sections that assume knowledge not yet taught?
+
+### Foundation / Background Coherence
+
+- Does the article include necessary background before core ideas?
+- Are prerequisite explanations consistent across sections?
+- Are concepts introduced once and reused cleanly?
+- Are terms and notation introduced before use?
+- Does the article avoid both extremes: assuming too much and repeating too much background in every section?
+- Does section ordering follow the intended learning ladder?
+- Does the final article satisfy the declared `audience_profile`?
+- For `paper_deep_dive`, are math, concept, and notation foundations sufficient before paper mechanics?
+- For `system_design_deep_dive`, are requirements, capacity, API, data-model, and system primitives established before detailed architecture?
+- For `algorithm_walkthrough`, are data structure and complexity foundations sufficient?
+- Are deferred concepts either eventually explained or explicitly marked as out of scope?
+- If the article lacks necessary background for the declared audience, set `ready_for_publish_pack: false`.
+- If the article has background but the flow is bloated or repetitive, flag `needs_cross_section_fixes` when severe.
 
 ### Source Fidelity And Coverage
 
@@ -285,6 +304,15 @@ Assess ordering, transitions, and difficulty progression.
 
 ## Prerequisite / Terminology Notes
 Assess definitions, prerequisite ladder, and consistency.
+
+## Foundation / Background Coherence Notes
+Include:
+- foundation_stack.md status
+- prerequisites covered
+- missing prerequisites
+- repeated/bloated foundation material
+- deferred concepts
+- audience-fit verdict
 
 ## Source Fidelity / Coverage Notes
 Assess source grounding and major coverage gaps.

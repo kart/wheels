@@ -17,6 +17,7 @@ This skill owns:
 - generating `<TOPIC_DIR>/plan.yaml` through the startup prompt
 - running wiki/source phases from `<TOPIC_DIR>/plan.yaml`
 - generating rich PDF source audit files under `<TOPIC_DIR>/wiki/source_assets/**` when PDF sources exist
+- generating `<TOPIC_DIR>/wiki/foundation_stack.md` as a source-grounded background/prerequisite planning artifact
 - marking completed wiki phases in `<TOPIC_DIR>/.wheels_state.json`
 - invoking post-wiki replanning
 - requiring the revised plan to split future prose work into reader-approved sections
@@ -114,6 +115,7 @@ Bootstrap may update only:
 - `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
 - `<TOPIC_DIR>/wiki/source_assets/pages/**`
 - `<TOPIC_DIR>/wiki/source_assets/extracted/**`
+- `<TOPIC_DIR>/wiki/foundation_stack.md`
 - `<TOPIC_DIR>/wiki_preview/**`
 - `<TOPIC_DIR>/.wheels_state.json` as needed
 
@@ -172,6 +174,70 @@ If source inventory or source grounding is needed, write it under:
 - `<TOPIC_DIR>/wiki/source_map.md`
 - `<TOPIC_DIR>/wiki/source_summary.md`
 - another appropriate `<TOPIC_DIR>/wiki/**` file
+
+## Foundation Stack Generation
+
+During bootstrap, after source extraction/wiki compilation and before post-wiki replanning, create or update:
+
+```text
+<TOPIC_DIR>/wiki/foundation_stack.md
+```
+
+`foundation_stack.md` is a first-class generated wiki artifact. It is source-grounding and planning support for later section planning and authoring. It is not final article prose, not section authoring, not a publish output, and not permission to create `<TOPIC_DIR>/sections/**`, `<TOPIC_DIR>/outputs/**`, or `<TOPIC_DIR>/reviews/**`.
+
+Build the foundation stack from:
+
+- `<TOPIC_DIR>/topic.yaml` `article_shape`
+- `<TOPIC_DIR>/topic.yaml` `audience_profile`
+- `<TOPIC_DIR>/raw/**` source material
+- compiled `<TOPIC_DIR>/wiki/**`
+- available source asset audits under `<TOPIC_DIR>/wiki/source_assets/**`
+
+Required structure for `<TOPIC_DIR>/wiki/foundation_stack.md`:
+
+1. Topic and target audience
+2. Goal of the foundation stack
+3. Big picture of the topic
+4. Prerequisite stack
+5. Detailed prerequisite sections
+6. For each prerequisite:
+   - what the reader needs to know
+   - intuition-first explanation
+   - small example, analogy, or tiny worked case
+   - why it matters for this topic
+   - what enough understanding means
+   - optional learn-more links when available
+7. Best learning order
+8. Final prerequisite checklist
+9. Core mental model in one paragraph
+10. Open foundation gaps or uncertainties
+
+Quality bar:
+
+- Do not create a shallow glossary.
+- Do not merely list terms.
+- Explain intuition before notation or jargon.
+- Use concrete examples, analogies, or tiny worked cases.
+- Explicitly say what the reader does not need to know yet when that prevents overlearning irrelevant background.
+- Be deep enough that section planning can decide whether the article needs one or more background sections before the core topic.
+- Clearly separate source-backed claims from bootstrap interpretation or inferred learning needs.
+
+Article-shape guidance:
+
+- For `paper_deep_dive`, include mathematical, conceptual, notation, and paper-specific prerequisite ladders. Include historical/contextual prerequisites only when useful. Do not require reading unrelated original papers unless truly necessary. Explain what can be skipped or deferred on a first pass.
+- For `system_design_deep_dive`, include foundations such as requirements thinking, capacity estimation, API design, data modeling, SQL vs NoSQL, blob/object storage vs metadata storage, caching/CDN, queues and async workflows, stream processing, consistency, indexing/search, counters/analytics, failure modes, observability/SLOs, cost/performance tradeoffs, and evolution from simple to scaled design. For `audience_profile: system_design_interview_l5_plus`, make the main path support strong L5, identify selective L6+ depth where useful, do not create separate L5/L6/L7 prerequisite guides, and distinguish public facts from inferred design knowledge.
+- For `algorithm_walkthrough`, include data structure prerequisites, complexity-analysis prerequisites, proof/intuition prerequisites when relevant, common pattern prerequisites, and edge-case thinking.
+- For `general_concept_deep_dive`, infer the needed foundation stack from the topic and sources and make the prerequisite ladder explicit.
+
+Guardrails:
+
+- Do not modify `<TOPIC_DIR>/topic.yaml`.
+- Do not modify `<TOPIC_DIR>/raw/**`.
+- Do not create or modify `<TOPIC_DIR>/sections/**`.
+- Do not create or modify `<TOPIC_DIR>/outputs/**`.
+- Do not create or modify `<TOPIC_DIR>/reviews/**`.
+- Do not write final article prose.
+- Do not create section visuals/code/media.
 
 ## Rich PDF Source Audit
 
@@ -459,6 +525,7 @@ Stop the wiki loop when:
 
 - required `<TOPIC_DIR>/wiki/**` files from `<TOPIC_DIR>/plan.yaml` exist, and
 - required `<TOPIC_DIR>/wiki/source_assets/**` audit files exist when `<TOPIC_DIR>/raw/**` contains PDF sources, and
+- `<TOPIC_DIR>/wiki/foundation_stack.md` has been created or refreshed, and
 - the next phase is replan, outline, lesson, content, visual, preview, review, fix, or publish.
 
 If the startup plan did not include an explicit replan phase after `<TOPIC_DIR>/wiki/**` is compiled, still invoke the replan workflow below.
@@ -487,6 +554,7 @@ Replan rules:
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Preserve source fidelity notes and useful strategy sections.
 - Preserve and reference `<TOPIC_DIR>/wiki/source_assets/**` audit guidance when PDF source assets exist.
+- Preserve and reference `<TOPIC_DIR>/wiki/foundation_stack.md` as planning support for background sections, prerequisite ladders, notation strategy, and intuition strategy.
 
 After replan, verify that `<TOPIC_DIR>/plan.yaml` contains section-planning metadata only. It must not contain generated section prose, visual asset contents, code, `<TOPIC_DIR>/outputs/preview.html` content, or `<TOPIC_DIR>/outputs/publish/blog.md` content.
 
@@ -503,6 +571,7 @@ Require all future section/content phases to include:
 - `reader_question` or `reader_goal`
 - source coverage from `<TOPIC_DIR>/wiki/**` and/or `<TOPIC_DIR>/raw/**` source references
 - source asset coverage from `<TOPIC_DIR>/wiki/source_assets/**` when PDFs exist
+- foundation/background coverage from `<TOPIC_DIR>/wiki/foundation_stack.md`
 - prerequisite concepts to introduce first
 - concepts this section is allowed to teach
 - visuals/code expected for this section, if any
@@ -526,6 +595,7 @@ End this skill by presenting:
 - the topic status
 - the `<TOPIC_DIR>/wiki/**` files created or already present
 - the `<TOPIC_DIR>/wiki/source_assets/**` files created or already present, if PDFs were audited
+- whether `<TOPIC_DIR>/wiki/foundation_stack.md` was created or refreshed
 - the replanned reader-facing sections from `<TOPIC_DIR>/plan.yaml`
 - any source extraction caveats
 - any rich PDF visual audit caveats
@@ -541,6 +611,7 @@ Then stop and ask the reader to approve or revise the section plan before any se
 - Never rewrite an existing final article as part of bootstrap.
 - Do not continue into section prose generation.
 - Stop before generating section prose, visuals, code, `<TOPIC_DIR>/outputs/preview.html`, or `<TOPIC_DIR>/outputs/publish/blog.md`.
+- Bootstrap stops after source extraction/source map, compiled wiki, `<TOPIC_DIR>/wiki/foundation_stack.md`, and post-wiki replan; it stops before `<TOPIC_DIR>/sections/**`, section prose, section visuals/code, `<TOPIC_DIR>/outputs/**`, `<TOPIC_DIR>/reviews/**`, and publish artifacts.
 - Rendering PDF pages into `<TOPIC_DIR>/wiki/source_assets/pages/**` is allowed source evidence generation when PDF sources exist; do not place those files under `<TOPIC_DIR>/outputs/**`.
 - Reviewer behavior belongs to reviewer skills; this skill may inspect `<TOPIC_DIR>/reviews/**` only as prior context.
 - If PDF reading is insufficient, ask for extracted text or figures rather than inventing claims.

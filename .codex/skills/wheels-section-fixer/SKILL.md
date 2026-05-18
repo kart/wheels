@@ -105,6 +105,7 @@ If `<SECTION_DIR>/state.yaml` has `needs_fix: false` and there are no user comme
 
 ## Allowed Writes
 
+- `<SECTION_DIR>/authoring_notes.md`
 - `<SECTION_DIR>/draft.md`
 - `<SECTION_DIR>/blog_fragment.md`
 - `<SECTION_DIR>/preview.html`
@@ -159,6 +160,7 @@ Do not blindly apply reviewer suggestions. For each finding:
 
 - verify against `<SECTION_DIR>/section.yaml`
 - verify against `<TOPIC_DIR>/wiki/**` and source anchors
+- verify against `<TOPIC_DIR>/wiki/foundation_stack.md` when the finding or user comment involves missing background, shallow prerequisites, excessive assumed knowledge, duplicated foundation material, `foundation_role`, or `foundation_stack_refs`
 - verify against `<TOPIC_DIR>/wiki/source_assets/**` when the finding or section contract involves formulas, figures, tables, charts, diagrams, page evidence, `source_assets`, or `visual_verification_required`
 - verify against the actual section artifacts
 - decide whether the finding is valid
@@ -176,6 +178,19 @@ When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verificati
 - `<SECTION_DIR>/review.md`
 
 Treat `<TOPIC_DIR>/wiki/source_assets/**`, `<TOPIC_DIR>/wiki/**`, `<SECTION_DIR>/section.yaml`, and `<SECTION_DIR>/review.md` as read-only inputs.
+
+When `<SECTION_DIR>/section.yaml` contains `foundation_role` or `foundation_stack_refs`, or when `<SECTION_DIR>/review.md` or user comments mention foundation, background, prerequisites, assumed knowledge, notation, or glossary-like prose, inspect:
+
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
+- `<SECTION_DIR>/section.yaml`
+- `<SECTION_DIR>/authoring_notes.md`
+- `<SECTION_DIR>/draft.md`
+- `<SECTION_DIR>/blog_fragment.md`
+- `<SECTION_DIR>/preview.html`
+- `<SECTION_DIR>/source_notes.md` if present
+- `<SECTION_DIR>/review.md`
+
+Treat `<TOPIC_DIR>/wiki/foundation_stack.md` as read-only planning/source-grounding support. Do not modify wiki files.
 
 4. Apply only accepted fixes.
 
@@ -206,6 +221,36 @@ If accepted reviewer findings or user comments identify source-asset-related iss
 - `<SECTION_DIR>/source_notes.md`
 - `<SECTION_DIR>/fix_log.md`
 - `<SECTION_DIR>/state.yaml`
+
+### Foundation / Background Fixes
+
+If the reviewer or user flags missing background, shallow prerequisites, excessive assumed knowledge, or failed `foundation_role` behavior:
+
+- inspect `<TOPIC_DIR>/wiki/foundation_stack.md` when present
+- add the smallest useful missing foundation explanation
+- prefer intuition + tiny example + why it matters
+- do not add a long generic primer unless the section is explicitly a background section
+- preserve section scope
+- update `<SECTION_DIR>/authoring_notes.md` if the foundation use changes
+- update `<SECTION_DIR>/source_notes.md` if new claims or source-grounded context are added
+- record the accepted/rejected/deferred decision in `<SECTION_DIR>/fix_log.md`
+
+If the reviewer or user flags overlong or duplicated background:
+
+- trim duplicated foundation material
+- point to prior approved sections when appropriate
+- preserve the main section flow
+- record the decision in `<SECTION_DIR>/fix_log.md`
+
+For background sections:
+
+- deepen shallow glossary-like content into intuition-first teaching
+- add examples and enough-understanding checks
+
+For core sections:
+
+- keep background concise
+- do not re-teach everything from `<TOPIC_DIR>/wiki/foundation_stack.md`
 
 ### System Design Deep Dive Fixes
 

@@ -28,6 +28,7 @@ All topic-specific paths must be scoped through `TOPIC_DIR`.
 Use scoped paths like:
 
 - `<TOPIC_DIR>/topic.yaml`
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<TOPIC_DIR>/sections/<section_id>/section.yaml`
 - `<TOPIC_DIR>/sections/<section_id>/state.yaml`
@@ -153,15 +154,19 @@ The final blog should:
 
 - be coherent as a single article or long-form lesson
 - preserve section order
+- preserve approved foundation/background sections and prerequisite explanations that were authored section-by-section
 - remove section-local duplication where appropriate
 - preserve source fidelity
 - preserve toy-to-real bridges
 - preserve mechanism-first explanations
 - avoid adding new unsupported claims
 - avoid introducing new major content not present in approved sections
+- include a short "Prerequisites / Background" section only if approved section content contains one
 - include valid Jekyll front matter if `<TOPIC_DIR>/topic.yaml` requests Jekyll output
 - use web-safe asset paths according to `<TOPIC_DIR>/topic.yaml`
 - not include internal authoring_notes, review notes, fix logs, or section state metadata
+- not publish `<TOPIC_DIR>/wiki/foundation_stack.md` directly as an internal artifact unless explicitly requested
+- not include internal foundation planning notes or section state metadata
 
 For `article_shape: system_design_deep_dive`, preserve approved system design teaching artifacts and caveats:
 
@@ -174,6 +179,10 @@ For `article_shape: system_design_deep_dive`, preserve approved system design te
 - failure-mode tables
 - L6+ callouts
 - source/caveat notes distinguishing public facts from inferred design choices
+
+For `article_shape: system_design_deep_dive`, preserve approved background around system-design primitives, but do not include internal planning scaffolding.
+
+For `article_shape: paper_deep_dive`, preserve approved math, notation, and concept background, but do not publish raw wiki notes.
 
 Do not publish external repos or deployment artifacts.
 
@@ -197,6 +206,7 @@ Create or update `<TOPIC_DIR>/outputs/publish/asset_manifest.md`.
 It should list:
 
 - every visual/media/code asset referenced by the final blog
+- internal planning sources when useful, including `<TOPIC_DIR>/wiki/foundation_stack.md` as an internal source not published directly
 - source section
 - current repo path
 - intended publish destination path
@@ -257,6 +267,7 @@ It should explain:
 - what files are in the publish pack
 - what the user should inspect before publishing
 - where assets should be copied
+- that `<TOPIC_DIR>/wiki/foundation_stack.md`, if present, was an internal planning/source-grounding artifact rather than a publish artifact
 - any known caveats from final audit
 - suggested publishing order
 

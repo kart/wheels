@@ -85,6 +85,7 @@ Before creating section planning files, inspect:
 - `<TOPIC_DIR>/wiki/**`
 - `<TOPIC_DIR>/wiki/source_map.md` if present
 - `<TOPIC_DIR>/wiki/source_summary.md` if present
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
 - `<TOPIC_DIR>/wiki/glossary.md` if present
 - `<TOPIC_DIR>/wiki/open_questions.md` if present
 - `<TOPIC_DIR>/wiki/source_assets/index.yaml` if present
@@ -185,6 +186,34 @@ If no `<TOPIC_DIR>/wiki/source_assets/**` directory exists:
 
 Source asset mappings are planning metadata only. They should point to existing evidence paths and planned section usage; they must not generate section visuals.
 
+## Foundation Stack Integration
+
+If `<TOPIC_DIR>/wiki/foundation_stack.md` exists, treat it as read-only wiki/source-grounding support created by bootstrap. Use it to decide how the article should build prerequisite intuition before the core walkthrough.
+
+Planner behavior:
+
+- Set `foundation_strategy.foundation_stack_available: true` in `<TOPIC_DIR>/sections/section_plan.yaml`.
+- Decide whether one or more early background/foundation sections are needed.
+- Do not assume section 1 must always be pure topic motivation.
+- If the topic requires substantial prerequisites, plan one or more early foundation/background sections.
+- If prerequisites can be embedded into core sections, record where they should be introduced.
+- Do not duplicate the whole foundation stack into planned prose.
+- Convert the foundation stack into a practical section sequence with explicit background, bridge, core, advanced, and recap roles.
+- Preserve the existing prerequisite-ramp policy, source asset policy, code-generated visual policy, and system-design policy.
+
+If `<TOPIC_DIR>/wiki/foundation_stack.md` is absent:
+
+- Set `foundation_strategy.foundation_stack_available: false`.
+- Continue planning from the available wiki if the bootstrap is otherwise complete.
+- Record any missing foundation uncertainty in `foundation_strategy` and `global_prerequisite_ladder`.
+
+Article-shape rules:
+
+- For `beginner_technical` audiences, do not jump straight into formulas, paper mechanics, system architecture, or optimized algorithms unless the foundation stack says the prerequisites are already simple.
+- For `system_design_interview_l5_plus`, build system-design interview foundations before major architecture decisions.
+- For `paper_deep_dive`, ensure mathematical, conceptual, and notation foundations appear before formula-heavy sections.
+- For `algorithm_walkthrough`, ensure data structure and complexity foundations appear before optimized solution mechanics.
+
 ## Code-Generated Technical Visuals Policy
 
 For technical teaching visuals, prefer code-generated visuals when feasible.
@@ -232,6 +261,16 @@ section_order:
 authoring_order_notes:
 section_dependencies:
 global_prerequisite_ladder:
+foundation_strategy:
+  foundation_stack_available: true | false
+  background_sections_needed: true | false
+  background_section_ids:
+  prerequisites_to_introduce_before_core_topic:
+  prerequisites_to_inline:
+  prerequisites_deferred:
+  notation_strategy:
+  intuition_strategy:
+  checklist_strategy:
 source_coverage_strategy:
 source_asset_strategy:
   source_assets_available: true | false
@@ -313,6 +352,14 @@ visual_verification_required:
   - asset_id:
     reason:
 prerequisite_concepts:
+foundation_role:
+  type: background | bridge | core_topic | advanced_extension | recap
+  prerequisites_introduced:
+  prerequisites_assumed:
+  intuition_to_build:
+  notation_to_introduce:
+  concepts_to_defer:
+  foundation_stack_refs:
 prerequisite_ladder:
   assumed_concepts:
   concepts_introduced_here:
@@ -448,9 +495,11 @@ Create `<TOPIC_DIR>/sections/README.md` explaining:
 
 - Mechanism-first, not prose-first.
 - Prerequisite-ramp first, then mechanism. Before a section introduces notation, formulas, algorithms, paper-specific terms, or expert vocabulary, it must build the minimum beginner mental model needed to understand them.
+- Use `<TOPIC_DIR>/wiki/foundation_stack.md` when present to decide which prerequisites need dedicated background sections, which should be introduced inline, and which should be deferred.
 - Prefer this teaching order: concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm. This is a preferred teaching flow, not a rigid template that every paragraph must follow.
 - Avoid this teaching order: notation -> formula -> terminology -> explanation.
 - Each planned section should identify concepts it assumes and concepts it must introduce.
+- Each planned section should include `foundation_role` with the role type, prerequisites introduced or assumed, intuition to build, notation to introduce, concepts to defer, and foundation stack references.
 - Each section should list terms that must be introduced before use and the order in which notation should be introduced.
 - `terms_that_must_be_introduced_before_use` should not mean every technical word. It should mean terms that are central, likely confusing, or not already established.
 - Use `term_introduction_strategy` to decide, based on `audience_profile`, `prerequisite_concepts`, `depends_on_sections`, terms already introduced in prior approved sections, section learning goal, and section position, which terms need immediate plain-English grounding, a tiny example, a later formal definition, or no extra explanation.
@@ -477,6 +526,7 @@ For `article_shape: paper_deep_dive` or research paper topics:
 
 - Preserve the paper's intellectual order where useful.
 - Add prerequisite sections before the paper walkthrough if needed.
+- Use the foundation stack to place math, concept, and notation foundations before paper equations and formula-heavy sections.
 - Do not merely mirror paper headings mechanically.
 - Each section should answer a learning question.
 - Include source anchors to paper sections, equations, figures, or claims when available.
@@ -524,6 +574,7 @@ For each relevant section, include system design planning fields in `<SECTION_DI
 Planner behavior:
 
 - Aim the default path at strong L5.
+- Use the foundation stack to establish requirements, capacity, API, data-model, storage, caching, consistency, async, observability, and failure-mode primitives before detailed architecture decisions.
 - Ensure every major section teaches design reasoning, not just components.
 - Plan L6+ callouts selectively; do not require every section to have one.
 - Add an L6+ callout only when it meaningfully deepens the design.
@@ -540,6 +591,7 @@ For `article_shape: algorithm_walkthrough`, plan sections in this order:
 
 - problem in plain English
 - examples and constraints
+- data structure, complexity, and pattern foundations when needed
 - brute force
 - why brute force is wasteful
 - key insight
@@ -556,7 +608,7 @@ Plan code as usually required; do not generate code in this skill. The mechanism
 For `article_shape: general_concept_deep_dive` or unknown shape:
 
 - Plan around learning questions.
-- Use prerequisite ladder first.
+- Use the prerequisite ladder and foundation stack first.
 - Then motivation, mechanism, concrete examples, caveats, applications, and recap.
 - Pick the best mechanism per section instead of forcing code.
 

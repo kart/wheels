@@ -66,6 +66,7 @@ Before authoring, verify these exist:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/foundation_stack.md` if present
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
 
@@ -121,6 +122,8 @@ When the skill is actually used, read:
 - evidence image paths referenced in `<SECTION_DIR>/section.yaml`, such as `<TOPIC_DIR>/wiki/source_assets/pages/**` or `<TOPIC_DIR>/wiki/source_assets/extracted/**`
 
 Read `<SECTION_DIR>/section.yaml` first.
+
+If `<TOPIC_DIR>/wiki/foundation_stack.md` exists, inspect it after reading `<SECTION_DIR>/section.yaml`, especially when `<SECTION_DIR>/section.yaml` contains `foundation_role` or `foundation_stack_refs`. Treat the foundation stack as read-only planning/source-grounding support. Do not use it as final prose directly and do not dump it into the section.
 
 When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`, inspect the relevant files from:
 
@@ -201,6 +204,39 @@ Do not modify:
 
 Do not copy raw evidence images into the section by default. If a source asset inspires a teaching visual, create a simplified section-local visual under `<SECTION_DIR>/visuals/**` and document the transformation in `<SECTION_DIR>/authoring_notes.md` and `<SECTION_DIR>/source_notes.md`.
 
+## Foundation / Background Use
+
+Read `foundation_role` and `foundation_stack_refs` from `<SECTION_DIR>/section.yaml` when present.
+
+Authoring behavior:
+
+- If the section is a background/foundation section, write it as a real learning scaffold, not a shallow glossary.
+- If the section is a bridge section, connect the prerequisite intuition to the first core topic mechanism.
+- If the section is a core-topic section, introduce only the prerequisite intuition needed for that section and rely on prior approved sections where appropriate.
+- Do not dump the entire `<TOPIC_DIR>/wiki/foundation_stack.md` into every section.
+- Do not use `<TOPIC_DIR>/wiki/foundation_stack.md` as final prose directly.
+- Convert foundation stack material into section-specific teaching.
+- Avoid over-explaining concepts already established in prior approved sections.
+- Avoid starting too abstractly.
+- Technical terms may be introduced early when immediately grounded in plain English.
+
+For background sections, use this teaching style:
+
+- what this concept is
+- why the reader needs it
+- intuition-first explanation
+- tiny example
+- why it matters for the main topic
+- enough-understanding check
+
+For core sections, keep the ramp concise and local.
+
+Article-shape behavior:
+
+- For `paper_deep_dive`, use the foundation stack to introduce math and notation before paper equations. Include "what you do not need yet" when it prevents overlearning irrelevant background.
+- For `system_design_deep_dive`, use the foundation stack to introduce system-design primitives before using them in architecture decisions. For `system_design_interview_l5_plus`, keep the main explanation strong L5 and use selective L6+ callouts.
+- For `algorithm_walkthrough`, use the foundation stack to introduce data structures, complexity, and pattern intuition before optimized implementation.
+
 ### Formula Handling Rule
 
 If the section depends on a formula asset:
@@ -250,6 +286,15 @@ Before writing polished prose, create `<SECTION_DIR>/authoring_notes.md`.
 - what the toy/demo omits
 - toy-to-real bridge
 - section-local structure before prose
+
+`<SECTION_DIR>/authoring_notes.md` must also include a `Foundation / Background Use` section with:
+
+- foundation_stack.md sections consulted
+- prerequisites introduced in this section
+- prerequisites assumed from prior approved sections
+- intuition built before notation
+- concepts deliberately deferred
+- why the section does or does not need a foundation ramp
 
 When source assets exist for the section, `<SECTION_DIR>/authoring_notes.md` must include a `Source Assets Used` section listing:
 
@@ -427,6 +472,8 @@ For each technical term introduced, decide whether it needs a plain-English defi
 Prefer "term + plain-English grounding" over avoiding the term entirely. Keep the ramp concise; do not create a glossary dump. Avoid defining every possible term if it distracts from the section's learning goal.
 
 Keep the prerequisite/intuition ramp concise but real. Do not add filler.
+
+For background/foundation sections, do not stop at definitions. Build intuition with examples and enough-understanding checks. For core sections, avoid re-teaching the whole foundation stack; include only the local ramp needed to understand the current mechanism.
 
 Do not write full-topic `blog.md`. Do not jump ahead to later sections. Do not summarize future sections except with brief forward pointers when needed.
 
