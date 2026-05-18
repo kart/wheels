@@ -25,6 +25,7 @@ All topic-specific files must be referenced through `TOPIC_DIR`:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/wiki_preview/**`
 - `<TOPIC_DIR>/sections/**`
 - `<TOPIC_DIR>/outputs/**`
@@ -82,6 +83,11 @@ Before creating section planning files, inspect:
 - `<TOPIC_DIR>/wiki/source_summary.md` if present
 - `<TOPIC_DIR>/wiki/glossary.md` if present
 - `<TOPIC_DIR>/wiki/open_questions.md` if present
+- `<TOPIC_DIR>/wiki/source_assets/index.yaml` if present
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md` if present
+- `<TOPIC_DIR>/wiki/source_assets/figures.md` if present
+- `<TOPIC_DIR>/wiki/source_assets/tables.md` if present
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md` if present
 - `AGENTS.md`
 - `templates/article_shapes.md`
 - `prompts/audience_profiles.md`
@@ -111,6 +117,7 @@ This skill must not modify:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/raw/**`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/.wheels_state.json`
 - `<TOPIC_DIR>/outputs/**`
@@ -147,6 +154,33 @@ Each section should be small enough that the user can:
 
 The section planner must not author content. It only plans the learning/content sequence.
 
+## Source Asset Audit Integration
+
+If `<TOPIC_DIR>/wiki/source_assets/**` exists, treat it as read-only source evidence created by bootstrap. Use it to decide which formulas, figures, charts, diagrams, tables, or page screenshots matter for each planned section.
+
+When source assets are present:
+
+- inspect `<TOPIC_DIR>/wiki/source_assets/index.yaml`
+- inspect `<TOPIC_DIR>/wiki/source_assets/formulas.md`
+- inspect `<TOPIC_DIR>/wiki/source_assets/figures.md`
+- inspect `<TOPIC_DIR>/wiki/source_assets/tables.md`
+- inspect `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
+- map relevant source assets to the appropriate `<TOPIC_DIR>/sections/<section_id>/section.yaml`
+- include open visual verification items in `<TOPIC_DIR>/sections/section_plan.yaml`
+- do not copy source asset files
+- do not render new pages
+- do not crop images
+- do not create media, code, prose, previews, or publish files
+- do not modify `<TOPIC_DIR>/wiki/source_assets/**`
+
+If no `<TOPIC_DIR>/wiki/source_assets/**` directory exists:
+
+- set `source_assets_available: false` in `<TOPIC_DIR>/sections/section_plan.yaml`
+- do not fail solely because source assets are absent
+- do fail and tell the user to rerun `wheels-topic-bootstrap` only if the topic clearly depends on formula/table/figure evidence and the wiki is not sufficient for source-grounded section planning
+
+Source asset mappings are planning metadata only. They should point to existing evidence paths and planned section usage; they must not generate section visuals.
+
 ## Required Top-Level Plan
 
 Create `<TOPIC_DIR>/sections/section_plan.yaml` with at least:
@@ -165,6 +199,15 @@ authoring_order_notes:
 section_dependencies:
 global_prerequisite_ladder:
 source_coverage_strategy:
+source_asset_strategy:
+  source_assets_available: true | false
+  important_assets:
+    - asset_id:
+      type:
+      likely_section:
+      visual_verification_needed:
+  open_visual_verification_items:
+    - item:
 mechanism_strategy:
 media_strategy:
 code_strategy:
@@ -188,6 +231,31 @@ reader_outcome:
 source_anchors:
   - source:
     relevant_claims:
+source_assets:
+  formulas:
+    - asset_id:
+      reason:
+      evidence_image:
+      visual_verification_needed:
+  figures:
+    - asset_id:
+      reason:
+      evidence_image:
+      recommended_treatment:
+      visual_verification_needed:
+  tables:
+    - asset_id:
+      reason:
+      evidence_image:
+      qualitative_or_quantitative:
+      visual_verification_needed:
+  pages:
+    - asset_id:
+      reason:
+      evidence_image:
+visual_verification_required:
+  - asset_id:
+    reason:
 prerequisite_concepts:
 depends_on_sections:
 authoring_order_notes:
@@ -232,6 +300,7 @@ Create `<TOPIC_DIR>/sections/README.md` explaining:
 - Plan code when it can naturally clarify the concept; do not generate code in this skill.
 - Code should not be forced when a diagram, worked example, state machine, or table teaches better.
 - Every major section should identify a concrete teaching mechanism.
+- Every major section should map relevant source assets from `<TOPIC_DIR>/wiki/source_assets/**` when that audit exists.
 - Every section should include a toy-to-real bridge when applicable.
 - Every section should have explicit expected reader confusions.
 - Every section should have completion criteria.
