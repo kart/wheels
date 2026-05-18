@@ -17,6 +17,10 @@ Ownership boundaries:
 
 The section author may read those files, but must treat them as read-only inputs.
 
+## Tooling Policy
+
+For Python instructions, examples, or validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Required User Inputs
 
 This skill requires:
@@ -229,9 +233,13 @@ Before writing polished prose, create `<SECTION_DIR>/authoring_notes.md`.
 
 - what question this section answers
 - what the reader should understand by the end
+- a `Prerequisite / Intuition Ramp` section
 - source anchors and claims used
 - source assets used, if any
 - prerequisite concepts needed
+- concepts assumed from prior approved sections
+- terms and notation this section will introduce
+- the concrete mental model and tiny example used before notation
 - expected reader confusions
 - concrete teaching mechanism selected
 - why this mechanism fits this section
@@ -276,6 +284,12 @@ Plan and generate code only when it naturally clarifies the section. Do not forc
 
 If code is generated, it must be section-local under `<SECTION_DIR>/code/**`. It should be small, readable, educational, and connected directly to the prose.
 
+Use the repo virtual environment for Python instructions and commands:
+
+- prefer `.venv/bin/python`
+- do not use system Python
+- do not install packages from inside the skill unless the user explicitly asks
+
 ## Media Rule
 
 Generate media only when it clarifies the section.
@@ -284,11 +298,133 @@ If media is generated, it must be section-local under `<SECTION_DIR>/visuals/**`
 
 If media is based on source assets, it must be a section-local teaching artifact unless there is a clear reason to embed original evidence. Preserve source fidelity, but prefer simplified explanatory visuals over dense paper screenshots.
 
+## Code-Generated Technical Visuals Policy
+
+For technical teaching visuals, prefer code-generated visuals when feasible.
+
+This applies especially to visuals involving plots, curves, loss landscapes, optimizer trajectories, gradient updates, vector geometry, matrices, attention maps, probability distributions, algorithm traces, state-machine-like flows, system diagrams with structured layout, charts derived from source assets, and simplified redraws of paper figures or tables.
+
+The preferred artifact pattern is:
+
+```text
+<SECTION_DIR>/visuals/<visual_id>_spec.md
+<SECTION_DIR>/visuals/<visual_id>.py
+<SECTION_DIR>/visuals/<visual_id>.svg
+<SECTION_DIR>/visuals/<visual_id>.png
+```
+
+The Python file is the source of truth. The SVG/PNG files are rendered outputs.
+
+When creating a technical visual:
+
+1. First write `<SECTION_DIR>/visuals/<visual_id>_spec.md`.
+2. Prefer writing Python source at `<SECTION_DIR>/visuals/<visual_id>.py`.
+3. Render both `<SECTION_DIR>/visuals/<visual_id>.svg` and `<SECTION_DIR>/visuals/<visual_id>.png`.
+4. Use `.venv/bin/python` to run the visual script.
+5. Use deterministic visual generation.
+
+The visual spec must include:
+
+- teaching purpose
+- exact concept being shown
+- what each visual mark means
+- what the visual must not imply
+- source assets used, if any
+- whether the visual is conceptual or source-derived
+- caption
+- review checklist
+
+Deterministic visual generation means:
+
+- no uncontrolled randomness
+- set an explicit seed if randomness is useful
+- fixed figure size
+- explicit axis limits where appropriate
+- explicit margins/layout
+- readable font sizes
+- no clipped text
+- no text outside canvas
+- no hidden labels
+- no overlapping labels
+- no oversized arrows
+- no decorative-only visuals
+- clear caption
+- visual meaning matches section prose
+
+If using matplotlib:
+
+- use matplotlib, not seaborn
+- avoid unnecessary styling
+- use clear labels and annotations
+- prefer simple, high-contrast layouts
+- avoid crowded legends
+- save SVG and PNG
+- use `bbox_inches` only carefully; ensure it does not crop labels
+- consider `constrained_layout` or explicit `subplots_adjust`
+- close figures after saving
+
+If a visual is based on a source asset:
+
+- do not blindly reproduce the paper visual
+- create a simplified teaching redraw when appropriate
+- document the transformation in `<SECTION_DIR>/authoring_notes.md` and `<SECTION_DIR>/source_notes.md`
+- preserve source meaning
+- do not quote exact values unless reliable or visually verified
+
+`<SECTION_DIR>/preview.html` should use the rendered SVG or PNG. It should not embed the Python source. It should include a caption explaining whether the image is conceptual or source-derived.
+
+Keep visual source local to the section. Do not write visuals under `<TOPIC_DIR>/outputs/**` during authoring.
+
+Hand-authored SVG is allowed only when:
+
+- the visual is simple
+- code generation would add unnecessary complexity
+- the reviewer can still inspect rendered output
+- the author documents why `hand_svg` was chosen in `<SECTION_DIR>/authoring_notes.md`
+
+Avoid:
+
+- freehand complex SVG as the default
+- AI-generated images for technical diagrams requiring accuracy
+- decorative graphics that do not teach a mechanism
+- raw paper screenshots as reader-facing visuals unless there is a clear teaching reason
+- copying dense paper figures directly when a simplified teaching redraw would be clearer
+
 ## Prose Rule
 
 Write `<SECTION_DIR>/draft.md` as the canonical section draft.
 
 Write `<SECTION_DIR>/blog_fragment.md` as the publishable fragment for this section only.
+
+Before writing prose, list in `<SECTION_DIR>/authoring_notes.md` the terms and notation the section will introduce.
+
+Start prose with the simplest concrete mental model that gives the reader an object to think about. Do not overload the opening with stacked abstractions.
+
+For notation, formulas, algorithms, paper-specific terms, and expert vocabulary, prefer this order:
+
+```text
+concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm
+```
+
+This is a preferred teaching flow, not a rigid template that every paragraph must follow.
+
+Avoid this order:
+
+```text
+notation -> formula -> terminology -> explanation
+```
+
+Technical terms may be introduced early if they are immediately grounded in plain English, especially when the term is central to the section. The issue is not using technical terms; the issue is using them as if the reader already understands them.
+
+Good: "Adam is an optimizer: a rule that decides how to change model parameters after seeing a gradient."
+
+Bad: "Adam is a first-order stochastic optimizer for scalar objectives over high-dimensional parameter spaces."
+
+For each technical term introduced, decide whether it needs a plain-English definition, a tiny example, a later formal definition, or can rely on prior approved sections. Make this judgment based on `audience_profile`, `prerequisite_concepts`, `depends_on_sections`, terms already introduced in prior approved sections, the section learning goal, and the section's position in the article.
+
+Prefer "term + plain-English grounding" over avoiding the term entirely. Keep the ramp concise; do not create a glossary dump. Avoid defining every possible term if it distracts from the section's learning goal.
+
+Keep the prerequisite/intuition ramp concise but real. Do not add filler.
 
 Do not write full-topic `blog.md`. Do not jump ahead to later sections. Do not summarize future sections except with brief forward pointers when needed.
 

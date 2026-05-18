@@ -9,6 +9,10 @@ Use this skill after `wheels-section-reviewer` has reviewed one authored section
 
 This skill fixes exactly one reviewed Wheels section. It must validate review findings and user comments before applying changes. It must not blindly apply reviewer suggestions. It must not approve the section. It must not move to the next section.
 
+## Tooling Policy
+
+For Python instructions, examples, or validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Required User Inputs
 
 This skill requires:
@@ -179,6 +183,7 @@ Possible fixes may include:
 
 - improving explanation depth
 - adding missing prerequisite explanation
+- adding or repairing a prerequisite/intuition ramp before technical notation or terminology
 - correcting unsupported claims
 - improving toy-to-real bridge
 - fixing broken preview rendering
@@ -214,6 +219,28 @@ If a formula issue is accepted:
 - do not pretend uncertainty is resolved unless evidence was visually checked
 - record the fix decision in `<SECTION_DIR>/fix_log.md`
 
+### Prerequisite / Intuition Ramp Fixes
+
+If a reviewer or user flags missing prerequisite intuition, revise the opening/ramp before polishing wording.
+
+When fixing prerequisite-ramp issues:
+
+- fix missing intuition by adding the smallest useful explanation, not by adding a long generic primer
+- prefer local surgical fixes: one concrete analogy, one short definition, one tiny example, or a sentence connecting the term to prior sections
+- add a concrete mental model before notation when the audience needs it
+- add a tiny example when it helps anchor the concept
+- ground central technical terms in plain English when first used, unless prior approved sections already established them
+- introduce notation after the reader has an intuitive object for it when the notation is new or likely confusing
+- prefer concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm as a teaching flow, not a rigid template
+- avoid notation -> formula -> terminology -> explanation
+- do not overcorrect by bloating the section with definitions unrelated to the learning goal
+- do not bury the main idea under a glossary dump
+- preserve flow, section scope, and the section's learning goal
+- preserve section scope and do not drift into later sections
+- update `<SECTION_DIR>/authoring_notes.md` only if the fix changes the planned ramp or introduced terms
+- update `<SECTION_DIR>/source_notes.md` if new or clarified claims are added
+- record accepted/rejected/deferred ramp fixes in `<SECTION_DIR>/fix_log.md`
+
 ### Figure And Table Fixes
 
 If a figure/table issue is accepted:
@@ -239,12 +266,58 @@ If a reviewer says manual visual verification is required:
 - Modify code/media only when the review or user comments justify it.
 - Keep changes section-local.
 - Do not introduce large new demos unless explicitly justified.
+- Use `.venv/bin/python` for Python code or visual-generation checks. Do not use system Python.
+- Do not install packages from inside the skill unless the user explicitly asks.
 - If generated code exists and needs verification, run only section-local checks when safe and practical.
 - If code checks are run, they must be section-local.
 - Code checks must not write outside `<SECTION_DIR>/**`.
 - If a code check would write outside `<SECTION_DIR>/**`, stop or record it as deferred in `<SECTION_DIR>/fix_log.md`.
 - Do not run expensive, destructive, networked, or ambiguous checks without explicit user approval.
 - If code execution is risky, expensive, or ambiguous, record the check as deferred in `<SECTION_DIR>/fix_log.md`.
+
+### Code-Generated Visual Fixes
+
+For technical teaching visuals, prefer fixing the visual source code/spec and regenerating rendered outputs.
+
+The preferred artifact pattern is:
+
+```text
+<SECTION_DIR>/visuals/<visual_id>_spec.md
+<SECTION_DIR>/visuals/<visual_id>.py
+<SECTION_DIR>/visuals/<visual_id>.svg
+<SECTION_DIR>/visuals/<visual_id>.png
+```
+
+The Python file is the source of truth. The SVG/PNG files are rendered outputs.
+
+When fixing visual issues:
+
+- prefer editing the visual source code/spec and regenerating rendered outputs
+- do not manually patch rendered SVG unless the visual is trivial and no source exists
+- if a hand-authored SVG exists and needs substantial revision, consider replacing it with code-generated visual artifacts
+- use `.venv/bin/python` when running visual scripts
+- keep all visual source and outputs section-local under `<SECTION_DIR>/visuals/**`
+- do not modify `<TOPIC_DIR>/wiki/source_assets/**`, `<TOPIC_DIR>/wiki/**`, `<TOPIC_DIR>/raw/**`, `<TOPIC_DIR>/outputs/**`, or other sections
+
+When fixing code-generated visuals:
+
+1. update the spec if the teaching intent changed
+2. update the Python source
+3. regenerate SVG and PNG
+4. update `<SECTION_DIR>/preview.html` if needed
+5. update `<SECTION_DIR>/source_notes.md` if source-derived
+6. record all decisions in `<SECTION_DIR>/fix_log.md`
+
+If a reviewer flags visual clipping/overflow:
+
+- fix layout in source code
+- rerender
+- verify rendered output if tooling permits
+
+If a reviewer flags misleading visual implication:
+
+- change the visual design, not just the caption
+- update prose/caption as needed
 
 6. Preview rule:
 

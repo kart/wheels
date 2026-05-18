@@ -9,6 +9,10 @@ Use this skill after all sections have been individually approved and `wheels-fi
 
 This is a final assembly skill. It must not author new section content. It must not rewrite unapproved sections. It must not run section author, reviewer, fixer, or final-audit behavior.
 
+## Tooling Policy
+
+For Python instructions, examples, or validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Required User Input
 
 This skill requires:
@@ -184,6 +188,18 @@ It should list:
 - intended publish destination path
 - whether the asset needs copying to a blog/static-site location
 - any known caveats
+- for each visual: `section_id`, `visual_id`, rendered asset path, source code path if present, spec path if present, whether the visual is conceptual or source-derived, source assets used if any, and whether rendered review passed
+
+When assembling publish artifacts:
+
+- include rendered visual outputs, not visual source code, in the final article by default
+- preserve visual captions
+- preserve conceptual/source-derived caveats
+- ensure `asset_manifest.md` records visual source files and rendered outputs
+- ensure `README.md` notes any non-published visual source files
+- do not publish Python visual source code unless explicitly requested
+- do not copy assets to external repos
+- do not run deployment
 
 ### 4. Create Final Source Notes
 

@@ -9,6 +9,10 @@ Use this skill after `wheels-section-author` has authored one section. This is a
 
 This skill reviews exactly one authored Wheels section. It must write review findings only. It must not apply fixes.
 
+## Tooling Policy
+
+For Python instructions, examples, or validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Required User Inputs
 
 This skill requires:
@@ -174,10 +178,29 @@ Treat all source asset files and section authoring artifacts as read-only while 
 ### Prerequisite Handling
 
 - Are prerequisite concepts introduced before use?
-- Are undefined terms avoided?
+- Are technical terms introduced with enough context for the declared audience?
 - Are equations introduced only after intuition?
 - Are formula symbols defined?
 - Are formulas paired with numerical or concrete examples when useful?
+
+### Prerequisite / Intuition Ramp Review
+
+- Does `<SECTION_DIR>/authoring_notes.md` include a `Prerequisite / Intuition Ramp` section?
+- Does the section build the minimum beginner mental model before introducing notation, formulas, algorithms, paper-specific terms, or expert vocabulary?
+- Does the prose generally prefer concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm, without treating that sequence as a rigid paragraph-by-paragraph template?
+- Does the section avoid notation -> formula -> terminology -> explanation?
+- Does the section assume the concept it is supposed to teach?
+- Are technical terms introduced with enough context for the declared audience?
+- Are multiple abstractions stacked before any concrete mental model?
+- Does the section explain central terms when first used?
+- Does the section over-explain already-established terms?
+- Does the section bury the main idea under too many definitions?
+- Did the author make a reasonable audience-aware judgment based on `audience_profile`, prerequisites, dependencies, prior approved sections, section learning goal, and section position?
+- Do not require every technical term to be defined from scratch if prior approved sections establish it.
+- Are the first few paragraphs accessible to the declared audience?
+- For beginner-oriented audiences, does the section avoid assuming domain-specific machinery unless explicitly listed as prerequisite?
+- If the section starts too abstractly for the audience, set `needs_fix: true`.
+- Do not treat a missing intuition ramp as optional polish when it blocks beginner comprehension.
 
 ### Mechanism Clarity
 
@@ -211,9 +234,17 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - If the section contains any reader-facing visual artifact, inspect the rendered visual output when local tooling makes that possible.
 - Reader-facing visual artifacts include `<SECTION_DIR>/visuals/**`, `<SECTION_DIR>/manim_media/**`, SVG files, PNG/JPG/WebP files, charts, diagrams, and `<SECTION_DIR>/preview.html` with embedded visuals.
 - Do not rely only on source text for SVG files. Inspect the rendered SVG when possible.
+- For code-generated visuals, review both the visual source/spec and rendered output. Inspect `<SECTION_DIR>/visuals/<visual_id>_spec.md`, `<SECTION_DIR>/visuals/<visual_id>.py`, `<SECTION_DIR>/visuals/<visual_id>.svg`, `<SECTION_DIR>/visuals/<visual_id>.png`, and `<SECTION_DIR>/preview.html` when present.
+- Treat the Python visual source as the source of truth and SVG/PNG files as rendered outputs.
+- Use available local tools for rendered checks when possible: `.venv/bin/python`, Pillow for image dimension/basic checks, CairoSVG for SVG-to-PNG rendering if installed, and Playwright/Chromium for `<SECTION_DIR>/preview.html` screenshots if installed.
+- Do not use system Python for visual checks. Prefer `.venv/bin/python`.
+- Do not install packages during review unless the user explicitly asks.
 - For rendered SVGs and other rendered visuals, check for clipped text, text running outside the canvas, overlap, occlusion, unreadable labels, poor visual hierarchy, oversized arrows or marks, ambiguous arrows or labels, misleading visual implications, and inconsistencies between the caption and the image meaning.
+- Does the rendered visual match the visual spec?
 - Does every visual/media artifact teach one clear idea?
 - Are labels readable?
+- Are arrows/marks too large?
+- Are arrows/labels ambiguous?
 - Are there occlusion issues?
 - Are there duplicated captions or labels?
 - Are diagrams technically correct?
@@ -222,7 +253,12 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - If visuals are derived from source assets, do they preserve the source meaning?
 - Do simplified visuals introduce any misleading claims?
 - Do captions clearly distinguish original source evidence from teaching redraws?
+- If a visual is conceptual, is it clearly labeled as conceptual?
+- Are exact values avoided unless verified?
+- Does `<SECTION_DIR>/preview.html` render the visual in context?
 - If rendered visual inspection is not possible with available local tooling, state that explicitly in `<SECTION_DIR>/review.md` and treat visual review as incomplete.
+- If rendered visual inspection cannot be performed, do not mark a central visual as approval-ready. Set `needs_fix: true` if the visual is central to the learning mechanism.
+- If rendered inspection finds clipping, overflow, overlap, occlusion, unreadable labels, misleading implication, or caption mismatch, mark it as a review finding and set `needs_fix: true` when the visual appears in `<SECTION_DIR>/preview.html` or is central to the section.
 
 ### Preview Review
 

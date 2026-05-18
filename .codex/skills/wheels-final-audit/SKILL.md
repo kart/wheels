@@ -9,6 +9,10 @@ Use this skill after all planned sections have been individually authored, revie
 
 This is an audit-only skill. It must not edit section content. It must not apply fixes. It must not generate the publish pack. It must not assemble the final blog or final preview.
 
+## Tooling Policy
+
+For Python instructions, examples, or validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Required User Input
 
 This skill requires:
@@ -202,6 +206,16 @@ Treat all source asset files as read-only. Use them to audit whether source evid
 - Are captions consistent?
 - Are visuals non-duplicative and useful?
 - Are there known occlusion, readability, ambiguity, or correctness issues?
+- Are important technical visuals backed by specs and source code when feasible?
+- Are rendered SVG/PNG files present for code-generated visuals?
+- Were central visuals reviewed after rendering?
+- Do any approved sections still have incomplete rendered visual review?
+- Are visual source files section-local?
+- Are captions clear about conceptual vs source-derived visuals?
+- Are simplified redraws faithful to source assets?
+- Are there unresolved clipping/overflow/occlusion issues?
+- Are there broken image paths in section previews?
+- Are generated visuals suitable for publish-pack assembly?
 
 ### Preview And Publish Readiness
 
@@ -211,6 +225,8 @@ Treat all source asset files as read-only. Use them to audit whether source evid
 - Are there front matter concerns that should be handled by publish-pack?
 - If a visual verification item is blocking and unresolved, the verdict must be `blocked` or `needs_cross_section_fixes` and `ready_for_publish_pack` must be `false`.
 - If visual verification items are non-blocking caveats, list them in `<TOPIC_DIR>/reviews/final_audit.md`; publish-pack may proceed only if the caveats do not affect correctness of the final article.
+- If a central visual has not passed rendered review, the final audit should block publish readiness and set `ready_for_publish_pack: false`.
+- If an important technical visual lacks a spec/source code without a documented reason, report it as a consistency gap. Treat it as blocking when it affects reviewability or correctness.
 
 ### Audience Fit
 

@@ -11,6 +11,10 @@ This skill plans the learning/content sequence only. It must not author content,
 
 `scripts/init_topic.py` owns deterministic `<TOPIC_DIR>/topic.yaml` creation. This skill may read `<TOPIC_DIR>/topic.yaml`, but must treat it as read-only configuration.
 
+## Tooling Policy
+
+For any future Python instructions, examples, or optional validation commands, prefer `.venv/bin/python`. Do not use system Python. Do not install packages from inside the skill unless the user explicitly asks. If dependencies are missing, note that the user may install them with commands such as `.venv/bin/python -m pip install matplotlib numpy pillow cairosvg playwright pymupdf` and `.venv/bin/python -m playwright install chromium`.
+
 ## Topic Resolution
 
 This skill requires an active topic id.
@@ -181,6 +185,36 @@ If no `<TOPIC_DIR>/wiki/source_assets/**` directory exists:
 
 Source asset mappings are planning metadata only. They should point to existing evidence paths and planned section usage; they must not generate section visuals.
 
+## Code-Generated Technical Visuals Policy
+
+For technical teaching visuals, prefer code-generated visuals when feasible.
+
+This applies especially to visuals involving plots, curves, loss landscapes, optimizer trajectories, gradient updates, vector geometry, matrices, attention maps, probability distributions, algorithm traces, state-machine-like flows, system diagrams with structured layout, charts derived from source assets, and simplified redraws of paper figures or tables.
+
+The preferred artifact pattern for later authoring is:
+
+```text
+<SECTION_DIR>/visuals/<visual_id>_spec.md
+<SECTION_DIR>/visuals/<visual_id>.py
+<SECTION_DIR>/visuals/<visual_id>.svg
+<SECTION_DIR>/visuals/<visual_id>.png
+```
+
+The Python file is the source of truth. The SVG/PNG files are rendered outputs.
+
+Planner behavior:
+
+- For technical visuals, default `preferred_generation_method` to `code_generated` unless there is a strong reason not to.
+- For plots, trajectories, curves, matrices, optimizer/gradient illustrations, and conceptual technical diagrams, prefer `suggested_tool: matplotlib`.
+- For graph/flow diagrams, use Graphviz or Mermaid only when already available and clearly better for the diagram.
+- Use Manim only when animation or step-by-step math transformation is specifically useful.
+- Use `hand_svg` only for very simple diagrams where code would add unnecessary complexity, and explain why in planning metadata.
+- Avoid AI-generated images for technical diagrams requiring accuracy.
+- Avoid decorative-only visuals.
+- Avoid raw paper screenshots as reader-facing visuals unless there is a clear teaching reason.
+- For formula/figure/table source assets, plan simplified teaching redraws as code-generated visuals when appropriate.
+- Do not generate visual code, SVG, PNG, media, or previews in this planner. Planning metadata only.
+
 ## Required Top-Level Plan
 
 Create `<TOPIC_DIR>/sections/section_plan.yaml` with at least:
@@ -212,6 +246,10 @@ mechanism_strategy:
 media_strategy:
 code_strategy:
 toy_to_real_strategy:
+prerequisite_ramp_strategy:
+  default_order: "concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm"
+  audience_constraints:
+  section_1_assumptions:
 user_review_policy:
   mode: section_by_section
   must_wait_for_approval: true
@@ -257,6 +295,20 @@ visual_verification_required:
   - asset_id:
     reason:
 prerequisite_concepts:
+prerequisite_ladder:
+  assumed_concepts:
+  concepts_introduced_here:
+  concrete_mental_model:
+  tiny_example:
+terms_that_must_be_introduced_before_use:
+term_introduction_strategy:
+  immediate_plain_english:
+  tiny_example_needed:
+  already_established_in:
+  can_be_used_lightly:
+  defer_formal_definition_until:
+notation_introduction_order:
+intuition_before_notation_notes:
 depends_on_sections:
 authoring_order_notes:
 key_questions_to_answer:
@@ -266,6 +318,19 @@ core_mechanism:
 media_needed:
   - type:
     purpose:
+    preferred_generation_method: code_generated | hand_svg | manim | mermaid | none
+    suggested_tool: matplotlib | graphviz | manim | mermaid | plain_svg | none
+    visual_source_expected: true | false
+    rendered_outputs_expected:
+      - svg
+      - png
+    source_assets_used:
+      - asset_id:
+    review_requirements:
+      - rendered_visual_check
+      - no_clipping
+      - no_misleading_implication
+      - caption_matches_visual
 code_needed:
   required: true | false
   why:
@@ -297,9 +362,19 @@ Create `<TOPIC_DIR>/sections/README.md` explaining:
 ## Planning Principles
 
 - Mechanism-first, not prose-first.
+- Prerequisite-ramp first, then mechanism. Before a section introduces notation, formulas, algorithms, paper-specific terms, or expert vocabulary, it must build the minimum beginner mental model needed to understand them.
+- Prefer this teaching order: concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm. This is a preferred teaching flow, not a rigid template that every paragraph must follow.
+- Avoid this teaching order: notation -> formula -> terminology -> explanation.
+- Each planned section should identify concepts it assumes and concepts it must introduce.
+- Each section should list terms that must be introduced before use and the order in which notation should be introduced.
+- `terms_that_must_be_introduced_before_use` should not mean every technical word. It should mean terms that are central, likely confusing, or not already established.
+- Use `term_introduction_strategy` to decide, based on `audience_profile`, `prerequisite_concepts`, `depends_on_sections`, terms already introduced in prior approved sections, section learning goal, and section position, which terms need immediate plain-English grounding, a tiny example, a later formal definition, or no extra explanation.
+- For `beginner_technical` audiences, section 1 must not assume domain-specific machinery unless it is explicitly listed as a prerequisite.
 - Plan code when it can naturally clarify the concept; do not generate code in this skill.
 - Code should not be forced when a diagram, worked example, state machine, or table teaches better.
 - Every major section should identify a concrete teaching mechanism.
+- Every planned technical visual should specify whether visual source is expected, what tool should generate it, which rendered outputs are expected, and what rendered review checks are required.
+- For technical visuals, prefer code-generated visuals with deterministic generation and rendered SVG/PNG outputs.
 - Every major section should map relevant source assets from `<TOPIC_DIR>/wiki/source_assets/**` when that audit exists.
 - Every section should include a toy-to-real bridge when applicable.
 - Every section should have explicit expected reader confusions.
