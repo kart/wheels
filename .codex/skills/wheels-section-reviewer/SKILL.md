@@ -27,6 +27,7 @@ Use scoped paths like:
 
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
 - `<SECTION_DIR>/authoring_notes.md`
@@ -92,6 +93,8 @@ If `<SECTION_DIR>/review.md` already exists, inspect it first. Update it intenti
 - Do not modify `<SECTION_DIR>/code/**`.
 - Do not modify `<SECTION_DIR>/manim/**`.
 - Do not modify `<SECTION_DIR>/manim_media/**`.
+- Do not modify `<TOPIC_DIR>/wiki/**`.
+- Do not modify `<TOPIC_DIR>/wiki/source_assets/**`.
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Do not modify `<TOPIC_DIR>/outputs/**`.
 - Do not modify `<TOPIC_DIR>/reviews/**`.
@@ -120,8 +123,22 @@ Review exactly this section's artifacts:
 - `<SECTION_DIR>/manim/**` if present
 - `<SECTION_DIR>/source_notes.md` if present
 - relevant `<TOPIC_DIR>/wiki/**` source anchors
+- relevant `<TOPIC_DIR>/wiki/source_assets/**` files if `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`
 
 Do not review unrelated sections in this skill run. Use a separate run with a different `SECTION_ID` for another section.
+
+When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`, inspect:
+
+- `<TOPIC_DIR>/wiki/source_assets/index.yaml`
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md`
+- `<TOPIC_DIR>/wiki/source_assets/figures.md`
+- `<TOPIC_DIR>/wiki/source_assets/tables.md`
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
+- evidence image paths referenced in `<SECTION_DIR>/section.yaml`
+- the `Source Assets Used` section in `<SECTION_DIR>/authoring_notes.md`
+- `<SECTION_DIR>/source_notes.md` if present
+
+Treat all source asset files and section authoring artifacts as read-only while reviewing.
 
 ## Review Checks
 
@@ -131,6 +148,21 @@ Do not review unrelated sections in this skill run. Use a separate run with a di
 - Are paper/system/source claims represented accurately?
 - Are unsupported claims clearly marked as interpretation?
 - Are simplifications disclosed?
+
+### Source Asset / Formula / Figure / Table Review
+
+- Did the section use the assets mapped in `<SECTION_DIR>/section.yaml`?
+- Were any relevant mapped assets ignored without explanation?
+- Were formulas transcribed or normalized accurately?
+- Were symbols defined?
+- Was intuition explained before equations?
+- Were `visual_verification_needed` caveats respected?
+- Were uncertain formulas, tables, or charts treated cautiously?
+- Were exact table/chart values quoted only if reliable or visually verified?
+- Were dense paper figures copied blindly, or were simplified teaching visuals created when appropriate?
+- If simplified visuals were created, are they faithful to the source asset?
+- Are raw evidence screenshots exposed in `<SECTION_DIR>/preview.html` only when there is a clear teaching reason?
+- Are source-asset caveats recorded in `<SECTION_DIR>/authoring_notes.md` or `<SECTION_DIR>/source_notes.md`?
 
 ### Learning Goal Fit
 
@@ -183,6 +215,9 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - Are diagrams technically correct?
 - Are captions accurate?
 - Is any media decorative filler rather than teaching support?
+- If visuals are derived from source assets, do they preserve the source meaning?
+- Do simplified visuals introduce any misleading claims?
+- Do captions clearly distinguish original source evidence from teaching redraws?
 
 ### Preview Review
 
@@ -225,6 +260,15 @@ List helpful but optional improvements.
 
 ## Source Fidelity Notes
 State whether claims are grounded, unsupported, or simplified.
+
+## Source Asset / Formula / Figure / Table Notes
+State:
+- assets reviewed
+- formula accuracy issues
+- figure/table interpretation issues
+- visual verification caveats
+- whether source evidence was transformed faithfully into teaching artifacts
+- whether any manual spot-check is required
 
 ## Learning Goal Coverage
 State whether the section meets its learning goal and key questions.
