@@ -36,6 +36,7 @@ Use scoped paths like:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<SECTION_DIR>/section.yaml`
 - `<SECTION_DIR>/authoring_notes.md`
@@ -112,8 +113,19 @@ When the skill is actually used, read:
 - `templates/article_shapes.md`
 - `prompts/audience_profiles.md`
 - relevant source anchors from `<TOPIC_DIR>/wiki/**`
+- relevant source asset audit files under `<TOPIC_DIR>/wiki/source_assets/**` when `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`
+- evidence image paths referenced in `<SECTION_DIR>/section.yaml`, such as `<TOPIC_DIR>/wiki/source_assets/pages/**` or `<TOPIC_DIR>/wiki/source_assets/extracted/**`
 
 Read `<SECTION_DIR>/section.yaml` first.
+
+When `<SECTION_DIR>/section.yaml` contains `source_assets` or `visual_verification_required`, inspect the relevant files from:
+
+- `<TOPIC_DIR>/wiki/source_assets/index.yaml`
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md`
+- `<TOPIC_DIR>/wiki/source_assets/figures.md`
+- `<TOPIC_DIR>/wiki/source_assets/tables.md`
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
+- evidence image paths referenced in `<SECTION_DIR>/section.yaml`
 
 ## Allowed Writes
 
@@ -137,6 +149,7 @@ Before writing or updating section-local artifacts, inspect existing `<SECTION_D
 
 - Do not modify `<TOPIC_DIR>/topic.yaml`.
 - Do not modify `<TOPIC_DIR>/wiki/**`.
+- Do not modify `<TOPIC_DIR>/wiki/source_assets/**`.
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Do not modify `<TOPIC_DIR>/plan.yaml`.
 - Do not modify `<TOPIC_DIR>/.wheels_state.json`.
@@ -164,6 +177,50 @@ The section author must not enrich, repair, strengthen, or update `<TOPIC_DIR>/t
 - discovered source inventory
 - section plan metadata
 
+## Source Asset Handling
+
+When `<SECTION_DIR>/section.yaml` maps source assets to the section, consume those assets as read-only source evidence.
+
+Use:
+
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md` to explain equations accurately
+- `<TOPIC_DIR>/wiki/source_assets/figures.md` to understand paper figures, charts, and diagrams
+- `<TOPIC_DIR>/wiki/source_assets/tables.md` to understand tables
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md` to respect caveats and verification needs
+- page or extracted evidence images as source evidence, not as section visuals by default
+
+Do not modify:
+
+- `<TOPIC_DIR>/wiki/source_assets/**`
+- `<TOPIC_DIR>/wiki/**`
+- `<SECTION_DIR>/section.yaml`
+
+Do not copy raw evidence images into the section by default. If a source asset inspires a teaching visual, create a simplified section-local visual under `<SECTION_DIR>/visuals/**` and document the transformation in `<SECTION_DIR>/authoring_notes.md` and `<SECTION_DIR>/source_notes.md`.
+
+### Formula Handling Rule
+
+If the section depends on a formula asset:
+
+- explain the intuition before the equation
+- define every symbol used
+- include a small worked example when useful
+- explicitly state any simplification
+- if `visual_verification_needed` is `true`, do not pretend the formula is fully verified
+- either visually verify the evidence image if practical or mark the relevant prose as needing verification in `<SECTION_DIR>/authoring_notes.md`
+
+### Figure And Table Handling Rule
+
+If the section depends on figure or table assets:
+
+- do not blindly copy dense paper visuals into the section
+- decide whether to:
+  - explain in text
+  - redraw a simplified teaching visual under `<SECTION_DIR>/visuals/**`
+  - use the original evidence image only as a reference
+  - skip it with reason
+- do not quote exact table or chart values unless they are marked reliable or visually verified
+- if exact values are uncertain, describe the qualitative trend instead
+
 ## Authoring Notes First
 
 Before writing polished prose, create `<SECTION_DIR>/authoring_notes.md`.
@@ -173,6 +230,7 @@ Before writing polished prose, create `<SECTION_DIR>/authoring_notes.md`.
 - what question this section answers
 - what the reader should understand by the end
 - source anchors and claims used
+- source assets used, if any
 - prerequisite concepts needed
 - expected reader confusions
 - concrete teaching mechanism selected
@@ -184,6 +242,16 @@ Before writing polished prose, create `<SECTION_DIR>/authoring_notes.md`.
 - what the toy/demo omits
 - toy-to-real bridge
 - section-local structure before prose
+
+When source assets exist for the section, `<SECTION_DIR>/authoring_notes.md` must include a `Source Assets Used` section listing:
+
+- formulas used
+- figures used
+- tables used
+- page evidence used
+- visual verification items
+- which assets were used only as source evidence
+- which assets were transformed into section teaching visuals
 
 ## Mechanism-First Teaching
 
@@ -214,6 +282,8 @@ Generate media only when it clarifies the section.
 
 If media is generated, it must be section-local under `<SECTION_DIR>/visuals/**`, `<SECTION_DIR>/manim/**`, or `<SECTION_DIR>/manim_media/**`. Media must have a clear teaching purpose and must not be decorative filler.
 
+If media is based on source assets, it must be a section-local teaching artifact unless there is a clear reason to embed original evidence. Preserve source fidelity, but prefer simplified explanatory visuals over dense paper screenshots.
+
 ## Prose Rule
 
 Write `<SECTION_DIR>/draft.md` as the canonical section draft.
@@ -228,6 +298,10 @@ Create `<SECTION_DIR>/preview.html` as a reader-facing preview for this section 
 
 It should render the section draft, visuals, code snippets, and captions in context. It should not include internal planning notes unless clearly collapsed or omitted.
 
+If the section creates simplified visuals based on source assets, include the simplified section visual in `<SECTION_DIR>/preview.html`.
+
+Do not expose raw evidence page screenshots in the reader-facing preview unless there is a clear teaching reason. If a paper figure or table is referenced but not reproduced, mention it in prose rather than embedding raw evidence by default.
+
 Do not create or modify `<TOPIC_DIR>/outputs/preview.html`.
 
 ## Source Notes
@@ -235,8 +309,11 @@ Do not create or modify `<TOPIC_DIR>/outputs/preview.html`.
 Create or update `<SECTION_DIR>/source_notes.md` with:
 
 - source anchors used
+- source assets used
 - claims supported by each source
 - assumptions or simplifications
+- visual verification caveats
+- which source assets were used only as evidence and which were transformed into section-local teaching visuals
 - toy-to-real caveats
 
 ## State
@@ -292,7 +369,7 @@ You may creatively choose:
 You must not creatively invent:
 
 - unsupported source claims
-- results not present in `<TOPIC_DIR>/wiki/**` or source anchors
+- results not present in `<TOPIC_DIR>/wiki/**`, `<TOPIC_DIR>/wiki/source_assets/**`, or source anchors
 - fake citations
 - production details not grounded in sources or clearly marked as interpretation
 - content from future sections
