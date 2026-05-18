@@ -1,0 +1,108 @@
+topic_id: system_design_youtube
+topic_dir: topics/system_design_youtube
+article_shape: system_design_deep_dive
+audience_profile: system_design_interview_l5_plus
+planning_inputs:
+  - topics/system_design_youtube/topic.yaml
+  - topics/system_design_youtube/plan.yaml
+  - topics/system_design_youtube/wiki/index.md
+  - topics/system_design_youtube/wiki/source_map.md
+  - topics/system_design_youtube/wiki/requirements_and_scope.md
+  - topics/system_design_youtube/wiki/capacity_and_constraints.md
+  - topics/system_design_youtube/wiki/apis_and_entities.md
+  - topics/system_design_youtube/wiki/architecture_notes.md
+  - topics/system_design_youtube/wiki/operations_and_failure_modes.md
+  - topics/system_design_youtube/wiki/glossary.md
+  - topics/system_design_youtube/wiki/open_questions.md
+section_order:
+  - section_id: section_01_foundation
+    title: "What are we building?"
+    reason_for_position: "Starts with scope, source boundaries, and concrete creator/viewer journeys before components."
+  - section_id: section_02_requirements_apis_scale
+    title: "Requirements, APIs, and scale"
+    reason_for_position: "Turns the prompt into measurable requirements and request shapes before storage or architecture choices."
+  - section_id: section_03_data_model_storage
+    title: "Data model and storage choices"
+    reason_for_position: "Defines state and storage boundaries before walking through write/read pipelines."
+  - section_id: section_04_upload_transcoding
+    title: "Upload and transcoding pipeline"
+    reason_for_position: "Covers the hardest write path after entities, APIs, and storage are established."
+  - section_id: section_05_playback_cdn
+    title: "Playback, CDN, and edge caching"
+    reason_for_position: "Covers the dominant read path after processed media artifacts exist."
+  - section_id: section_06_discovery_engagement
+    title: "Search, recommendations, and engagement"
+    reason_for_position: "Adds product subsystems around the core video path without letting them dominate the article."
+  - section_id: section_07_reliability_operations_cost
+    title: "Reliability, observability, and cost"
+    reason_for_position: "Deepens the design once all major workflows and bottlenecks are visible."
+  - section_id: section_08_final_architecture
+    title: "Final architecture and interview recap"
+    reason_for_position: "Synthesizes the design and gives a concise interview-ready answer after all mechanisms are introduced."
+authoring_order_notes: "Author sections in order. Each section should be reviewed, fixed, and approved before the next begins."
+section_dependencies:
+  section_01_foundation: []
+  section_02_requirements_apis_scale:
+    - section_01_foundation
+  section_03_data_model_storage:
+    - section_01_foundation
+    - section_02_requirements_apis_scale
+  section_04_upload_transcoding:
+    - section_02_requirements_apis_scale
+    - section_03_data_model_storage
+  section_05_playback_cdn:
+    - section_03_data_model_storage
+    - section_04_upload_transcoding
+  section_06_discovery_engagement:
+    - section_03_data_model_storage
+    - section_05_playback_cdn
+  section_07_reliability_operations_cost:
+    - section_04_upload_transcoding
+    - section_05_playback_cdn
+    - section_06_discovery_engagement
+  section_08_final_architecture:
+    - section_01_foundation
+    - section_02_requirements_apis_scale
+    - section_03_data_model_storage
+    - section_04_upload_transcoding
+    - section_05_playback_cdn
+    - section_06_discovery_engagement
+    - section_07_reliability_operations_cost
+global_prerequisite_ladder:
+  - "Product journey and source boundary"
+  - "Requirements, APIs, entities, and scale assumptions"
+  - "Metadata versus media bytes"
+  - "Storage domains, sharding, indexing, and consistency"
+  - "Async queues, workers, transcoding, renditions, and manifests"
+  - "Playback manifests, CDN, cache hit/miss, and origin"
+  - "Event streams, search indexing, counters, and feed serving"
+  - "SLOs, failure modes, degradation, cost, and multi-region tradeoffs"
+source_coverage_strategy: "Use public sources only for explicit grounding facts. Label all APIs, schemas, shard keys, workflows, capacity estimates, and architecture diagrams as plausible design choices or interview assumptions unless directly sourced."
+source_asset_strategy:
+  source_assets_available: false
+  important_assets: []
+  open_visual_verification_items:
+    - item: "No PDF source assets exist. Later visuals should be original teaching diagrams based on wiki notes, not copied source figures."
+mechanism_strategy: "Every section must center on a concrete mechanism: journey map, requirements table, data model diagram, sequence diagram, pipeline, cache-flow diagram, aggregation flow, failure-mode table, or final architecture map."
+media_strategy: "Prefer code-generated or structured diagrams for technical visuals. Use Graphviz for architecture/data-flow diagrams, Mermaid for simple sequence diagrams if locally supported, and hand SVG only for simple tables or layouts where code generation adds no value. Do not use AI-generated images for technical diagrams."
+code_strategy: "Do not require runnable code. Use HTTP examples, pseudo-schema, queue message examples, and capacity arithmetic only where they clarify the design."
+toy_to_real_strategy: "Use small concrete examples first, such as one creator uploading one video and one viewer watching it, then bridge to fleet-scale concerns such as queue backlog, CDN hit rate, sharding, and counter aggregation."
+prerequisite_ramp_strategy:
+  default_order: "concrete object -> plain-English intuition -> tiny example -> notation -> paper terminology -> formula/algorithm"
+  audience_constraints: "Main flow should be strong L5 interview-practical; L6+ callouts are selective and must deepen tradeoffs, not add generic component lists."
+  section_1_assumptions: "Assume general software/system design familiarity, but do not assume knowledge of CDNs, transcoding, sharding, or adaptive bitrate."
+system_design_strategy:
+  applies: true
+  main_path_level: strong_l5
+  l6_plus_policy: selective_only
+  requirements_strategy: "Make functional and nonfunctional requirements explicit, tie each to a mechanism, and label non-goals early."
+  capacity_strategy: "Use round-number interview assumptions and source-grounded anchors separately; never present assumptions as measured YouTube data."
+  api_strategy: "Design APIs around state transitions and failure semantics, not just endpoint lists."
+  data_model_strategy: "Separate metadata, media blobs, search index, engagement actions, counters, and event streams by access pattern."
+  workflow_strategy: "Show upload/transcoding and playback as step-by-step workflows with sync/async boundaries."
+  reliability_strategy: "Tie failure modes to user impact, mitigation, detection, and graceful degradation."
+  observability_strategy: "Plan metrics, logs, traces, alerts, and SLOs near the workflows they observe."
+user_review_policy:
+  mode: section_by_section
+  must_wait_for_approval: true
+status: planned

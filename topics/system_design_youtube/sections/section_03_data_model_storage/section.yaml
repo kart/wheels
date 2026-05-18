@@ -1,0 +1,237 @@
+section_id: section_03_data_model_storage
+title: "Data model and storage choices"
+status: planned
+learning_goal: "Plan how metadata, media blobs, search indexes, event streams, and counters fit into separate storage domains."
+reader_outcome: "Reader can defend storage choices by access pattern instead of saying 'NoSQL because scale'."
+source_anchors:
+  - source: topics/system_design_youtube/wiki/apis_and_entities.md
+    relevant_claims:
+      - "Metadata, object storage, search index, and analytics/event stream serve different access patterns."
+      - "Candidate shard keys include video_id, channel_id, user_id, and time buckets."
+  - source: topics/system_design_youtube/wiki/source_map.md
+    relevant_claims:
+      - "Vitess public docs ground sharded SQL and proxy routing, not current YouTube schema."
+  - source: topics/system_design_youtube/wiki/glossary.md
+    relevant_claims:
+      - "Definitions exist for metadata, object storage, sharding, read replica, consistency, VTGate, and VTTablet."
+source_assets:
+  formulas: []
+  figures: []
+  tables: []
+  pages: []
+visual_verification_required: []
+prerequisite_concepts:
+  - section_02 APIs and entities
+  - durable state
+  - read/write workload
+prerequisite_ladder:
+  assumed_concepts:
+    - API
+    - entity
+    - capacity assumption
+  concepts_introduced_here:
+    - metadata versus blob
+    - shard
+    - replica
+    - index
+    - transaction
+    - eventual consistency
+  concrete_mental_model: "Video title is a small row; video bytes are large objects; search is a derived index."
+  tiny_example: "Changing a title updates metadata and search later, but it does not rewrite video chunks."
+terms_that_must_be_introduced_before_use:
+  - metadata
+  - object storage
+  - shard
+  - read replica
+  - search index
+  - event stream
+  - counter aggregation
+term_introduction_strategy:
+  immediate_plain_english:
+    - metadata
+    - object storage
+    - shard
+    - search index
+  tiny_example_needed:
+    - consistency
+    - counter aggregation
+  already_established_in:
+    - section_02_requirements_apis_scale
+  can_be_used_lightly:
+    - SQL
+    - NoSQL
+  defer_formal_definition_until:
+    - CDN
+notation_introduction_order: []
+intuition_before_notation_notes: "Use access-pattern tables and schema snippets rather than formulas."
+depends_on_sections:
+  - section_01_foundation
+  - section_02_requirements_apis_scale
+authoring_order_notes: "Must come before workflow sections so later pipelines can refer to concrete storage boundaries."
+key_questions_to_answer:
+  - "Which data is authoritative?"
+  - "Which data is derived?"
+  - "Where do large media bytes live?"
+  - "When is SQL a good choice?"
+  - "When are eventual counters acceptable?"
+core_mechanism:
+  type: architecture_diagram
+  why_this_mechanism: "A storage-domain map ties each access pattern to the right store."
+media_needed:
+  - type: data_model_diagram
+    purpose: "Show User, Channel, Video, Rendition, Manifest, Comment, Subscription, and Engagement relationships."
+    preferred_generation_method: code_generated
+    suggested_tool: graphviz
+    visual_source_expected: true
+    rendered_outputs_expected:
+      - svg
+      - png
+    source_assets_used: []
+    review_requirements:
+      - rendered_visual_check
+      - no_clipping
+      - no_misleading_implication
+      - caption_matches_visual
+  - type: storage_decision_table
+    purpose: "Map access patterns to SQL/object/search/event/counter storage."
+    preferred_generation_method: hand_svg
+    suggested_tool: plain_svg
+    visual_source_expected: true
+    rendered_outputs_expected:
+      - svg
+      - png
+    source_assets_used: []
+    review_requirements:
+      - rendered_visual_check
+      - caption_matches_visual
+code_needed:
+  required: false
+  why: "Pseudo-schema snippets are enough and should be embedded as educational examples later."
+  artifact_type: pseudo_schema
+toy_or_scaled_down_demo:
+  description: "One video row, one object path, one search document, one view event."
+  what_it_demonstrates: "Different copies of data serve different reads."
+  what_it_omits: "Operational details of resharding and index rebuilds."
+toy_to_real_bridge: "After the toy row/object/index, explain hot partitions, sharding, replica reads, and delayed derived data."
+expected_reader_confusions:
+  - "Thinking object storage can answer metadata queries."
+  - "Thinking SQL cannot scale."
+  - "Thinking search index is the source of truth."
+section_specific_review_checks:
+  - "Vitess claims are limited to public documentation."
+  - "SQL vs NoSQL reasoning names query, consistency, and operational tradeoffs."
+completion_criteria:
+  - "Data domains are separated by access pattern."
+  - "Shard keys and consistency boundaries are explained."
+user_review_gate:
+  required: true
+  instruction: "Stop after this section is authored/reviewed/fixed and wait for user approval before continuing."
+design_questions:
+  - question: "What data must be strongly consistent?"
+  - question: "What data can be derived asynchronously?"
+  - question: "How does sharded SQL compare with NoSQL for metadata?"
+requirements_covered:
+  functional:
+    - metadata storage
+    - media storage
+    - search
+    - engagement state
+  non_functional:
+    - scalable reads
+    - durable storage
+    - consistency boundaries
+design_decisions:
+  - decision: "Separate media bytes from metadata."
+    options_considered:
+      - "store everything in a database"
+      - "store media in object storage and metadata in queryable stores"
+    chosen_option: "separate media and metadata"
+    reason: "Large blobs and small queryable records have different access patterns."
+    tradeoffs: "Requires pointers and lifecycle coordination."
+    l6_plus_extension: "Discuss garbage collection for orphaned blobs and deletion guarantees."
+  - decision: "Use sharded SQL as a plausible metadata tier option."
+    options_considered:
+      - "single SQL database"
+      - "sharded SQL with proxy"
+      - "NoSQL primary store"
+    chosen_option: "sharded SQL option, not mandatory"
+    reason: "Public Vitess docs show scalable SQL can be viable for YouTube-era metadata scaling."
+    tradeoffs: "Maintains SQL semantics but adds sharding operations."
+    l6_plus_extension: "Discuss resharding and query routing as platform concerns."
+apis_to_design: []
+data_model:
+  entities:
+    - User
+    - Channel
+    - Video
+    - Rendition
+    - Manifest
+    - Comment
+    - Subscription
+    - EngagementAction
+    - WatchEvent
+  storage_choice:
+    - "metadata: sharded SQL or similar strongly queryable store"
+    - "media: object storage"
+    - "search: search index"
+    - "events: stream/analytics store"
+    - "counters: aggregated store"
+  sql_vs_nosql_reasoning: "Choose by access pattern, consistency, indexing, transactions, and operational maturity."
+  indexes:
+    - "video_id primary lookup"
+    - "channel_id plus publish_time"
+    - "user_id plus subscription/channel"
+    - "search inverted indexes"
+  partitioning_key:
+    - video_id
+    - channel_id
+    - user_id
+    - time_bucket plus video_id
+  consistency_model: "Strong for ownership/privacy/publication state; eventual for search, counters, and analytics."
+  l6_plus_extension: "Privacy deletion requires coordinated removal from primary, derived indexes, caches, and analytics."
+workflows: []
+diagrams_needed:
+  - type: data_model
+    purpose: "Show entities and storage domains."
+    preferred_generation_method: code_generated
+    suggested_tool: graphviz
+scale_and_capacity:
+  assumptions:
+    - "Metadata QPS is high but payloads are small."
+    - "Media bytes dominate storage and bandwidth."
+  bottlenecks:
+    - "hot video rows"
+    - "large object reads"
+    - "search index freshness"
+  scaling_strategy: "Shard metadata, cache reads, store media in object storage, and derive indexes/events asynchronously."
+  l6_plus_extension: "Separate logical data ownership from physical storage implementation."
+failure_modes:
+  - failure: "Search index lag"
+    mitigation: "Primary metadata remains source of truth; replay events."
+    detection: "Indexing lag metric."
+    l6_plus_extension: "Use tombstones for privacy/deletion propagation."
+observability:
+  metrics:
+    - "database latency by shard"
+    - "cache hit ratio"
+    - "indexing lag"
+  logs:
+    - "state transition logs"
+  traces:
+    - "metadata read trace"
+  alerts:
+    - "hot shard"
+  slos:
+    - "metadata read latency"
+source_grounding:
+  known_public_facts:
+    - "Vitess was created for YouTube MySQL scalability challenges."
+    - "Vitess uses proxy routing and sharding for MySQL."
+  inferred_design_choices:
+    - "The specific schema and shard keys."
+  sources_to_consult:
+    - topics/system_design_youtube/wiki/source_map.md
+l6_plus_callouts:
+  - topic: "Resharding and deletion propagation"
+    why_it_matters: "Senior designs account for data evolution and compliance-like state changes."
+    where_to_include: "After SQL vs NoSQL tradeoff."

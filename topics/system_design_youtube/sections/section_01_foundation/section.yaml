@@ -1,0 +1,190 @@
+section_id: section_01_foundation
+title: "What are we building?"
+status: planned
+learning_goal: "Frame the YouTube-like product, source boundary, non-goals, and two concrete user journeys."
+reader_outcome: "Reader can explain the system scope and distinguish public facts from plausible design choices."
+source_anchors:
+  - source: topics/system_design_youtube/raw/brief.md
+    relevant_claims:
+      - "Product scope includes upload, watch, metadata browsing, search, engagement, subscriptions, recommendations, view counts, and moderation hooks."
+      - "Do not claim exact YouTube internals without public support."
+  - source: topics/system_design_youtube/wiki/source_map.md
+    relevant_claims:
+      - "Public sources are grounding anchors; most architecture choices are inferred."
+  - source: topics/system_design_youtube/wiki/requirements_and_scope.md
+    relevant_claims:
+      - "Creator upload and viewer playback are the two concrete journeys."
+source_assets:
+  formulas: []
+  figures: []
+  tables: []
+  pages: []
+visual_verification_required: []
+prerequisite_concepts:
+  - product scope
+  - functional requirement
+  - nonfunctional requirement
+  - source-grounded claim
+prerequisite_ladder:
+  assumed_concepts:
+    - basic client/server request
+  concepts_introduced_here:
+    - public fact versus inferred design choice
+    - upload journey
+    - playback journey
+    - non-goal
+  concrete_mental_model: "One creator uploads a video; one viewer watches it later."
+  tiny_example: "A creator uploads `cooking.mp4`; the system stores it, processes it, and later a viewer streams playable chunks."
+terms_that_must_be_introduced_before_use:
+  - source grounding
+  - inferred design
+  - upload journey
+  - playback journey
+  - non-goal
+term_introduction_strategy:
+  immediate_plain_english:
+    - source grounding
+    - inferred design
+    - non-goal
+  tiny_example_needed:
+    - upload journey
+    - playback journey
+  already_established_in: []
+  can_be_used_lightly:
+    - API
+    - database
+  defer_formal_definition_until:
+    - CDN
+    - transcoding
+    - sharding
+notation_introduction_order: []
+intuition_before_notation_notes: "No notation needed. Use two concrete user stories before listing components."
+depends_on_sections: []
+authoring_order_notes: "Must be authored first."
+key_questions_to_answer:
+  - "What product are we designing?"
+  - "Which claims are public facts and which are design choices?"
+  - "What does the creator experience?"
+  - "What does the viewer experience?"
+core_mechanism:
+  type: visual_trace
+  why_this_mechanism: "A two-lane journey map makes the rest of the architecture feel necessary."
+media_needed:
+  - type: journey_map
+    purpose: "Show creator upload and viewer playback as separate but connected paths."
+    preferred_generation_method: code_generated
+    suggested_tool: graphviz
+    visual_source_expected: true
+    rendered_outputs_expected:
+      - svg
+      - png
+    source_assets_used: []
+    review_requirements:
+      - rendered_visual_check
+      - no_clipping
+      - no_misleading_implication
+      - caption_matches_visual
+code_needed:
+  required: false
+  why: "A journey map teaches better than code."
+  artifact_type: none
+toy_or_scaled_down_demo:
+  description: "One creator, one uploaded file, one later viewer."
+  what_it_demonstrates: "Upload and watch are different workflows with different constraints."
+  what_it_omits: "Scale, storage choices, and operational failures."
+toy_to_real_bridge: "After the toy journey, point out which steps become bottlenecks at platform scale."
+expected_reader_confusions:
+  - "Thinking the article describes actual YouTube internals."
+  - "Treating upload completion as equivalent to playback readiness."
+section_specific_review_checks:
+  - "Does not overclaim YouTube internals."
+  - "Explains the two journeys before naming many components."
+completion_criteria:
+  - "Scope, non-goals, and source boundary are explicit."
+  - "Journey visual is planned or created later near the section."
+user_review_gate:
+  required: true
+  instruction: "Stop after this section is authored/reviewed/fixed and wait for user approval before continuing."
+design_questions:
+  - question: "What exact product scope should the interview answer cover?"
+  - question: "What is public source grounding versus inferred system design?"
+requirements_covered:
+  functional:
+    - upload videos
+    - watch videos
+    - discover and engage with videos
+  non_functional:
+    - source fidelity
+    - clear non-goals
+design_decisions:
+  - decision: "Use a YouTube-like system, not YouTube's internal architecture."
+    options_considered:
+      - "claim actual YouTube internals"
+      - "design a plausible YouTube-like platform"
+    chosen_option: "design a plausible YouTube-like platform"
+    reason: "Sources do not disclose full internals."
+    tradeoffs: "Less sensational, more accurate and interview-useful."
+    l6_plus_extension: "Call out where public facts constrain design but do not determine implementation."
+apis_to_design: []
+data_model:
+  entities: []
+  storage_choice: []
+  sql_vs_nosql_reasoning: ""
+  indexes: []
+  partitioning_key: []
+  consistency_model: ""
+  l6_plus_extension: ""
+workflows:
+  - name: "Creator upload journey"
+    steps:
+      - "Authenticate"
+      - "Create upload session"
+      - "Upload original bytes"
+      - "Start async processing"
+      - "Publish when ready"
+    sync_or_async: "mixed"
+    failure_modes:
+      - "upload interrupted"
+      - "processing delayed"
+    retry_idempotency_notes: "Detailed idempotency is deferred to section 04."
+  - name: "Viewer playback journey"
+    steps:
+      - "Open video"
+      - "Fetch metadata and manifest"
+      - "Fetch media chunks"
+      - "Emit watch event"
+    sync_or_async: "mixed"
+    failure_modes:
+      - "video not ready"
+      - "media fetch fails"
+    retry_idempotency_notes: "Detailed CDN/playback behavior is deferred to section 05."
+diagrams_needed:
+  - type: architecture
+    purpose: "Two-lane journey map."
+    preferred_generation_method: code_generated
+    suggested_tool: graphviz
+scale_and_capacity:
+  assumptions: []
+  bottlenecks:
+    - "upload processing"
+    - "playback delivery"
+  scaling_strategy: "Deferred to later sections."
+  l6_plus_extension: ""
+failure_modes: []
+observability:
+  metrics: []
+  logs: []
+  traces: []
+  alerts: []
+  slos: []
+source_grounding:
+  known_public_facts:
+    - "Public sources ground only selected CDN, database scaling, and transcoding facts."
+  inferred_design_choices:
+    - "The proposed end-to-end architecture."
+  sources_to_consult:
+    - topics/system_design_youtube/wiki/source_map.md
+l6_plus_callouts:
+  - topic: "Source boundary discipline"
+    why_it_matters: "Senior interview answers avoid unsupported claims."
+    where_to_include: "End of section 01."
