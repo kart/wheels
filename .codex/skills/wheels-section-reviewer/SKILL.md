@@ -208,6 +208,10 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 
 ### Media Review, If Media Exists
 
+- If the section contains any reader-facing visual artifact, inspect the rendered visual output when local tooling makes that possible.
+- Reader-facing visual artifacts include `<SECTION_DIR>/visuals/**`, `<SECTION_DIR>/manim_media/**`, SVG files, PNG/JPG/WebP files, charts, diagrams, and `<SECTION_DIR>/preview.html` with embedded visuals.
+- Do not rely only on source text for SVG files. Inspect the rendered SVG when possible.
+- For rendered SVGs and other rendered visuals, check for clipped text, text running outside the canvas, overlap, occlusion, unreadable labels, poor visual hierarchy, oversized arrows or marks, ambiguous arrows or labels, misleading visual implications, and inconsistencies between the caption and the image meaning.
 - Does every visual/media artifact teach one clear idea?
 - Are labels readable?
 - Are there occlusion issues?
@@ -218,9 +222,12 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - If visuals are derived from source assets, do they preserve the source meaning?
 - Do simplified visuals introduce any misleading claims?
 - Do captions clearly distinguish original source evidence from teaching redraws?
+- If rendered visual inspection is not possible with available local tooling, state that explicitly in `<SECTION_DIR>/review.md` and treat visual review as incomplete.
 
 ### Preview Review
 
+- Open or render `<SECTION_DIR>/preview.html` when local browser or screenshot tooling is available.
+- If browser/screenshot rendering is not available, inspect the HTML, linked image paths, image dimensions, and layout constraints, but mark rendered preview review as incomplete.
 - Does `<SECTION_DIR>/preview.html` render as a reader-facing section preview?
 - Are visuals/code/captions shown in context?
 - Are internal notes omitted or clearly separated?
@@ -237,6 +244,13 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - Is this section ready for user reading?
 - What blocks approval?
 - What can be improved later but does not block approval?
+- If the section contains important reader-facing visuals and rendered visual inspection was not performed, do not mark the section fully approval-ready.
+- If an uninspected important visual is central to the section's learning mechanism, set `needs_fix: true` and state that visual review is incomplete.
+- If an uninspected visual is not central to the section's learning mechanism, list incomplete rendered visual review as a caveat.
+- If rendered visual inspection finds clipping, text running outside the canvas, overlap, occlusion, unreadable labels, misleading visual implications, or caption/image mismatch in a reader-facing visual, mark this as a review finding.
+- If that visual is central to the section's learning mechanism or appears in `<SECTION_DIR>/preview.html`, set `needs_fix: true`.
+- Do not mark the section approval-ready until the visual issue is fixed or explicitly deferred by the user.
+- Do not set `approved_by_user: true`; only the user can approve a section.
 
 ## Output
 
@@ -275,9 +289,20 @@ State whether the section meets its learning goal and key questions.
 
 ## Mechanism / Code / Media Notes
 Review the concrete teaching mechanism, code, visuals, Manim, or diagrams.
+Explicitly state:
+- whether rendered visual inspection was performed
+- which visual files were inspected
+- whether clipping, overlap, occlusion, unreadable labels, visual hierarchy problems, oversized marks, ambiguous arrows/labels, misleading implications, or caption/image mismatches were found
+- whether visual review is complete or incomplete
 
 ## Preview / Rendering Notes
 Review `<SECTION_DIR>/preview.html`.
+Explicitly state:
+- whether `<SECTION_DIR>/preview.html` was opened or rendered
+- which preview rendering method or local tooling was used, if any
+- whether embedded visuals rendered in context
+- whether clipping, overlap, occlusion, bad layout, broken paths, or unreadable visual labels were found
+- whether rendered preview review is complete or incomplete
 
 ## Recommended Fixes
 Give exact, actionable fixes with file references.
