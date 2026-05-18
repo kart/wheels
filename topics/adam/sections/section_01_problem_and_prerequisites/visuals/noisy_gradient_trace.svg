@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="420" viewBox="0 0 920 420" role="img" aria-labelledby="title desc">
+  <title id="title">Noisy gradients make repeated updates zigzag</title>
+  <desc id="desc">A teaching diagram contrasting raw stochastic gradient steps with a smoother stateful optimizer path toward a low-loss region.</desc>
+  <rect width="920" height="420" fill="#fbfbf8"/>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2f6f9f"/>
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#2f7d4f"/>
+    </marker>
+  </defs>
+
+  <text x="60" y="44" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#222">One parameter, noisy hints</text>
+  <text x="60" y="72" font-family="Arial, sans-serif" font-size="14" fill="#555">Each mini-batch gradient points downhill locally, but the hint can wobble.</text>
+
+  <line x1="88" y1="330" x2="388" y2="330" stroke="#777" stroke-width="2"/>
+  <line x1="88" y1="330" x2="88" y2="110" stroke="#777" stroke-width="2"/>
+  <text x="218" y="368" font-family="Arial, sans-serif" font-size="14" fill="#555">parameter value</text>
+  <text x="27" y="226" font-family="Arial, sans-serif" font-size="14" fill="#555" transform="rotate(-90 27 226)">loss</text>
+
+  <path d="M105 139 C145 122, 190 140, 230 185 C272 232, 320 287, 375 320" fill="none" stroke="#b9a46b" stroke-width="5" opacity="0.35"/>
+  <circle cx="355" cy="306" r="34" fill="#f2e7b8" stroke="#b9a46b" stroke-width="2"/>
+  <text x="318" y="314" font-family="Arial, sans-serif" font-size="13" fill="#6e5b1f">lower loss</text>
+
+  <polyline points="125,148 165,205 204,166 242,235 284,213 326,278 358,306" fill="none" stroke="#2f6f9f" stroke-width="4" marker-mid="url(#arrow-blue)" marker-end="url(#arrow-blue)"/>
+  <circle cx="125" cy="148" r="6" fill="#2f6f9f"/>
+  <text x="118" y="112" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#2f6f9f">raw SGD-style nudges</text>
+  <text x="118" y="132" font-family="Arial, sans-serif" font-size="12" fill="#555">uses the current noisy hint directly</text>
+
+  <text x="500" y="44" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#222">Why keep optimizer state?</text>
+  <text x="500" y="72" font-family="Arial, sans-serif" font-size="14" fill="#555">A stateful optimizer remembers recent hints before deciding the next nudge.</text>
+
+  <line x1="528" y1="330" x2="828" y2="330" stroke="#777" stroke-width="2"/>
+  <line x1="528" y1="330" x2="528" y2="110" stroke="#777" stroke-width="2"/>
+  <text x="658" y="368" font-family="Arial, sans-serif" font-size="14" fill="#555">parameter value</text>
+  <text x="467" y="226" font-family="Arial, sans-serif" font-size="14" fill="#555" transform="rotate(-90 467 226)">loss</text>
+
+  <path d="M545 139 C585 122, 630 140, 670 185 C712 232, 760 287, 815 320" fill="none" stroke="#b9a46b" stroke-width="5" opacity="0.35"/>
+  <circle cx="795" cy="306" r="34" fill="#f2e7b8" stroke="#b9a46b" stroke-width="2"/>
+  <text x="758" y="314" font-family="Arial, sans-serif" font-size="13" fill="#6e5b1f">lower loss</text>
+
+  <path d="M565 148 C610 176, 645 195, 690 226 C730 253, 762 279, 798 306" fill="none" stroke="#2f7d4f" stroke-width="5" marker-end="url(#arrow-green)"/>
+  <circle cx="565" cy="148" r="6" fill="#2f7d4f"/>
+  <text x="558" y="112" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#2f7d4f">stateful nudges</text>
+  <text x="558" y="132" font-family="Arial, sans-serif" font-size="12" fill="#555">remember direction and scale before stepping</text>
+
+  <rect x="480" y="255" width="180" height="78" rx="8" fill="#ffffff" stroke="#cfcfcf"/>
+  <text x="498" y="280" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#333">Optimizer memory</text>
+  <text x="498" y="301" font-family="Arial, sans-serif" font-size="12" fill="#555">recent direction</text>
+  <text x="498" y="319" font-family="Arial, sans-serif" font-size="12" fill="#555">recent squared size</text>
+
+  <text x="60" y="397" font-family="Arial, sans-serif" font-size="13" fill="#555">Qualitative teaching sketch. It shows the motivation for optimizer state, not a measured Adam result.</text>
+</svg>
