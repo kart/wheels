@@ -26,6 +26,7 @@ Use scoped paths like:
 - `<TOPIC_DIR>/topic.yaml`
 - `<TOPIC_DIR>/plan.yaml`
 - `<TOPIC_DIR>/wiki/**`
+- `<TOPIC_DIR>/wiki/source_assets/**`
 - `<TOPIC_DIR>/sections/section_plan.yaml`
 - `<TOPIC_DIR>/sections/<section_id>/section.yaml`
 - `<TOPIC_DIR>/sections/<section_id>/state.yaml`
@@ -97,6 +98,8 @@ Do not create any other files under `<TOPIC_DIR>/reviews/**`.
 
 - Do not modify `<TOPIC_DIR>/raw/**`.
 - Do not modify `<TOPIC_DIR>/outputs/**`.
+- Do not modify `<TOPIC_DIR>/wiki/**`.
+- Do not modify `<TOPIC_DIR>/wiki/source_assets/**`.
 - Do not modify `<TOPIC_DIR>/plan.yaml`.
 - Do not modify `<TOPIC_DIR>/.wheels_state.json`.
 - Do not modify `<TOPIC_DIR>/sections/**`.
@@ -119,6 +122,16 @@ Do not create any other files under `<TOPIC_DIR>/reviews/**`.
 ## Audit Behavior
 
 Review the full topic across all approved sections.
+
+If `<TOPIC_DIR>/wiki/source_assets/**` exists, inspect:
+
+- `<TOPIC_DIR>/wiki/source_assets/index.yaml`
+- `<TOPIC_DIR>/wiki/source_assets/formulas.md`
+- `<TOPIC_DIR>/wiki/source_assets/figures.md`
+- `<TOPIC_DIR>/wiki/source_assets/tables.md`
+- `<TOPIC_DIR>/wiki/source_assets/visual_audit.md`
+
+Treat all source asset files as read-only. Use them to audit whether source evidence was mapped, used, reviewed, fixed, deferred, or documented appropriately across sections.
 
 ## Audit Checks
 
@@ -150,6 +163,17 @@ Review the full topic across all approved sections.
 - Are claims grounded in `<TOPIC_DIR>/wiki/**` and section source notes?
 - Are interpretations clearly separated from source-backed claims?
 - Are limitations and caveats represented honestly?
+
+### Source Asset And Visual Evidence Handling
+
+- Do section.yaml files reference relevant source assets where appropriate?
+- Were important formula assets covered by some section?
+- Were important figure/table/chart assets either used, explicitly skipped, or noted as not relevant?
+- Are `visual_verification_required` items resolved, deferred, or clearly documented?
+- Did any section quote exact chart/table values that were not marked reliable or visually verified?
+- Did any section transform paper figures/tables into simplified teaching visuals, and if so, was the transformation reviewed?
+- Are source-asset caveats carried through `<SECTION_DIR>/review.md`, `<SECTION_DIR>/fix_log.md`, `<SECTION_DIR>/source_notes.md`, or section prose?
+- Are any rich PDF visual audit caveats still blocking publish readiness?
 
 ### Redundancy And Contradiction
 
@@ -185,6 +209,8 @@ Review the full topic across all approved sections.
 - Are there broken markdown, math, HTML, code block, image, or asset path issues?
 - Are blog fragments likely to assemble cleanly?
 - Are there front matter concerns that should be handled by publish-pack?
+- If a visual verification item is blocking and unresolved, the verdict must be `blocked` or `needs_cross_section_fixes` and `ready_for_publish_pack` must be `false`.
+- If visual verification items are non-blocking caveats, list them in `<TOPIC_DIR>/reviews/final_audit.md`; publish-pack may proceed only if the caveats do not affect correctness of the final article.
 
 ### Audience Fit
 
@@ -228,6 +254,15 @@ Assess definitions, prerequisite ladder, and consistency.
 
 ## Source Fidelity / Coverage Notes
 Assess source grounding and major coverage gaps.
+
+## Source Asset / Visual Evidence Notes
+Include:
+- important formulas/figures/tables/pages audited
+- source assets covered by sections
+- source assets missing section coverage
+- unresolved visual verification items
+- manual spot-checks still needed
+- whether publish-pack may proceed safely
 
 ## Mechanism / Code / Media Notes
 Assess teaching mechanisms, toy demos, visuals, code, and toy-to-real bridges.
