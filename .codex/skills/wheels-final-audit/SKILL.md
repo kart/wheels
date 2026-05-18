@@ -234,6 +234,24 @@ Treat all source asset files as read-only. Use them to audit whether source evid
 - Does it remain useful to an experienced CS learner building AI/system foundations?
 - Is the content deep enough, or does it collapse into summary?
 
+### System Design Deep Dive Coherence
+
+For `article_shape: system_design_deep_dive`, audit whole-topic design coherence:
+
+- Are requirements consistent across sections?
+- Are capacity assumptions consistent?
+- Do APIs, data models, and workflows agree?
+- Does the architecture evolve logically from simple to scaled design?
+- Are there contradictions in storage or consistency choices?
+- Are diagrams consistent across sections?
+- Are public facts vs inferred design choices clearly separated?
+- Is the final article not a copy of any source?
+- Is the final design deep enough to be useful beyond interview prep?
+- Are L6+ callouts selective, senior, and not bloated?
+- Does the main path remain useful to L5 candidates?
+
+If the system design is generic, shallow, component-list-only, or lacks design reasoning, set `ready_for_publish_pack: false`.
+
 ## Output
 
 Create or update `<TOPIC_DIR>/reviews/final_audit.md` with this structure:

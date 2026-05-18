@@ -256,6 +256,24 @@ user_review_policy:
 status: planned
 ```
 
+System design fields are optional and conditional. They should not be emitted for non-system-design sections unless explicitly relevant.
+
+For `article_shape: system_design_deep_dive`, `audience_profile: system_design_interview_l5_plus`, or explicitly system-design sections, add relevant top-level planning fields such as:
+
+```yaml
+system_design_strategy:
+  applies: true | false
+  main_path_level: strong_l5
+  l6_plus_policy: selective_only
+  requirements_strategy:
+  capacity_strategy:
+  api_strategy:
+  data_model_strategy:
+  workflow_strategy:
+  reliability_strategy:
+  observability_strategy:
+```
+
 ## Required Section Files
 
 Create one `<TOPIC_DIR>/sections/<section_id>/section.yaml` for each planned section. Each file must include at least:
@@ -348,6 +366,73 @@ user_review_gate:
   instruction: "Stop after this section is authored/reviewed/fixed and wait for user approval before continuing."
 ```
 
+System design fields are optional and conditional. Include the following fields only when `article_shape` is `system_design_deep_dive`, `audience_profile` is `system_design_interview_l5_plus`, or the section is explicitly a system-design section. For non-system-design topics, do not include these fields unless directly relevant; do not pollute `paper_deep_dive`, `algorithm_walkthrough`, or `general_concept_deep_dive` section files with empty system-design fields.
+
+```yaml
+design_questions:
+  - question:
+requirements_covered:
+  functional:
+  non_functional:
+design_decisions:
+  - decision:
+    options_considered:
+    chosen_option:
+    reason:
+    tradeoffs:
+    l6_plus_extension:
+apis_to_design:
+  - name:
+    purpose:
+    request_shape:
+    response_shape:
+    consistency_expectation:
+    failure_cases:
+data_model:
+  entities:
+  storage_choice:
+  sql_vs_nosql_reasoning:
+  indexes:
+  partitioning_key:
+  consistency_model:
+  l6_plus_extension:
+workflows:
+  - name:
+    steps:
+    sync_or_async:
+    failure_modes:
+    retry_idempotency_notes:
+diagrams_needed:
+  - type: architecture | sequence | data_model | state_machine | pipeline | cache_flow
+    purpose:
+    preferred_generation_method: code_generated | mermaid | graphviz | hand_svg
+    suggested_tool:
+scale_and_capacity:
+  assumptions:
+  bottlenecks:
+  scaling_strategy:
+  l6_plus_extension:
+failure_modes:
+  - failure:
+    mitigation:
+    detection:
+    l6_plus_extension:
+observability:
+  metrics:
+  logs:
+  traces:
+  alerts:
+  slos:
+source_grounding:
+  known_public_facts:
+  inferred_design_choices:
+  sources_to_consult:
+l6_plus_callouts:
+  - topic:
+    why_it_matters:
+    where_to_include:
+```
+
 Use stable, readable `section_id` values such as `section_01_motivation` or `section_04_core_mechanism`.
 
 ## Required README
@@ -402,18 +487,50 @@ For `article_shape: paper_deep_dive` or research paper topics:
 
 ### System Design Deep Dive
 
-For `article_shape: system_design_deep_dive`, plan sections in this general order:
+For `article_shape: system_design_deep_dive`, plan a serious system design deep dive, not a generic interview-prep outline. When `audience_profile: system_design_interview_l5_plus` is present, the main path should be useful to a strong L5 candidate and selective L6+ callouts should deepen only the decisions where senior-level reasoning materially helps.
 
-- concrete user journey
-- requirements and constraints
-- back-of-the-envelope scale
-- APIs/entities
+Plan sections that cover, when applicable:
+
+- problem framing and product scope
+- functional requirements
+- non-functional requirements
+- capacity and traffic estimates
+- core entities
+- API design
 - high-level architecture
+- upload/write path
+- read/playback path
+- async workflows
 - data model
-- deep dives into hard parts
-- failure modes
-- observability/operations
-- tradeoffs and final design
+- SQL vs NoSQL tradeoffs
+- blob/object storage vs metadata storage
+- partitioning/sharding strategy
+- indexing/search strategy
+- caching/CDN strategy
+- eventing/queues/stream processing
+- consistency choices
+- id generation
+- counters/analytics
+- recommendations/feed path, when applicable
+- abuse/moderation hooks, when applicable
+- reliability and failure modes
+- observability/metrics/SLOs
+- security/privacy basics
+- cost/performance tradeoffs
+- evolution from simple design to real-world scale
+
+For each relevant section, include system design planning fields in `<SECTION_DIR>/section.yaml` from the template above. Use them to capture design questions, requirements covered, design decisions, APIs, data model, workflows, diagrams, scale/capacity, failure modes, observability, source grounding, and selective L6+ callouts.
+
+Planner behavior:
+
+- Aim the default path at strong L5.
+- Ensure every major section teaches design reasoning, not just components.
+- Plan L6+ callouts selectively; do not require every section to have one.
+- Add an L6+ callout only when it meaningfully deepens the design.
+- Do not create separate L5/L6/L7 versions of each section.
+- Avoid bloated repeated level-specific answers.
+- Use clearly marked callout labels such as "L6+ extension:", "Senior-level tradeoff:", or "Where a stronger answer goes deeper:".
+- Candidate L6+ topics include multi-region architecture, consistency boundaries, capacity modeling, operational maturity, cost controls, incident handling, data evolution, platform abstractions, organizational/ownership tradeoffs, abuse/moderation implications, observability and SLOs, and migration/evolution strategy.
 
 Mechanisms may be architecture diagrams, sequence diagrams, tables, simulations, or pseudocode. Code is optional and should only be required when it clarifies an algorithm, simulation, or data structure. Always include a toy-to-real bridge for scale assumptions.
 

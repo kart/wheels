@@ -163,6 +163,20 @@ The final blog should:
 - use web-safe asset paths according to `<TOPIC_DIR>/topic.yaml`
 - not include internal authoring_notes, review notes, fix logs, or section state metadata
 
+For `article_shape: system_design_deep_dive`, preserve approved system design teaching artifacts and caveats:
+
+- architecture diagrams
+- API examples
+- schema/data model examples
+- workflow diagrams
+- design-decision tables
+- capacity assumptions
+- failure-mode tables
+- L6+ callouts
+- source/caveat notes distinguishing public facts from inferred design choices
+
+Do not publish external repos or deployment artifacts.
+
 ### 2. Create Final Preview
 
 Create or update `<TOPIC_DIR>/outputs/preview.html`.
@@ -212,6 +226,7 @@ It should consolidate section source notes:
 - key claims supported
 - simplifications or interpretations
 - toy-to-real caveats
+- for system design topics, public facts vs inferred design choices and any approved caveats about plausible architecture decisions
 
 ### 5. Create Social Variants
 

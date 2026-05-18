@@ -298,6 +298,8 @@ If media is generated, it must be section-local under `<SECTION_DIR>/visuals/**`
 
 If media is based on source assets, it must be a section-local teaching artifact unless there is a clear reason to embed original evidence. Preserve source fidelity, but prefer simplified explanatory visuals over dense paper screenshots.
 
+For `article_shape: system_design_deep_dive` and especially `audience_profile: system_design_interview_l5_plus`, prefer architecture, sequence, data-flow, pipeline, cache-flow, data-model, or state diagrams. Mermaid or Graphviz may be better than matplotlib for architecture and sequence diagrams. Diagrams must show meaningful boundaries and data/control flow, not generic boxes. Captions should explain the design decision the diagram supports.
+
 ## Code-Generated Technical Visuals Policy
 
 For technical teaching visuals, prefer code-generated visuals when feasible.
@@ -427,6 +429,42 @@ Prefer "term + plain-English grounding" over avoiding the term entirely. Keep th
 Keep the prerequisite/intuition ramp concise but real. Do not add filler.
 
 Do not write full-topic `blog.md`. Do not jump ahead to later sections. Do not summarize future sections except with brief forward pointers when needed.
+
+### System Design Deep Dive Authoring
+
+For `article_shape: system_design_deep_dive` and/or `audience_profile: system_design_interview_l5_plus`, author sections as design reasoning, not generic architecture prose.
+
+The main explanation should be a strong L5 path. Add L6+ callouts only when they add senior-level depth. Keep those callouts concise and clearly marked with labels such as:
+
+- "L6+ extension:"
+- "Senior-level tradeoff:"
+- "Where a stronger answer goes deeper:"
+
+Do not repeat the whole section separately for L5, L6, and L7. Avoid padding. Do not add L6+ callouts when they are filler.
+
+Each relevant section should include:
+
+- requirements or constraints before architecture
+- concrete API examples when applicable
+- concrete data model examples when applicable
+- explicit SQL vs NoSQL tradeoffs when storage is central
+- step-by-step workflows
+- sync vs async boundary explanations
+- consistency model discussion when relevant
+- failure modes and mitigations
+- observability/metrics when operationally relevant
+- capacity or bottleneck reasoning when relevant
+- clear separation of public facts vs inferred design choices
+- diagrams that clarify architecture, sequence, data flow, pipelines, state, or data models
+
+Wording policy:
+
+- Do not claim a real company or system does something internally unless supported by a public source in `<TOPIC_DIR>/wiki/**`.
+- For inferred choices, use phrasing such as "a YouTube-like system could..." or "one plausible design is...".
+- Use public sources as grounding, not as text to copy.
+- Do not lift prose, diagrams, or structure from Alex Xu, Grokking, or similar interview-prep sources.
+
+Useful L6+ callout topics include multi-region architecture, consistency boundaries, capacity modeling, operational maturity, cost controls, incident handling, data evolution, platform abstractions, organizational/ownership tradeoffs, abuse/moderation implications, observability and SLOs, and migration/evolution strategy.
 
 ## Preview Rule
 

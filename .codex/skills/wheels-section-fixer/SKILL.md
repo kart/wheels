@@ -207,6 +207,37 @@ If accepted reviewer findings or user comments identify source-asset-related iss
 - `<SECTION_DIR>/fix_log.md`
 - `<SECTION_DIR>/state.yaml`
 
+### System Design Deep Dive Fixes
+
+For `article_shape: system_design_deep_dive`, validate and repair accepted findings about:
+
+- missing requirements
+- vague architecture prose
+- missing APIs
+- missing data model
+- unjustified storage choices
+- unclear SQL vs NoSQL reasoning
+- unclear workflows
+- missing sync vs async boundary discussion
+- missing consistency choices
+- missing retry/idempotency notes
+- missing failure modes
+- unsupported real-world claims
+- generic diagrams
+- missing tradeoffs
+- missing observability/metrics/SLOs
+- missing or excessive L6+ callouts
+
+When fixing system design sections:
+
+- keep the main path coherent for a strong L5 candidate
+- add only meaningful L6+ callouts
+- remove filler L6+ callouts
+- avoid duplicating the section for L5, L6, and L7
+- preserve clear separation between source-grounded public facts and inferred design choices
+- phrase inferred designs as plausible choices, not as unsupported claims about real systems
+- avoid copying prose, diagrams, or structure from interview-prep sources
+
 ### Formula Fixes
 
 If a formula issue is accepted:

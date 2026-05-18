@@ -175,6 +175,38 @@ Treat all source asset files and section authoring artifacts as read-only while 
 - Does it match the intended audience?
 - Does it stay within this section's scope?
 
+### System Design Deep Dive Review
+
+For `article_shape: system_design_deep_dive` sections, check:
+
+- Are requirements clear?
+- Are assumptions explicit?
+- Are APIs concrete enough?
+- Is the data model plausible?
+- Are SQL/NoSQL choices justified?
+- Are storage choices separated between metadata and blobs/object storage where relevant?
+- Are workflows complete and ordered?
+- Are async boundaries clear?
+- Are consistency choices stated?
+- Are retry/idempotency concerns addressed where needed?
+- Are failure modes included?
+- Are bottlenecks and scaling paths discussed?
+- Are observability/metrics/SLOs included where relevant?
+- Are public facts separated from inferred design choices?
+- Are diagrams readable, accurate, and not generic filler?
+- Does the section avoid copying interview-prep sources?
+- Does it teach design reasoning, not just list components?
+
+For `audience_profile: system_design_interview_l5_plus`, additionally check:
+
+- Does the main path remain coherent for L5?
+- Are L6+ callouts selective and meaningful?
+- Are L6+ callouts too verbose or too frequent?
+- Are senior-level topics included where they genuinely matter?
+- Does the section avoid separate repetitive L5/L6/L7 answers?
+
+If a system design section is generic, component-list-only, or lacks design reasoning, mark `needs_fix: true`.
+
 ### Prerequisite Handling
 
 - Are prerequisite concepts introduced before use?
