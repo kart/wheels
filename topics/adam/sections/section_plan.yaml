@@ -1,0 +1,163 @@
+topic_id: adam
+topic_dir: topics/adam
+article_shape: paper_deep_dive
+audience_profile: beginner_technical
+planning_inputs:
+  - topics/adam/topic.yaml
+  - topics/adam/plan.yaml
+  - topics/adam/wiki/index.md
+  - topics/adam/wiki/source_map.md
+  - topics/adam/wiki/paper_walkthrough.md
+  - topics/adam/wiki/algorithm_notes.md
+  - topics/adam/wiki/bias_correction_notes.md
+  - topics/adam/wiki/convergence_notes.md
+  - topics/adam/wiki/experiments_notes.md
+  - topics/adam/wiki/glossary.md
+  - topics/adam/wiki/open_questions.md
+  - topics/adam/wiki/source_assets/index.yaml
+  - topics/adam/wiki/source_assets/formulas.md
+  - topics/adam/wiki/source_assets/figures.md
+  - topics/adam/wiki/source_assets/tables.md
+  - topics/adam/wiki/source_assets/visual_audit.md
+section_order:
+  - section_id: section_01_problem_and_prerequisites
+    title: "Why Adam Exists"
+    reason_for_position: "Motivates stochastic optimization and establishes the prerequisite vocabulary before any equations."
+  - section_id: section_02_adam_update_loop
+    title: "The Adam Update Loop"
+    reason_for_position: "Introduces the paper's central mechanism while the reader still has the motivation fresh."
+  - section_id: section_03_bias_correction
+    title: "The Cold Start Problem"
+    reason_for_position: "Explains the least obvious part of Algorithm 1 after the reader knows the state variables."
+  - section_id: section_04_update_properties_and_related_work
+    title: "Why The Update Behaves Differently From SGD"
+    reason_for_position: "Uses the mechanism to explain update behavior and connect Adam to prior optimizers."
+  - section_id: section_05_theory_scope
+    title: "What The Convergence Analysis Actually Says"
+    reason_for_position: "Covers the proof claims after the algorithm and update properties are understandable."
+  - section_id: section_06_experiments_variants_and_caveats
+    title: "Experiments, AdaMax, And Practical Caveats"
+    reason_for_position: "Closes with empirical evidence, variants, real-world usage, caveats, recap, and what came next."
+authoring_order_notes: >
+  Author one section at a time in this order. Each section must be reviewed,
+  fixed, and approved before the next section begins.
+section_dependencies:
+  section_01_problem_and_prerequisites: []
+  section_02_adam_update_loop:
+    - section_01_problem_and_prerequisites
+  section_03_bias_correction:
+    - section_02_adam_update_loop
+  section_04_update_properties_and_related_work:
+    - section_02_adam_update_loop
+    - section_03_bias_correction
+  section_05_theory_scope:
+    - section_02_adam_update_loop
+    - section_04_update_properties_and_related_work
+  section_06_experiments_variants_and_caveats:
+    - section_03_bias_correction
+    - section_04_update_properties_and_related_work
+    - section_05_theory_scope
+global_prerequisite_ladder:
+  - objective/loss function
+  - parameter vector
+  - gradient and stochastic gradient
+  - minibatch noise and sparse gradients
+  - exponential moving average
+  - elementwise vector operations and squared gradients
+  - bias correction
+  - coordinate-wise adaptive scaling
+  - online learning and regret
+  - qualitative chart reading
+source_coverage_strategy: >
+  Use an adapted paper-deep-dive structure that preserves every major paper
+  section: motivation and related work, Algorithm 1, update-rule properties,
+  bias correction, convergence analysis and appendix, experiments, AdaMax,
+  temporal averaging, and conclusion. Keep source claims separate from teaching
+  interpretation.
+source_asset_strategy:
+  source_assets_available: true
+  important_assets:
+    - asset_id: F01_adam_moment_updates
+      type: formula
+      likely_section: section_02_adam_update_loop
+      visual_verification_needed: false
+    - asset_id: F02_efficient_order
+      type: formula
+      likely_section: section_02_adam_update_loop
+      visual_verification_needed: true
+    - asset_id: F03_effective_step_bounds
+      type: formula
+      likely_section: section_04_update_properties_and_related_work
+      visual_verification_needed: true
+    - asset_id: F04_bias_correction_expansion
+      type: formula
+      likely_section: section_03_bias_correction
+      visual_verification_needed: true
+    - asset_id: F05_regret_definition
+      type: formula
+      likely_section: section_05_theory_scope
+      visual_verification_needed: false
+    - asset_id: F06_theorem_4_1
+      type: formula
+      likely_section: section_05_theory_scope
+      visual_verification_needed: true
+    - asset_id: F07_adamax_recurrence
+      type: formula
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+    - asset_id: F08_temporal_averaging
+      type: formula
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+    - asset_id: G01_algorithm_1
+      type: diagram
+      likely_section: section_02_adam_update_loop
+      visual_verification_needed: false
+    - asset_id: G02_figure_1_logistic_regression
+      type: chart
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+    - asset_id: G03_figure_2_mlp
+      type: chart
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+    - asset_id: G04_figure_3_cifar10
+      type: chart
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+    - asset_id: G05_figure_4_bias_correction
+      type: chart
+      likely_section: section_03_bias_correction
+      visual_verification_needed: true
+    - asset_id: G06_algorithm_2_adamax
+      type: diagram
+      likely_section: section_06_experiments_variants_and_caveats
+      visual_verification_needed: true
+  open_visual_verification_items:
+    - item: "Verify Algorithm 1 notation on page 2 before final prose."
+    - item: "Verify efficient computation order F02 before implementation notes."
+    - item: "Verify Section 2.1 effective step-size bound cases on page 3."
+    - item: "Verify bias-correction summation indices, equation numbering, and zeta explanation on pages 3-4."
+    - item: "Verify theorem assumptions and appendix formulas on pages 5 and 12-15."
+    - item: "Treat Figures 1-4 qualitatively unless exact chart values are manually extracted."
+    - item: "Verify AdaMax p-norm to infinity-norm derivation on pages 8-9."
+mechanism_strategy: >
+  Each section should be carried by a concrete mechanism: motivation trace,
+  state-machine walkthrough, worked cold-start example, coordinate-wise scaling
+  diagram, regret timeline, or qualitative experiment matrix.
+media_strategy: >
+  Plan simplified reader-facing visuals later. Do not use source page screenshots
+  as final visuals by default; they are evidence references. Avoid exact numeric
+  charts unless the values are sourced.
+code_strategy: >
+  Code is required only for the Adam update-loop section, where a tiny educational
+  Python step function can clarify state changes. Later sections may refer back
+  to it but should not force extra code.
+toy_to_real_strategy: >
+  Use tiny one-coordinate or two-coordinate examples to teach mechanics, then
+  bridge back to high-dimensional minibatch optimization, sparse bag-of-words
+  features, dropout noise, and CNN training as described in the paper.
+user_review_policy:
+  mode: section_by_section
+  must_wait_for_approval: true
+status: planned

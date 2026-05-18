@@ -1,0 +1,87 @@
+section_id: section_05_theory_scope
+title: "What The Convergence Analysis Actually Says"
+status: planned
+learning_goal: "Teach the paper's regret analysis at the level needed to understand its claim and limits."
+reader_outcome: "The reader can explain regret, list the theorem assumptions, and avoid overgeneralizing the result to nonconvex neural networks."
+source_anchors:
+  - source: topics/adam/wiki/convergence_notes.md
+    relevant_claims:
+      - "The analysis uses online convex optimization."
+      - "Regret compares online choices with the best fixed parameter in hindsight."
+      - "The theorem gives an O(sqrt(T)) regret-style guarantee under assumptions."
+  - source: topics/adam/wiki/paper_walkthrough.md
+    relevant_claims:
+      - "The appendix supplies convexity definitions, lemmas, and the proof map."
+source_assets:
+  formulas:
+    - asset_id: F05_regret_definition
+      reason: "Central formula for explaining the theory setup."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_04.png
+      visual_verification_needed: false
+    - asset_id: F06_theorem_4_1
+      reason: "Main theorem evidence; should be summarized with assumptions."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_05.png
+      visual_verification_needed: true
+  figures: []
+  tables: []
+  pages:
+    - asset_id: page_12_appendix_start
+      reason: "Evidence for convexity definition and proof setup."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_12.png
+    - asset_id: page_13_appendix_lemma
+      reason: "Evidence for Lemma 10.4 proof."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_13.png
+    - asset_id: page_14_appendix_theorem
+      reason: "Evidence for theorem proof details."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_14.png
+    - asset_id: page_15_appendix_conclusion
+      reason: "Evidence for proof conclusion."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_15.png
+visual_verification_required:
+  - asset_id: F06_theorem_4_1
+    reason: "Verify theorem assumptions and bound before simplifying."
+prerequisite_concepts:
+  - convex function
+  - online learning
+  - regret
+  - bounded gradients
+depends_on_sections:
+  - section_02_adam_update_loop
+  - section_04_update_properties_and_related_work
+authoring_order_notes: "Make this a scope-and-assumptions section, not a dense proof reproduction."
+key_questions_to_answer:
+  - "What is regret?"
+  - "What assumptions does the theorem require?"
+  - "What does O(sqrt(T)) imply for average regret?"
+  - "Why is this not a universal deep-learning convergence proof?"
+core_mechanism:
+  type: visual_trace
+  why_this_mechanism: "A timeline comparing online choices with best fixed hindsight choice makes regret concrete."
+media_needed:
+  - type: timeline diagram
+    purpose: "Illustrate regret over T rounds."
+  - type: checklist
+    purpose: "List theorem assumptions and what they exclude."
+code_needed:
+  required: false
+  why: "Theory scope is clearer with diagrams and a tiny arithmetic example than code."
+  artifact_type: none
+toy_or_scaled_down_demo:
+  description: "Three-round online prediction example with simple losses."
+  what_it_demonstrates: "How regret accumulates relative to the best fixed choice."
+  what_it_omits: "The full Adam regret proof algebra."
+toy_to_real_bridge: "Explain that the theorem is a mathematical lens while experiments address practical neural-network behavior."
+expected_reader_confusions:
+  - "Thinking convex regret guarantees apply directly to all neural networks."
+  - "Interpreting average regret as immediate monotonic loss decrease."
+  - "Getting lost in proof symbols before understanding the claim."
+section_specific_review_checks:
+  - "Theory assumptions appear before theorem implications."
+  - "No overgeneralization to nonconvex training."
+  - "Appendix is covered via proof map or justified summary."
+completion_criteria:
+  - "Reader can define regret in plain English."
+  - "Reader can state what the theorem does and does not prove."
+user_review_gate:
+  required: true
+  instruction: "Stop after this section is authored/reviewed/fixed and wait for user approval before continuing."

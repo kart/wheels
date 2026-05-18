@@ -1,0 +1,118 @@
+section_id: section_06_experiments_variants_and_caveats
+title: "Experiments, AdaMax, And Practical Caveats"
+status: planned
+learning_goal: "Cover the paper's experiments, variants, real-world use, caveats, recap, and what came next without overclaiming."
+reader_outcome: "The reader can summarize what evidence the paper presents, what AdaMax changes, and how to use Adam claims cautiously."
+source_anchors:
+  - source: topics/adam/wiki/experiments_notes.md
+    relevant_claims:
+      - "Experiments include MNIST and IMDB logistic regression, MNIST MLPs, CIFAR-10 ConvNet, and a VAE bias-correction study."
+      - "The CIFAR-10 discussion is nuanced and should not be turned into universal dominance."
+  - source: topics/adam/wiki/paper_walkthrough.md
+    relevant_claims:
+      - "Section 7 derives AdaMax and describes temporal averaging."
+      - "The conclusion restates Adam's practical motivation."
+source_assets:
+  formulas:
+    - asset_id: F07_adamax_recurrence
+      reason: "Evidence for AdaMax update."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_09.png
+      visual_verification_needed: true
+    - asset_id: F08_temporal_averaging
+      reason: "Evidence for temporal averaging extension."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_10.png
+      visual_verification_needed: true
+  figures:
+    - asset_id: G02_figure_1_logistic_regression
+      reason: "Evidence for MNIST and IMDB logistic regression comparisons."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_06.png
+      recommended_treatment: explain_in_text
+      visual_verification_needed: true
+    - asset_id: G03_figure_2_mlp
+      reason: "Evidence for MNIST multilayer network comparisons."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_07.png
+      recommended_treatment: explain_in_text
+      visual_verification_needed: true
+    - asset_id: G04_figure_3_cifar10
+      reason: "Evidence for CIFAR-10 ConvNet comparison and nuanced result."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_07.png
+      recommended_treatment: explain_in_text
+      visual_verification_needed: true
+    - asset_id: G06_algorithm_2_adamax
+      reason: "Evidence for AdaMax pseudocode."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_09.png
+      recommended_treatment: explain_in_text
+      visual_verification_needed: true
+  tables: []
+  pages:
+    - asset_id: page_06_logistic_regression
+      reason: "Full-page evidence for Figure 1."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_06.png
+    - asset_id: page_07_mlp_cifar
+      reason: "Full-page evidence for Figures 2 and 3."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_07.png
+    - asset_id: page_08_bias_and_adamax_start
+      reason: "Evidence for Figure 4 and AdaMax setup."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_08.png
+    - asset_id: page_09_adamax
+      reason: "Evidence for Algorithm 2."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_09.png
+    - asset_id: page_10_temporal_averaging_conclusion
+      reason: "Evidence for temporal averaging and conclusion."
+      evidence_image: topics/adam/wiki/source_assets/pages/paper_01_page_10.png
+visual_verification_required:
+  - asset_id: G02_figure_1_logistic_regression
+    reason: "Describe qualitatively unless exact plot values are extracted."
+  - asset_id: G03_figure_2_mlp
+    reason: "Describe qualitatively unless exact plot values are extracted."
+  - asset_id: G04_figure_3_cifar10
+    reason: "Preserve paper nuance; do not overclaim."
+  - asset_id: F07_adamax_recurrence
+    reason: "Verify p-norm to infinity-norm derivation before final formula prose."
+  - asset_id: F08_temporal_averaging
+    reason: "Verify recurrence before including."
+prerequisite_concepts:
+  - qualitative chart reading
+  - train loss vs generalization caveat
+  - infinity norm, informally
+depends_on_sections:
+  - section_03_bias_correction
+  - section_04_update_properties_and_related_work
+  - section_05_theory_scope
+authoring_order_notes: "Close the article by tying experiments and variants back to the mechanism, not by adding unsupported claims."
+key_questions_to_answer:
+  - "What experiment families did the paper test?"
+  - "What do the figures support, and what do they not prove?"
+  - "What changes in AdaMax?"
+  - "How should a practitioner think about using Adam?"
+core_mechanism:
+  type: table
+  why_this_mechanism: "A qualitative matrix can map each experiment to what it was meant to test without inventing numbers."
+media_needed:
+  - type: qualitative experiment matrix
+    purpose: "Summarize paper experiments by setup, optimizer comparison, and caution."
+  - type: practical workflow checklist
+    purpose: "Bridge the paper to using Adam in a real training loop."
+code_needed:
+  required: false
+  why: "This section can refer back to the toy Adam code; no new code is needed."
+  artifact_type: optional summary of prior toy demo
+toy_or_scaled_down_demo:
+  description: "A qualitative matrix instead of reproducing paper-scale experiments."
+  what_it_demonstrates: "Which claims are supported by each experiment family."
+  what_it_omits: "Exact reproduction, hyperparameter sweeps, and plotted numeric values."
+toy_to_real_bridge: "Connect the toy update loop to practical training choices: defaults as starting points, monitor validation behavior, and treat paper results as evidence from tested settings."
+expected_reader_confusions:
+  - "Reading training curves as universal proof of best optimizer."
+  - "Missing that CIFAR-10 results are nuanced."
+  - "Thinking AdaMax is a replacement that must always be used."
+section_specific_review_checks:
+  - "No invented chart values."
+  - "Experiments are described with the paper's caveats."
+  - "Includes recap, practical workflow, limitations, and next-up material."
+completion_criteria:
+  - "Reader can summarize the experiment evidence without overclaiming."
+  - "Reader understands AdaMax and temporal averaging at the appropriate depth."
+user_review_gate:
+  required: true
+  instruction: "Stop after this section is authored/reviewed/fixed and wait for user approval before continuing."
