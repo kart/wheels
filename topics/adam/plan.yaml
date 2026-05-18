@@ -1,0 +1,602 @@
+topic_id: adam
+plan_version: 2
+status: replanned_after_wiki
+
+source_reading:
+  pdf_direct_reading_status: readable_with_pdftotext_and_rendered_pages
+  extraction_needed: false
+  notes: >
+    Primary source is topics/adam/raw/papers/adam.pdf, a 15-page ICLR 2015
+    paper. Text extraction and all-page rendering are complete under wiki/source_assets/.
+    Formula layout and experiment plots still require visual spot checks before final prose.
+
+completed_bootstrap_phases:
+  - phase_01_source_extraction_and_source_map
+  - phase_02_compile_wiki
+
+teaching_strategy:
+  audience_summary: >
+    Beginner technical reader with undergraduate maturity, weak-to-moderate math
+    comfort, and novice coding skill.
+  explanation_style: >
+    Use an adapted paper_deep_dive structure: teach the prerequisites and mechanism
+    before walking through theory, experiments, and variants. Explicitly map the
+    adapted sections back to every major paper section so the article does not
+    become a high-level overview.
+  visual_strategy: >
+    Use source-audited page screenshots as evidence only. Later reader-facing
+    visuals should be simplified redraws: noisy SGD motivation, Adam state loop,
+    moving-average cold start, coordinate-wise scaling, regret scope, and
+    qualitative experiment summary.
+  code_strategy: >
+    Include a small educational Adam step implementation only after the update
+    loop is explained. It should demonstrate state changes on a toy objective,
+    not reproduce paper experiments.
+
+wiki_structure:
+  - path: wiki/index.md
+    purpose: Compiled overview and source-fidelity warnings.
+  - path: wiki/source_map.md
+    purpose: Source inventory, page map, and extraction limitations.
+  - path: wiki/paper_walkthrough.md
+    purpose: Section-by-section source coverage for the Adam paper.
+  - path: wiki/algorithm_notes.md
+    purpose: Adam update equations, state variables, hyperparameters, and properties.
+  - path: wiki/bias_correction_notes.md
+    purpose: Initialization bias derivation and teaching examples.
+  - path: wiki/convergence_notes.md
+    purpose: Regret framing, theorem assumptions, and appendix proof map.
+  - path: wiki/experiments_notes.md
+    purpose: Experimental setup, qualitative results, and caveats.
+  - path: wiki/glossary.md
+    purpose: Prerequisites and symbol definitions.
+  - path: wiki/open_questions.md
+    purpose: Formula/chart verification items for later work.
+  - path: wiki/source_assets/
+    purpose: Generated source evidence, rendered pages, formula/figure/table audits.
+
+reader_facing_sections:
+  - id: section_01_problem_and_prerequisites
+    section_title: "Why Adam Exists"
+    reader_question: "Why is plain stochastic gradient descent not enough for noisy, high-dimensional training?"
+    paper_coverage:
+      - Abstract
+      - Section 1 Introduction
+      - Section 5 Related Work, high-level optimizer context
+    source_coverage:
+      - wiki/index.md
+      - wiki/source_map.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+    source_asset_coverage:
+      - wiki/source_assets/pages/paper_01_page_01.png
+      - wiki/source_assets/pages/paper_01_page_05.png
+    prerequisites_to_introduce:
+      - objective/loss function
+      - parameter vector
+      - gradient
+      - stochastic gradient/minibatch
+      - sparse gradient
+    allowed_concepts:
+      - first-order optimization
+      - noisy updates
+      - why optimizers keep state
+      - SGD, momentum, AdaGrad, RMSProp as motivations
+    expected_visuals_or_code:
+      - "visual: qualitative noisy-gradient path compared with a smoother stateful update"
+      - "code: none"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_10_section_01_problem_and_prerequisites_review.md
+    fix_log_path: reviews/phase_10_section_01_problem_and_prerequisites_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before section_02."
+
+  - id: section_02_adam_update_loop
+    section_title: "The Adam Update Loop"
+    reader_question: "What exactly changes inside Adam at each training step?"
+    paper_coverage:
+      - Section 2 Algorithm
+      - Algorithm 1
+    source_coverage:
+      - wiki/algorithm_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+    source_asset_coverage:
+      - wiki/source_assets/formulas.md#F01
+      - wiki/source_assets/formulas.md#F02
+      - wiki/source_assets/figures.md#G01
+      - wiki/source_assets/pages/paper_01_page_02.png
+    prerequisites_to_introduce:
+      - vector operation
+      - elementwise square
+      - exponential moving average
+      - learning rate/stepsize
+    allowed_concepts:
+      - Adam inputs and state
+      - first moment `m_t`
+      - second raw moment `v_t`
+      - bias-corrected estimates
+      - parameter update
+      - default hyperparameters as paper-tested defaults, not universal constants
+    expected_visuals_or_code:
+      - "visual: Adam state machine with gradient input and parameter output"
+      - "visual: two-coordinate update table"
+      - "code: beginner-friendly Python function for one Adam step"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/code/
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_11_section_02_adam_update_loop_review.md
+    fix_log_path: reviews/phase_11_section_02_adam_update_loop_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before section_03."
+
+  - id: section_03_bias_correction
+    section_title: "The Cold Start Problem"
+    reader_question: "Why does Adam divide by `1 - beta^t`, and what goes wrong without it?"
+    paper_coverage:
+      - Section 3 Initialization Bias Correction
+      - Figure 4 bias-correction experiment
+    source_coverage:
+      - wiki/bias_correction_notes.md
+      - wiki/algorithm_notes.md
+      - wiki/experiments_notes.md
+      - wiki/open_questions.md
+    source_asset_coverage:
+      - wiki/source_assets/formulas.md#F04
+      - wiki/source_assets/figures.md#G05
+      - wiki/source_assets/pages/paper_01_page_03.png
+      - wiki/source_assets/pages/paper_01_page_04.png
+      - wiki/source_assets/pages/paper_01_page_08.png
+    prerequisites_to_introduce:
+      - expected value, informally
+      - geometric/exponential weights, informally
+      - stationary vs changing gradient distribution
+    allowed_concepts:
+      - zero initialization bias
+      - "`v_t` recurrence expansion"
+      - correction factors
+      - sparse-gradient sensitivity
+      - qualitative role of Figure 4
+    expected_visuals_or_code:
+      - "visual: early moving-average weights before and after correction"
+      - "worked example: `beta_2 = 0.999`, `g^2 = 4`"
+      - "code: optional tiny table generator if useful"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_12_section_03_bias_correction_review.md
+    fix_log_path: reviews/phase_12_section_03_bias_correction_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before section_04."
+
+  - id: section_04_update_properties_and_related_work
+    section_title: "Why The Update Behaves Differently From SGD"
+    reader_question: "How do the first and second moments change Adam's step size and direction?"
+    paper_coverage:
+      - Section 2.1 Adam's Update Rule
+      - Section 5 Related Work
+    source_coverage:
+      - wiki/algorithm_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/open_questions.md
+    source_asset_coverage:
+      - wiki/source_assets/formulas.md#F03
+      - wiki/source_assets/pages/paper_01_page_03.png
+      - wiki/source_assets/pages/paper_01_page_05.png
+    prerequisites_to_introduce:
+      - coordinate-wise update
+      - square root scaling
+      - scale invariance caveat
+    allowed_concepts:
+      - effective step
+      - per-coordinate denominator as brake
+      - signal-to-noise-ratio interpretation
+      - relationship to SGD, momentum, AdaGrad, RMSProp
+      - approximate step-size bound with caveats
+    expected_visuals_or_code:
+      - "visual: same gradient direction with different coordinate scales"
+      - "visual: optimizer family comparison table"
+      - "code: none unless needed to extend prior toy demo"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_13_section_04_update_properties_and_related_work_review.md
+    fix_log_path: reviews/phase_13_section_04_update_properties_and_related_work_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before section_05."
+
+  - id: section_05_theory_scope
+    section_title: "What The Convergence Analysis Actually Says"
+    reader_question: "What does the regret theorem prove, and what does it not prove?"
+    paper_coverage:
+      - Section 4 Convergence Analysis
+      - Appendix proof material
+    source_coverage:
+      - wiki/convergence_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+      - wiki/open_questions.md
+    source_asset_coverage:
+      - wiki/source_assets/formulas.md#F05
+      - wiki/source_assets/formulas.md#F06
+      - wiki/source_assets/pages/paper_01_page_04.png
+      - wiki/source_assets/pages/paper_01_page_05.png
+      - wiki/source_assets/pages/paper_01_page_12.png
+      - wiki/source_assets/pages/paper_01_page_13.png
+      - wiki/source_assets/pages/paper_01_page_14.png
+      - wiki/source_assets/pages/paper_01_page_15.png
+    prerequisites_to_introduce:
+      - convex function
+      - online learning
+      - regret
+      - bounded gradients
+    allowed_concepts:
+      - regret definition
+      - theorem assumptions
+      - "`O(sqrt(T))` and average regret intuition"
+      - appendix proof map
+      - nonconvex deep-learning caveat
+    expected_visuals_or_code:
+      - "visual: online regret timeline"
+      - "visual: assumption checklist"
+      - "code: none"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_14_section_05_theory_scope_review.md
+    fix_log_path: reviews/phase_14_section_05_theory_scope_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before section_06."
+
+  - id: section_06_experiments_variants_and_caveats
+    section_title: "Experiments, AdaMax, And Practical Caveats"
+    reader_question: "What evidence did the paper show, what variants did it add, and how should we use Adam in practice?"
+    paper_coverage:
+      - Section 6 Experiments
+      - Section 7 Extensions
+      - Section 8 Conclusion
+    source_coverage:
+      - wiki/experiments_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/convergence_notes.md
+      - wiki/open_questions.md
+    source_asset_coverage:
+      - wiki/source_assets/figures.md#G02
+      - wiki/source_assets/figures.md#G03
+      - wiki/source_assets/figures.md#G04
+      - wiki/source_assets/figures.md#G06
+      - wiki/source_assets/formulas.md#F07
+      - wiki/source_assets/formulas.md#F08
+      - wiki/source_assets/pages/paper_01_page_06.png
+      - wiki/source_assets/pages/paper_01_page_07.png
+      - wiki/source_assets/pages/paper_01_page_08.png
+      - wiki/source_assets/pages/paper_01_page_09.png
+      - wiki/source_assets/pages/paper_01_page_10.png
+    prerequisites_to_introduce:
+      - qualitative chart reading
+      - train loss vs generalization caveat
+      - infinity norm, informally
+    allowed_concepts:
+      - MNIST and IMDB logistic regression setup
+      - MLP/dropout and CIFAR-10 ConvNet setup
+      - bias-correction empirical study
+      - AdaMax
+      - temporal averaging
+      - practical workflow and caveats
+      - recap and next-up section
+    expected_visuals_or_code:
+      - "visual: qualitative experiment matrix tied to paper figures"
+      - "visual: Adam practical workflow checklist"
+      - "code: optional final toy optimizer run summary if introduced earlier"
+    scoped_output_paths:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+    reviewer_report_path: reviews/phase_15_section_06_experiments_variants_and_caveats_review.md
+    fix_log_path: reviews/phase_15_section_06_experiments_variants_and_caveats_fix_log.md
+    approval_gate: "Stop after this section's review/fix loop and wait for user approval before final audit."
+
+execution_phases:
+  - id: phase_01_source_extraction_and_source_map
+    name: Source extraction and source map
+    goal: Extract readable text, render PDF evidence pages, audit formulas/figures/tables, and build a source map without modifying raw files.
+    inputs:
+      - topic.yaml
+      - raw/
+      - prompts/audience_profiles.md
+      - templates/article_shapes.md
+    outputs:
+      - wiki/source_map.md
+      - wiki/source_assets/index.yaml
+      - wiki/source_assets/formulas.md
+      - wiki/source_assets/figures.md
+      - wiki/source_assets/tables.md
+      - wiki/source_assets/visual_audit.md
+      - wiki/source_assets/pages/
+      - wiki/source_assets/extracted/
+    instructions:
+      - Completed during bootstrap.
+      - Do not rerun unless refreshing generated source evidence.
+      - Do not modify topic.yaml or raw/.
+    completion_check:
+      - wiki/source_map.md exists.
+      - source asset audit files exist.
+      - all 15 PDF pages are rendered under wiki/source_assets/pages/.
+
+  - id: phase_02_compile_wiki
+    name: Compile wiki
+    goal: Compile source-grounded understanding of the paper into wiki notes for later section planning.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - raw/
+      - wiki/source_map.md
+      - wiki/source_assets/
+    outputs:
+      - wiki/index.md
+      - wiki/paper_walkthrough.md
+      - wiki/algorithm_notes.md
+      - wiki/bias_correction_notes.md
+      - wiki/convergence_notes.md
+      - wiki/experiments_notes.md
+      - wiki/glossary.md
+      - wiki/open_questions.md
+      - wiki_preview/index.html
+    instructions:
+      - Completed during bootstrap.
+      - Stay grounded in the Adam paper.
+      - Do not draft final lesson prose.
+    completion_check:
+      - proposed wiki files exist.
+      - paper sections 1 through 7 and appendix material are covered.
+
+  - id: phase_03_refine_plan_after_wiki
+    name: Refine plan after wiki
+    goal: Refine plan.yaml into reader-approved section contracts after source-grounded wiki notes exist.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/
+      - wiki_preview/index.html
+    outputs:
+      - plan.yaml
+    instructions:
+      - Preserve completed phase ids.
+      - Split future reader-facing work into approved section phases.
+      - Include source coverage, source-asset coverage, prerequisites, visuals/code expectations, output paths, reviewer path, fix-log path, and approval gate for each future section.
+      - Do not generate lesson prose, visuals, code, preview HTML, or publish files.
+    completion_check:
+      - plan.yaml contains reader_facing_sections.
+      - future section phases stop for user approval.
+      - no generated final prose or preview content is included.
+
+  - id: phase_04_create_lesson_outline
+    name: Create lesson outline
+    goal: Initialize later reader-facing lesson and visual plan from approved section contracts without expanding full prose.
+    inputs:
+      - wiki/
+      - topic.yaml
+      - plan.yaml
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+    instructions:
+      - This phase is outside bootstrap and must not be run now.
+      - Use reader_facing_sections as the approved outline source.
+      - Keep the outline modular so each later section can be authored separately.
+    completion_check:
+      - outputs/lesson.md has section placeholders only.
+      - outputs/visual_plan.md has planned visuals only.
+
+  - id: phase_10_section_01_problem_and_prerequisites
+    name: "Section 01: Why Adam Exists"
+    goal: Draft, preview, review, and fix only section_01_problem_and_prerequisites.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/index.md
+      - wiki/source_map.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+      - reviews/phase_10_section_01_problem_and_prerequisites_review.md
+      - reviews/phase_10_section_01_problem_and_prerequisites_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_01_problem_and_prerequisites as the contract.
+      - Update only this section's lesson prose and nearby preview content.
+      - Generate only this section's needed visuals/assets if useful.
+      - Run a section reviewer pass and validate fixes.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Section answers its reader_question.
+      - Source claims are grounded in listed wiki/source files.
+      - Review report and fix log exist.
+
+  - id: phase_11_section_02_adam_update_loop
+    name: "Section 02: The Adam Update Loop"
+    goal: Draft, preview, review, and fix only section_02_adam_update_loop.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/algorithm_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/code/
+      - outputs/preview.html
+      - reviews/phase_11_section_02_adam_update_loop_review.md
+      - reviews/phase_11_section_02_adam_update_loop_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_02_adam_update_loop as the contract.
+      - Explain code before showing code.
+      - Keep code educational and small.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Algorithm 1 is correctly explained.
+      - Formula symbols are introduced before use.
+      - Review report and fix log exist.
+
+  - id: phase_12_section_03_bias_correction
+    name: "Section 03: The Cold Start Problem"
+    goal: Draft, preview, review, and fix only section_03_bias_correction.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/bias_correction_notes.md
+      - wiki/experiments_notes.md
+      - wiki/open_questions.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+      - reviews/phase_12_section_03_bias_correction_review.md
+      - reviews/phase_12_section_03_bias_correction_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_03_bias_correction as the contract.
+      - Include a tiny numerical example after the formula intuition.
+      - Treat Figure 4 qualitatively unless exact values are extracted.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Bias correction is explained without black boxes.
+      - Sparse-gradient caveat is included.
+      - Review report and fix log exist.
+
+  - id: phase_13_section_04_update_properties_and_related_work
+    name: "Section 04: Why The Update Behaves Differently From SGD"
+    goal: Draft, preview, review, and fix only section_04_update_properties_and_related_work.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/algorithm_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/open_questions.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+      - reviews/phase_13_section_04_update_properties_and_related_work_review.md
+      - reviews/phase_13_section_04_update_properties_and_related_work_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_04_update_properties_and_related_work as the contract.
+      - Verify exact update-bound notation before quoting it.
+      - Compare related optimizers as design choices, not as unsupported rankings.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Effective step-size intuition is correct.
+      - Related work coverage is source-faithful.
+      - Review report and fix log exist.
+
+  - id: phase_14_section_05_theory_scope
+    name: "Section 05: What The Convergence Analysis Actually Says"
+    goal: Draft, preview, review, and fix only section_05_theory_scope.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/convergence_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/glossary.md
+      - wiki/open_questions.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+      - reviews/phase_14_section_05_theory_scope_review.md
+      - reviews/phase_14_section_05_theory_scope_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_05_theory_scope as the contract.
+      - Explain theorem assumptions before the theorem's implication.
+      - Do not overgeneralize the theorem to nonconvex neural-network training.
+      - Stop and wait for user approval before the next section.
+    completion_check:
+      - Regret is explained plainly.
+      - Theory caveats are explicit.
+      - Review report and fix log exist.
+
+  - id: phase_15_section_06_experiments_variants_and_caveats
+    name: "Section 06: Experiments, AdaMax, And Practical Caveats"
+    goal: Draft, preview, review, and fix only section_06_experiments_variants_and_caveats.
+    inputs:
+      - topic.yaml
+      - plan.yaml
+      - wiki/experiments_notes.md
+      - wiki/paper_walkthrough.md
+      - wiki/convergence_notes.md
+      - wiki/open_questions.md
+      - wiki/source_assets/
+    outputs:
+      - outputs/lesson.md
+      - outputs/visual_plan.md
+      - outputs/preview.html
+      - reviews/phase_15_section_06_experiments_variants_and_caveats_review.md
+      - reviews/phase_15_section_06_experiments_variants_and_caveats_fix_log.md
+    instructions:
+      - Use reader_facing_sections entry section_06_experiments_variants_and_caveats as the contract.
+      - Treat plotted results qualitatively unless exact values are extracted.
+      - Include practical workflow, caveats, recap, and next-up material for paper_deep_dive shape.
+      - Stop and wait for user approval before final audit.
+    completion_check:
+      - Experiments are source-faithful and not overclaimed.
+      - AdaMax and temporal averaging are covered at appropriate depth.
+      - Review report and fix log exist.
+
+  - id: phase_90_final_reviewer_audit
+    name: Final reviewer audit
+    goal: Audit the complete reviewed-and-fixed article after all sections are done.
+    inputs:
+      - prompts/reviewer.md
+      - wiki/
+      - outputs/
+      - reviews/
+    outputs:
+      - reviews/reviewer_report.md
+    instructions:
+      - Reviewer must not edit source, wiki, lesson, visual, code, or preview files.
+      - Check source fidelity, teaching depth, visual correctness, code correctness, and preview quality.
+    completion_check:
+      - final reviewer report exists.
+
+  - id: phase_91_final_fixer_loop
+    name: Final fixer loop
+    goal: Validate and apply accepted final reviewer findings.
+    inputs:
+      - prompts/fixer.md
+      - reviews/reviewer_report.md
+      - outputs/
+      - wiki/
+    outputs:
+      - reviews/fix_log.md
+    instructions:
+      - Validate reviewer findings before applying fixes.
+      - Do not blindly apply reviewer feedback.
+      - Preserve section approvals and source fidelity.
+    completion_check:
+      - final fix log exists.
+
+  - id: phase_99_publish_pack
+    name: Publish pack
+    goal: Assemble copy-pasteable Jekyll publish package after final audit and fixes.
+    inputs:
+      - prompts/publish_pack.md
+      - topic.yaml
+      - outputs/
+      - reviews/
+    outputs:
+      - outputs/publish/
+    instructions:
+      - Do not actually publish anything.
+      - Use topic.yaml publish_target front matter and asset_base_path.
+    completion_check:
+      - outputs/publish/blog.md is Jekyll-ready and source-consistent.

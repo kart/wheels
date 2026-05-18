@@ -1,0 +1,8 @@
+{
+  "completed_phases": [
+    "phase_01_source_extraction_and_source_map",
+    "phase_02_compile_wiki",
+    "phase_03_refine_plan_after_wiki"
+  ],
+  "last_prompted_phase": "phase_04_create_lesson_outline"
+}

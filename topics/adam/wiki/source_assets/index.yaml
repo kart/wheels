@@ -1,0 +1,144 @@
+topic_id: adam
+pdf_sources:
+  - id: paper_01
+    path: raw/papers/adam.pdf
+    title: "Adam: A Method for Stochastic Optimization"
+    authors:
+      - Diederik P. Kingma
+      - Jimmy Lei Ba
+    pages: 15
+    extracted_text: wiki/source_assets/extracted/adam_pdftotext_layout.txt
+    extraction_notes:
+      - "pdftotext and pdftoppm produced a recoverable xref reconstruction warning."
+      - "Text extraction is readable, but formula layout and plot values require visual verification."
+assets:
+  - id: F01_adam_moment_updates
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 2
+    evidence_image: wiki/source_assets/pages/paper_01_page_02.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: false
+    suggested_section_ids:
+      - section_adam_update_loop
+  - id: F02_efficient_order
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 2
+    evidence_image: wiki/source_assets/pages/paper_01_page_02.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_adam_update_loop
+  - id: F03_effective_step_bounds
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 3
+    evidence_image: wiki/source_assets/pages/paper_01_page_03.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_why_it_works
+  - id: F04_bias_correction_expansion
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 4
+    evidence_image: wiki/source_assets/pages/paper_01_page_04.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_bias_correction
+  - id: F05_regret_definition
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 4
+    evidence_image: wiki/source_assets/pages/paper_01_page_04.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: false
+    suggested_section_ids:
+      - section_theory_and_caveats
+  - id: F06_theorem_4_1
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 5
+    evidence_image: wiki/source_assets/pages/paper_01_page_05.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_theory_and_caveats
+  - id: F07_adamax_recurrence
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 9
+    evidence_image: wiki/source_assets/pages/paper_01_page_09.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_variants
+  - id: F08_temporal_averaging
+    type: formula
+    source_pdf: raw/papers/adam.pdf
+    page: 10
+    evidence_image: wiki/source_assets/pages/paper_01_page_10.png
+    related_wiki_note_file: wiki/source_assets/formulas.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_variants
+  - id: G01_algorithm_1
+    type: diagram
+    source_pdf: raw/papers/adam.pdf
+    page: 2
+    evidence_image: wiki/source_assets/pages/paper_01_page_02.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: false
+    suggested_section_ids:
+      - section_adam_update_loop
+  - id: G02_figure_1_logistic_regression
+    type: chart
+    source_pdf: raw/papers/adam.pdf
+    page: 6
+    evidence_image: wiki/source_assets/pages/paper_01_page_06.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_experiments
+  - id: G03_figure_2_mlp
+    type: chart
+    source_pdf: raw/papers/adam.pdf
+    page: 7
+    evidence_image: wiki/source_assets/pages/paper_01_page_07.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_experiments
+  - id: G04_figure_3_cifar10
+    type: chart
+    source_pdf: raw/papers/adam.pdf
+    page: 7
+    evidence_image: wiki/source_assets/pages/paper_01_page_07.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_experiments
+  - id: G05_figure_4_bias_correction
+    type: chart
+    source_pdf: raw/papers/adam.pdf
+    page: 8
+    evidence_image: wiki/source_assets/pages/paper_01_page_08.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_bias_correction
+  - id: G06_algorithm_2_adamax
+    type: diagram
+    source_pdf: raw/papers/adam.pdf
+    page: 9
+    evidence_image: wiki/source_assets/pages/paper_01_page_09.png
+    related_wiki_note_file: wiki/source_assets/figures.md
+    visual_verification_needed: true
+    suggested_section_ids:
+      - section_variants
+open_verification_items:
+  - "Verify exact mathematical notation for formulas F02-F08 against page screenshots before final prose."
+  - "Treat experiment curves qualitatively unless exact chart values are manually extracted."
+  - "No standalone tables were found."
