@@ -1,20 +1,22 @@
 # Why Adam Exists
 
-Adam is an optimizer. It decides how to change a model's parameters after the training code measures a gradient.
+A model has parameters: adjustable numbers that act like knobs. Training means turning those knobs so the model makes fewer mistakes.
 
-The Adam paper starts from a common training problem: we have a scalar objective function, often called a loss, and we want to adjust many parameters so that this objective gets smaller. If the objective is differentiable, a first-order optimizer can use gradients. A gradient is a vector of local hints: each entry says how the loss would change if one parameter moved a little.
+A loss, also called an objective, is one number that says how wrong the model is. Lower is better. A gradient is a local hint for how to turn the knobs so the loss goes down.
+
+Measuring that hint on the full dataset can be expensive, so many training loops use a mini-batch: a smaller sample of examples. The mini-batch gradient is cheaper, but noisier.
+
+Stochastic gradient descent, or SGD, follows the latest noisy hint. Adam is an optimizer: a rule for changing parameters after seeing a gradient. It exists because it keeps state, or running summaries of recent hints.
 
 In the paper's notation, `theta` is the parameter vector and `f(theta)` is the objective. A training step changes `theta`.
 
 ## The Hint Is Useful, But It Is Noisy
 
-Large training runs often use mini-batches. The paper writes the stochastic objective at timestep `t` as `f_t(theta)`.
-
-The gradient from one mini-batch is useful, but it may not point exactly where the full dataset would point. Plain stochastic gradient descent has to use the current hint while also living with its noise.
+The paper writes the stochastic objective at timestep `t` as `f_t(theta)`. The gradient from one mini-batch is useful, but it may not point exactly where the full dataset would point. Plain SGD has to use the current hint while also living with its noise.
 
 <figure>
-  <img src="visuals/noisy_gradient_trace.svg" alt="A qualitative diagram showing raw noisy gradient steps zigzagging compared with a smoother stateful path." />
-  <figcaption>A qualitative sketch of the motivation: a single mini-batch gradient can be useful and still wobble.</figcaption>
+  <img src="visuals/noisy_gradient_trace.svg" alt="A qualitative diagram contrasting SGD reacting to noisy gradient hints with Adam-style running estimates m_t and v_t." />
+  <figcaption>A conceptual sketch of the motivation: a single mini-batch gradient can be useful and still wobble, while Adam-style optimizers keep running estimates of recent direction and squared-gradient scale. The symbols `m_t` and `v_t` are introduced later; this is not a measured result from the paper.</figcaption>
 </figure>
 
 ## A Tiny One-Parameter Example

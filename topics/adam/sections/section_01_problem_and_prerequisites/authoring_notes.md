@@ -50,7 +50,51 @@ No section-specific visual verification is required. The source PDF extraction w
 
 ### Evidence Versus Teaching Visuals
 
-The paper page screenshots are used only as source evidence. They are not embedded in the reader-facing preview. The section-local visual `visuals/noisy_gradient_trace.svg` is a simplified teaching sketch inspired by the paper's motivation, not a reproduction of a paper figure.
+The paper page screenshots are used only as source evidence. They are not embedded in the reader-facing preview. The section-local visual is a code-generated simplified teaching sketch inspired by the paper's motivation, not a reproduction of a paper figure.
+
+Visual source of truth:
+
+- Spec: `visuals/noisy_gradient_trace_spec.md`
+- Python source: `visuals/noisy_gradient_trace.py`
+- Rendered outputs: `visuals/noisy_gradient_trace.svg`, `visuals/noisy_gradient_trace.png`
+
+## Prerequisite / Intuition Ramp
+
+### Audience-Aware Judgment
+
+This is the first section, so it should not assume the reader already understands optimization vocabulary. It may use central terms early only when they are immediately grounded in plain English.
+
+### Terms Introduced
+
+- Parameters: adjustable model numbers, introduced as knobs.
+- Loss/objective: one number measuring how wrong the model is; lower is better.
+- Training: repeatedly changing parameters to reduce loss.
+- Gradient: a local hint for how parameters should move.
+- Mini-batch: a smaller sample of examples used to get a cheaper hint.
+- Stochastic gradient: a gradient from a sampled/noisy training situation.
+- SGD: a rule that follows the latest noisy hint.
+- Optimizer: a rule for deciding how to change parameters after seeing a gradient.
+- State: running summaries remembered across steps.
+
+### Ramp Order
+
+1. Start with parameters as adjustable knobs.
+2. Define loss/objective as a single wrongness score.
+3. Define training as repeatedly changing knobs to lower that score.
+4. Define gradient as a local hint.
+5. Explain why full-dataset gradients can be expensive.
+6. Introduce mini-batches as cheaper but noisier hints.
+7. Introduce SGD as following the latest noisy hint.
+8. Introduce Adam as a stateful optimizer that remembers recent hints.
+
+### Notation Introduction
+
+Only after the plain-English ramp:
+
+- `theta`: all parameters collected together.
+- `f(theta)`: the objective/loss at a parameter setting.
+- `f_t(theta)`: the sampled/noisy objective at timestep `t`.
+- `m_t` and `v_t`: named only as future Adam state symbols in the visual caption; formal mechanics are deferred.
 
 ## Prerequisites
 
@@ -70,15 +114,15 @@ The paper page screenshots are used only as source evidence. They are not embedd
 
 Mechanism: visual trace.
 
-The visual contrasts raw noisy nudges with a smoother stateful path. This fits the section because the goal is motivation, not yet the Adam equations.
+The visual contrasts raw noisy nudges with an Adam-style state-shaped step. This fits the section because the goal is motivation, not yet the Adam equations.
 
 ## Code Use
 
-No code is useful in this section. Code will be clearer in the next section after the Adam update loop exists.
+No reader-facing lesson code is useful in this section. The visual is generated from section-local Python source so the technical diagram is reproducible and reviewable.
 
 ## Media Use
 
-Use `visuals/noisy_gradient_trace.svg` near the toy example. It teaches one idea: noisy gradients motivate optimizer memory.
+Use the rendered `visuals/noisy_gradient_trace.svg` near the toy example. `visuals/noisy_gradient_trace.py` is the source of truth and also renders `visuals/noisy_gradient_trace.png`. The visual teaches one idea: noisy gradients motivate optimizer memory.
 
 ## Toy Demo
 
@@ -94,10 +138,12 @@ The same problem becomes more serious in high-dimensional models: different para
 
 ## Section-Local Structure Before Prose
 
-1. Start with the training-loop problem: repeated parameter nudges.
-2. Define objective, parameters, gradient, stochastic gradient.
-3. Use the one-parameter noisy-hint toy example.
-4. Bridge to high-dimensional and sparse/noisy settings.
-5. Introduce the design pressure behind stateful optimizers.
-6. Briefly position SGD, momentum, AdaGrad, RMSProp, and Adam without teaching their mechanics yet.
-7. End by preparing the reader for Algorithm 1.
+1. Start with a concrete knobs/loss/training mental model.
+2. Define gradient as a local hint.
+3. Explain mini-batches as cheaper but noisier hints.
+4. Introduce SGD as following the latest noisy hint.
+5. Introduce Adam as a stateful optimizer that remembers recent hints.
+6. Use the one-parameter noisy-hint toy example.
+7. Bridge to high-dimensional and sparse/noisy settings.
+8. Briefly position SGD, momentum, AdaGrad, RMSProp, and Adam without teaching their mechanics yet.
+9. End by preparing the reader for Algorithm 1.

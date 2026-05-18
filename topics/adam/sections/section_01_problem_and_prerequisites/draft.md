@@ -1,16 +1,22 @@
 # Why Adam Exists
 
-Adam is an optimizer. That means it does not define the model, the dataset, or the prediction task. It decides how to change the model's parameters after the training code measures a gradient.
+A model has parameters: adjustable numbers that act a little like knobs. Training means turning those knobs again and again so the model makes fewer mistakes.
 
-The Adam paper starts from a common training problem: we have a scalar objective function, often called a loss, and we want to adjust many parameters so that this objective gets smaller. If the objective is differentiable, a first-order optimizer can use gradients instead of trying every possible parameter setting. A gradient is a vector of local hints: each entry says how the loss would change if one parameter moved a little.
+To tell whether the model is improving, training code uses a loss, also called an objective. The loss is one number that says how wrong the model is on the data being checked. Lower is better.
 
-In symbols used throughout the paper, `theta` is the parameter vector and `f(theta)` is the objective. A training step changes `theta`. The optimizer's job is to decide the size and direction of that change.
+A gradient is a local hint for how to turn the knobs. If one parameter moved a little, would the loss go up or down? A gradient collects those hints, one per parameter.
+
+The most direct version would measure that hint using the full dataset every time. That can be expensive. So many training loops use a mini-batch: a smaller sample of examples. The mini-batch gradient is cheaper, but it is also noisier because it only sees part of the data.
+
+Stochastic gradient descent, or SGD, follows the latest noisy hint. Adam is an optimizer: a rule for deciding how to change the parameters after seeing a gradient. Adam exists because it does not treat the latest hint as the only thing worth knowing. It keeps state: running summaries of recent hints.
+
+In the Adam paper's notation, `theta` is the parameter vector: all the knobs collected together. `f(theta)` is the objective, or loss, for a parameter setting. A training step changes `theta`.
 
 ## The Hint Is Useful, But It Is Noisy
 
-If we could compute the exact gradient of the full objective at every step, training would already be expensive for large datasets. In practice, many training loops use a smaller random sample of the data, often a mini-batch. The paper calls the result a stochastic objective realization, written as `f_t(theta)` at timestep `t`.
+The paper calls the mini-batch version of the objective a stochastic objective realization, written as `f_t(theta)` at timestep `t`. "Stochastic" here does not mean random for no reason. It means the current objective comes from a sampled or noisy training situation.
 
-The gradient of that mini-batch objective is a stochastic gradient. It is not meaningless randomness. It is a real downhill hint for the sampled mini-batch. But it may not point exactly where the full dataset would point.
+The gradient of that mini-batch objective is a stochastic gradient. It is a real downhill hint for the sampled mini-batch. But it may not point exactly where the full dataset would point.
 
 So a simple update rule like stochastic gradient descent has a tension:
 
@@ -20,8 +26,8 @@ So a simple update rule like stochastic gradient descent has a tension:
 That tension is the opening Adam walks into.
 
 <figure>
-  <img src="visuals/noisy_gradient_trace.svg" alt="A qualitative diagram showing raw noisy gradient steps zigzagging compared with a smoother stateful path." />
-  <figcaption>A qualitative sketch of the motivation: a single mini-batch gradient can be useful and still wobble. This is not a measured result from the paper.</figcaption>
+  <img src="visuals/noisy_gradient_trace.svg" alt="A qualitative diagram contrasting SGD reacting to noisy gradient hints with Adam-style running estimates m_t and v_t." />
+  <figcaption>A conceptual sketch of the motivation: a single mini-batch gradient can be useful and still wobble, while Adam-style optimizers keep running estimates of recent direction and squared-gradient scale. The symbols `m_t` and `v_t` are introduced later; this is not a measured result from the paper.</figcaption>
 </figure>
 
 ## A Tiny One-Parameter Example
