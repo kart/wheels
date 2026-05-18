@@ -81,12 +81,19 @@ For a `paper_deep_dive`, the final blog must be a real paper walkthrough. It sho
 
 Audience profiles are defined in [prompts/audience_profiles.md](prompts/audience_profiles.md).
 
+Supported profiles:
+
+- `beginner_technical`
+- `system_design_interview_l5_plus`
+
 The current default profile used by Word2Vec is `beginner_technical`:
 
 - undergraduate-level technical maturity
 - math may be weak
 - coding skill may be novice
 - examples, visuals, and gradual buildup are essential
+
+Use `system_design_interview_l5_plus` for system design interview content where the main path should be useful to a strong L5 candidate and clearly marked L6+ callouts should deepen the answer only where they add meaningful design depth.
 
 ## Workflow
 
