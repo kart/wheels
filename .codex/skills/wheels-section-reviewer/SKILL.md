@@ -323,6 +323,8 @@ Do not execute or modify code while reviewing. If code execution is needed to ve
 - Are visuals/code/captions shown in context?
 - Are internal notes omitted or clearly separated?
 - Are there broken paths, broken math, broken markdown, or bad layout issues?
+- If the section contains reader-facing formulas, does `<SECTION_DIR>/preview.html` include MathJax or equivalent math rendering support, matching the `~/karthik.dev` MathJax v3 SVG setup closely enough for local preview fidelity?
+- Are important formulas rendered as math rather than left as plain fenced code blocks, unless the block is intentionally literal code or a non-math trace?
 
 ### Blog Fragment Review
 

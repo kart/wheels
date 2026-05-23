@@ -398,6 +398,8 @@ If a reviewer flags misleading visual implication:
 6. Preview rule:
 
 - Regenerate or update `<SECTION_DIR>/preview.html` when prose, code, media, captions, or layout changes affect the section preview.
+- If formulas or mathematical notation are added or fixed, preserve or add MathJax support in `<SECTION_DIR>/preview.html` using the same basic configuration as `~/karthik.dev/_layouts/default.html` (`tex-svg.js`, `$...$`/`\(...\)` inline delimiters, `$$...$$`/`\[...\]` display delimiters, SVG output with left-aligned display math).
+- Do not leave important reader-facing formulas as plain fenced code blocks in `<SECTION_DIR>/preview.html`; use TeX math delimiters unless the block is intentionally literal code or a non-math trace.
 - Preview must remain section-local.
 - Do not generate full-topic preview.
 

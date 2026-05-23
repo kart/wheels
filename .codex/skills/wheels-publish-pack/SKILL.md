@@ -198,6 +198,8 @@ The final preview should:
 - avoid internal planning/debug artifacts
 - use paths that work locally where possible
 - surface obvious broken image/code references if they cannot be resolved
+- include MathJax support when the assembled article contains formulas or mathematical notation, using the same basic configuration as `~/karthik.dev/_layouts/default.html` (`tex-svg.js`, `$...$`/`\(...\)` inline delimiters, `$$...$$`/`\[...\]` display delimiters, SVG output with left-aligned display math)
+- render important formulas as math rather than plain fenced code blocks, unless the block is intentionally literal code or a non-math trace
 
 ### 3. Create Asset Manifest
 

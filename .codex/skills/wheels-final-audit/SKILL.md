@@ -240,6 +240,8 @@ If `<TOPIC_DIR>/wiki/foundation_stack.md` exists, inspect it as read-only planni
 
 - Do section previews appear reader-facing?
 - Are there broken markdown, math, HTML, code block, image, or asset path issues?
+- For sections with reader-facing formulas, do section previews include MathJax or equivalent math rendering support, matching the `~/karthik.dev` MathJax v3 SVG setup closely enough for local preview fidelity?
+- Are important formulas represented with TeX math delimiters rather than plain fenced code blocks, unless the block is intentionally literal code or a non-math trace?
 - Are blog fragments likely to assemble cleanly?
 - Are there front matter concerns that should be handled by publish-pack?
 - If a visual verification item is blocking and unresolved, the verdict must be `blocked` or `needs_cross_section_fixes` and `ready_for_publish_pack` must be `false`.

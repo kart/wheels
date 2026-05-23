@@ -519,6 +519,26 @@ Create `<SECTION_DIR>/preview.html` as a reader-facing preview for this section 
 
 It should render the section draft, visuals, code snippets, and captions in context. It should not include internal planning notes unless clearly collapsed or omitted.
 
+If the section contains formulas or mathematical notation that should render as math, use TeX delimiters in reader-facing Markdown (`$...$`, `\(...\)`, `$$...$$`, or `\[...\]`) and include MathJax in `<SECTION_DIR>/preview.html` using the same basic configuration as `~/karthik.dev/_layouts/default.html`:
+
+```html
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    svg: {
+      fontCache: 'global',
+      displayAlign: 'left'
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+```
+
+Do not leave important formulas as plain fenced code blocks in `<SECTION_DIR>/preview.html`; code blocks are for literal code or monospace traces, not rendered math. Small numeric traces may remain as text when they are not meant to be typeset formulas.
+
 If the section creates simplified visuals based on source assets, include the simplified section visual in `<SECTION_DIR>/preview.html`.
 
 Do not expose raw evidence page screenshots in the reader-facing preview unless there is a clear teaching reason. If a paper figure or table is referenced but not reproduced, mention it in prose rather than embedding raw evidence by default.
